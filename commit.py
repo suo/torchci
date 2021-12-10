@@ -25,7 +25,7 @@ def do_commit_jobs_query(sha):
         api_server="https://api.rs2.usw2.rockset.com",
     )
     qlambda = rs.QueryLambda.retrieve(
-        "commit_jobs_query", version="2901d4cc01547811", workspace="commons"
+        "commit_jobs_query", version="ce3e700796b5ac43", workspace="commons"
     )
 
     params = ParamDict()

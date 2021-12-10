@@ -7,7 +7,7 @@ from common import CachedQuery, query_rockset
 hud_query = CachedQuery(
     query_rockset,
     query_name="hud_query",
-    kwargs={"query_name": "hud_query", "version": "fd824b45a33d668b"},
+    kwargs={"query_name": "hud_query", "version": "76aec40ee6173b68"},
     evict_after_sec=180,
 )
 master_query = CachedQuery(
