@@ -1,18 +1,32 @@
 {% macro emoji_for_conclusion(conclusion) %}
     {% if conclusion == 'success' %}
-    ✅
+        <span class="conclusion" style="color: green">
+            O
+        </span>
     {% elif conclusion == 'failure' %}
-    ❌
+        <span class="conclusion" style="color: red">
+            X
+        </span>
     {% elif conclusion == 'neutral' %}
-    🤷‍♂️
+        <span class="conclusion" style="color: grey">
+            N
+        </span>
     {% elif conclusion == 'cancelled' %}
-    🚫
+        <span class="conclusion" style="color: red">
+            C
+        </span>
     {% elif conclusion == 'timed_out' %}
-    ⏰
+        <span class="conclusion" style="color: red">
+            T
+        </span>
     {% elif conclusion == 'skipped' %}
-    ☑️
+        <span class="conclusion" style="color: grey">
+            S
+        </span>
     {% elif conclusion == None %}
-    ⏳
+        <span class="conclusion" style="color: yellow">
+            ?
+        </span>
     {% else %}
     🧞‍♂️
     {% endif %}
