@@ -8,6 +8,19 @@
         overflow: scroll;
         margin: 10px;
     }
+
+    .workflow-container {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        grid-gap: 10px;
+    }
+
+    .workflow-box {
+        border: 1px solid gray;
+        padding: 10px;
+        border-radius: 5px;
+        background-color: azure;
+    }
 </style>
 
 <html>
@@ -24,20 +37,24 @@
         {{ commit_message_body }}
     </article>
 
-    {% for workflow, jobs in jobs_by_workflow.items() %}
-    <section>
-        <h3>{{ workflow }}</h3>
-        <ul>
-            {% for job in jobs %}
-            <li>
-                {{ macros.emoji_for_conclusion(job.conclusion) }}
-                <a href="https://ossci-raw-job-status.s3.amazonaws.com/logs/{{job.id}}">[log]</a>
-                <a href="{{ job.html_url }}">{{ job.job_name }}</a>
-            </li>
-            {% endfor %}
-        </ul>
-    </section>
-    {% endfor %}
+    <div class="workflow-container">
+        {% for workflow, jobs in jobs_by_workflow.items() %}
+        <div class="workflow-box">
+            <h3>{{ workflow }}</h3>
+            <ul>
+                {% for job in jobs %}
+                <li>
+                    {{ macros.emoji_for_conclusion(job.conclusion) }}
+                    {% if job.status == 'completed' %}
+                    <a href="https://ossci-raw-job-status.s3.amazonaws.com/logs/{{job.id}}">[log]</a>
+                    {% endif %}
+                    <a href="{{ job.html_url }}">{{ job.job_name }}</a>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endfor %}
+    </div>
 
 </body>
 
