@@ -12,7 +12,7 @@ You will need a Rockset API key. You can get it from the
 
 Run a local server:
 ```bash
-ROCKSET_API_KEY=<key from above> FLASK_DEBUG=1 FLASK_APP=torchci/application.py flask run
+ROCKSET_API_KEY=<key from above> FLASK_DEBUG=1 FLASK_APP=application.py flask run
 ```
 
 ## Deploy

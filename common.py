@@ -34,7 +34,7 @@ class CachedQuery:
 
 
 client = Client(
-    api_key="ROCKSET_API_KEY",
+    api_key=ROCKSET_API_KEY,
     api_server="https://api.rs2.usw2.rockset.com",
 )
 
