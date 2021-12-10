@@ -1,7 +1,7 @@
 from flask import Flask
 
-import torchci.hud as hud
-import torchci.commit as commit
+import hud
+import commit
 
 
 application = Flask(__name__)

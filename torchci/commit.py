@@ -1,7 +1,7 @@
 from collections import defaultdict
 from flask import render_template
 from rockset import Client, ParamDict
-from torchci.common import ROCKSET_API_KEY
+from common import ROCKSET_API_KEY
 
 
 def do_commit_query(sha):

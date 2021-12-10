@@ -2,7 +2,7 @@ from collections import defaultdict
 from datetime import datetime
 from flask import render_template
 
-from torchci.common import CachedQuery, query_rockset
+from common import CachedQuery, query_rockset
 
 hud_query = CachedQuery(
     query_rockset,
