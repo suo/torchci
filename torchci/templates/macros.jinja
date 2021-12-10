@@ -1,0 +1,21 @@
+{% macro emoji_for_conclusion(conclusion) %}
+    {% if conclusion == 'success' %}
+    ✅
+    {% elif conclusion == 'failure' %}
+    ❌
+    {% elif conclusion == 'neutral' %}
+    🤷‍♂️
+    {% elif conclusion == 'cancelled' %}
+    🚫
+    {% elif conclusion == 'timed_out' %}
+    ⏰
+    {% elif conclusion == 'skipped' %}
+    ☑️
+    {% elif conclusion == None %}
+    ⏳
+    {% else %}
+    🧞‍♂️
+    {% endif %}
+{% endmacro %}
+
+

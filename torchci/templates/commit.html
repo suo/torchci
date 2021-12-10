@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+{% import 'macros.jinja' as macros %}
+
+<style>
+    .commit-message {
+        white-space: pre;
+        max-height: 13em;
+        overflow: scroll;
+        margin: 10px;
+    }
+</style>
+
+<html>
+
+<head>
+    <meta charset="UTF-8" />
+    <title>Janky PR HUD</title>
+</head>
+
+<body>
+    <h1>PyTorch Janky PR HUD</h1>
+    <h2>{{ commit_title }} </h2>
+    <article class="commit-message">
+        {{ commit_message_body }}
+    </article>
+
+    {% for workflow, jobs in jobs_by_workflow.items() %}
+    <section>
+        <h3>{{ workflow }}</h3>
+        <ul>
+            {% for job in jobs %}
+            <li>
+                {{ macros.emoji_for_conclusion(job.conclusion) }}
+                <a href="https://ossci-raw-job-status.s3.amazonaws.com/logs/{{job.id}}">[log]</a>
+                <a href="{{ job.html_url }}">{{ job.job_name }}</a>
+            </li>
+            {% endfor %}
+        </ul>
+    </section>
+    {% endfor %}
+
+</body>
+
+</html>

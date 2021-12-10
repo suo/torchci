@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+
+{% import 'macros.jinja' as macros %}
+<style>
+
+  /* Tooltip container */
+  .tooltip {
+    position: relative;
+    display: line-block;
+    text-decoration: none;
+
+  }
+
+  /* Tooltip text */
+  .tooltip .tooltiptext {
+    visibility: hidden;
+    background-color: black;
+    color: #fff;
+    text-align: center;
+    padding: 5px 0;
+    border-radius: 6px;
+
+    top: 100%;
+    /* Position the tooltip text - see examples below! */
+    position: absolute;
+    z-index: 1;
+
+    white-space: nowrap;
+  }
+
+  /* Show the tooltip text when you mouse over the tooltip container */
+  .tooltip:hover .tooltiptext {
+    visibility: visible;
+  }
+
+  th {
+    text-align: left;
+  }
+
+  /* code to roatate the workflow name headers */
+  th.job-header {
+    height: 220px;
+    white-space: nowrap;
+  }
+
+  th.job-header>div {
+    transform:
+      translate(10px, 100px) rotate(315deg);
+    width: 10px;
+    font-weight: 400;
+    font-size: .8em;
+  }
+
+  th.regular-header {
+    vertical-align: bottom;
+  }
+
+  td.no-wrap {
+    white-space: nowrap;
+  }
+
+  td.timestamp {
+    min-width: 90px;
+  }
+</style>
+
+<html>
+
+<head>
+  <meta charset="UTF-8" />
+  <title>Janky HUD</title>
+</head>
+<h1>PyTorch Janky HUD</h1>
+
+<body>
+  <table>
+    <thead>
+      <tr>
+        <th class="regular-header">Time</th>
+        <th class="regular-header">SHA</th>
+        <th class="regular-header">Commit</th>
+        <th class="regular-header">PR</th>
+
+        {% for name in names %}
+        <th class="job-header">
+          <div>
+            {{name}}
+          </div>
+        </th>
+        {% endfor %}
+      </tr>
+    </thead>
+
+    <tbody>
+      {% for (time, sha, commit_url, commit_message, pr_num), jobs in sha_grid.items() %}
+      <tr>
+        <!-- Time -->
+        <td class="no-wrap timestamp">
+          <span class="inner-timestamp" style="display:none">
+            {{time}}
+          </span>
+        </td>
+
+        <!-- SHA -->
+        <td><a href={{commit_url}}> {{ sha[:7] }} </a></td>
+
+        <!-- Commit title -->
+        <td class="no-wrap"> <a href="commit/{{sha}}">{{commit_message}}</a> </td>
+
+        <!-- Pull Request link -->
+        <td>
+          {% if pr_num %}
+          <a href=https://github.com/pytorch/pytorch/pull/{{pr_num}}>#{{pr_num}}</a>
+          {% endif %}
+        </td>
+
+        <!-- All the jobs -->
+        {% for job in jobs %}
+        <td>
+          <a href={{job.html_url}} class="tooltip">
+            {% if job %}
+            {{ macros.emoji_for_conclusion(job.conclusion) }}
+            <span class="tooltiptext">{{job.workflow_name}}: {{job.job_name}}</span>
+            {% endif %}
+          </a>
+        </td>
+        {% endfor %}
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</body>
+
+</html>
+
+
+<!-- scripts to get display times in local timezone -->
+<script src="https://unpkg.com/dayjs@1.8.21/dayjs.min.js"></script>
+<script src="https://unpkg.com/dayjs@1.8.21/plugin/utc.js"></script>
+<script>dayjs.extend(window.dayjs_plugin_utc)</script>
+<script>
+  document.querySelectorAll('span.inner-timestamp').forEach(function (elem) {
+    let time = dayjs(elem.innerHTML).local();
+    if (dayjs().isSame(time, 'day')) {
+      // "6:55 PM"
+      elem.innerHTML = time.format('h:mm A')
+    } else {
+      // "Wed, Dec 8"
+      elem.innerHTML = time.format('ddd, MMM D')
+    }
+    elem.style.display = null;
+  });
+</script>
