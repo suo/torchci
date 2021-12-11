@@ -87,7 +87,7 @@
 <h1>PyTorch Janky HUD</h1>
 
 <body>
-  <table>
+  <table id="hud-table" style="display:none">
     <thead>
       <tr>
         <th class="regular-header">Time</th>
@@ -169,4 +169,12 @@
     }
     elem.style.display = null;
   });
+</script>
+
+<script>
+  // Optimization to avoid needless re-flowing as the table HTML loads. Our
+  // table is static and very large, so we can just hide it until we have
+  // all the data then render it once.
+  // See: https://patdavid.net/2019/02/displaying-a-big-html-table/
+  document.getElementById("hud-table").style.display = null;
 </script>
