@@ -2,6 +2,15 @@
 
 {% import 'macros.jinja' as macros %}
 <style>
+  * {
+    font-family: sans-serif;
+  }
+
+  a {
+    text-decoration: none;
+    color: #0064cf;
+  }
+
   /* Tooltip container */
   .tooltip {
     position: relative;
@@ -122,12 +131,17 @@
         <!-- All the jobs -->
         {% for job in jobs %}
         <td>
+          {% if job %}
           <a href={{job.html_url}} class="tooltip">
-            {% if job %}
             {{ macros.emoji_for_conclusion(job.conclusion) }}
-            <span class="tooltiptext">{{job.workflow_name}}: {{job.job_name}}</span>
-            {% endif %}
+            <span class="tooltiptext">[{{job.conclusion}}] {{job.workflow_name}} / {{job.job_name}}</span>
           </a>
+          {% else %}
+          <div class="tooltip">
+            <span class="tooltiptext">[not run] {{names[loop.index0]}}</span>
+            <span class="conclusion" style="color: lightgray">O</span>
+          </div>
+          {% endif %}
         </td>
         {% endfor %}
       </tr>
