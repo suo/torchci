@@ -5,6 +5,7 @@ click==8.0.3
 docopt==0.6.2
 Flask==2.0.2
 Flask-Compress==1.10.1
+Flask-Caching==1.10.1
 geojson==2.5.0
 greenlet==1.1.2
 idna==3.3

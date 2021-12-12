@@ -2,24 +2,12 @@ from collections import defaultdict
 from datetime import datetime
 from flask import render_template
 
-from common import CachedQuery, query_rockset
+from common import query_rockset
 
-hud_query = CachedQuery(
-    query_rockset,
-    query_name="hud_query",
-    kwargs={"query_name": "hud_query", "version": "11d33dd45434cccd"},
-    evict_after_sec=180,
-)
-master_query = CachedQuery(
-    query_rockset,
-    query_name="master_query",
-    kwargs={"query_name": "master_commits", "version": "4d94a9d08bb397fd"},
-    evict_after_sec=180,
-)
 
 def get():
-    results = hud_query()
-    master_commits = master_query()
+    results = query_rockset("hud_query", "11d33dd45434cccd")
+    master_commits = query_rockset("master_commits", "4d94a9d08bb397fd")
 
     # dict of:
     # sha => commit info
@@ -63,4 +51,3 @@ def get():
             sha_grid[key].append(names_to_results.get(name))
 
     return render_template("index.html", sha_grid=sha_grid, names=names)
-
