@@ -148,33 +148,31 @@
       {% endfor %}
     </tbody>
   </table>
+
+  <!-- scripts to get display times in local timezone -->
+  <script src="https://unpkg.com/dayjs@1.8.21/dayjs.min.js"></script>
+  <script src="https://unpkg.com/dayjs@1.8.21/plugin/utc.js"></script>
+  <script>dayjs.extend(window.dayjs_plugin_utc)</script>
+  <script>
+    document.querySelectorAll('span.inner-timestamp').forEach(function (elem) {
+      let time = dayjs(elem.innerHTML).local();
+      if (dayjs().isSame(time, 'day')) {
+        // "6:55 PM"
+        elem.innerHTML = time.format('h:mm A')
+      } else {
+        // "Wed, Dec 8"
+        elem.innerHTML = time.format('ddd, MMM D')
+      }
+      elem.style.display = null;
+    });
+  </script>
+
+  <script>
+    // Optimization to avoid needless re-flowing as the table HTML loads. Our
+    // table is static and very large, so we can just hide it until we have
+    // all the data then render it once.
+    // See: https://patdavid.net/2019/02/displaying-a-big-html-table/
+    document.getElementById("hud-table").style.display = null;
+  </script>
 </body>
-
 </html>
-
-
-<!-- scripts to get display times in local timezone -->
-<script src="https://unpkg.com/dayjs@1.8.21/dayjs.min.js"></script>
-<script src="https://unpkg.com/dayjs@1.8.21/plugin/utc.js"></script>
-<script>dayjs.extend(window.dayjs_plugin_utc)</script>
-<script>
-  document.querySelectorAll('span.inner-timestamp').forEach(function (elem) {
-    let time = dayjs(elem.innerHTML).local();
-    if (dayjs().isSame(time, 'day')) {
-      // "6:55 PM"
-      elem.innerHTML = time.format('h:mm A')
-    } else {
-      // "Wed, Dec 8"
-      elem.innerHTML = time.format('ddd, MMM D')
-    }
-    elem.style.display = null;
-  });
-</script>
-
-<script>
-  // Optimization to avoid needless re-flowing as the table HTML loads. Our
-  // table is static and very large, so we can just hide it until we have
-  // all the data then render it once.
-  // See: https://patdavid.net/2019/02/displaying-a-big-html-table/
-  document.getElementById("hud-table").style.display = null;
-</script>
