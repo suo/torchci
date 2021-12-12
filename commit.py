@@ -25,7 +25,7 @@ def do_commit_jobs_query(sha):
         api_server="https://api.rs2.usw2.rockset.com",
     )
     qlambda = rs.QueryLambda.retrieve(
-        "commit_jobs_query", version="ce3e700796b5ac43", workspace="commons"
+        "commit_jobs_query", version="c131de34f7dc83a6", workspace="commons"
     )
 
     params = ParamDict()
@@ -40,9 +40,12 @@ def get(sha):
 
     # dict of workflow -> jobs
     jobs_by_workflow = defaultdict(list)
+    failed_jobs = []
     for job in jobs:
         jobs_by_workflow[job["workflow_name"]].append(job)
 
+        if job["conclusion"] == "failure":
+            failed_jobs.append(job)
 
     # sort jobs by job id, which gets us the same sorting as in the GH UI
     for jobs in jobs_by_workflow.values():
@@ -56,4 +59,5 @@ def get(sha):
         commit_message_body=commit_message_body,
         commit=commit,
         jobs_by_workflow=jobs_by_workflow,
+        failed_jobs=failed_jobs,
     )

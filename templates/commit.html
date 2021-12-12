@@ -21,6 +21,16 @@
         border-radius: 5px;
         background-color: azure;
     }
+
+    .conclusion {
+        font-family: monospace;
+        font-size: 1rem;
+        font-weight: bold;
+    }
+
+    pre {
+        background-color: aliceblue;
+    }
 </style>
 
 <html>
@@ -36,6 +46,27 @@
     <article class="commit-message">
         {{ commit_message_body }}
     </article>
+
+    {% if failed_jobs %}
+    <h2>Failed jobs</h2>
+    {% endif %}
+
+    {% for job in failed_jobs %}
+    <ul>
+        <li>
+            <span class="conclusion" style="color: red">X</span>
+            <a href="https://ossci-raw-job-status.s3.amazonaws.com/logs/{{job.id}}">[log]</a>
+            <a href="{{ job.html_url }}">{{job.workflow_name}} / {{ job.job_name }}</a>
+            {% if job.failure_line %}
+            <pre>{{job.failure_line}}</pre>
+            <details>
+                <summary><strong>More context</strong></summary>
+                <pre>{{job.failure_context}}</pre>
+            </details>
+            {% endif %}
+        </li>
+    </ul>
+    {% endfor %}
 
     <div class="workflow-container">
         {% for workflow, jobs in jobs_by_workflow.items() %}
