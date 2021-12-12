@@ -46,12 +46,12 @@
   }
 
   /* code to roatate the workflow name headers */
-  th.job-header {
+  .job-header {
     height: 220px;
     white-space: nowrap;
   }
 
-  th.job-header>div {
+  .job-header__name {
     transform:
       translate(10px, 100px) rotate(315deg);
     width: 10px;
@@ -59,16 +59,17 @@
     font-size: .8em;
   }
 
-  th.regular-header {
+  .regular-header {
     vertical-align: bottom;
   }
 
-  td.no-wrap {
+  .timestamp {
+    min-width: 90px;
     white-space: nowrap;
   }
 
-  td.timestamp {
-    min-width: 90px;
+  .commit-title {
+    white-space: nowrap;
   }
 
   .conclusion {
@@ -97,7 +98,7 @@
 
         {% for name in names %}
         <th class="job-header">
-          <div>
+          <div class="job-header__name">
             {{name}}
           </div>
         </th>
@@ -109,7 +110,7 @@
       {% for (time, sha, commit_url, commit_message, pr_num), jobs in sha_grid.items() %}
       <tr>
         <!-- Time -->
-        <td class="no-wrap timestamp">
+        <td class="timestamp">
           <span class="inner-timestamp" style="display:none">
             {{time}}
           </span>
@@ -119,7 +120,7 @@
         <td><a href={{commit_url}}> {{ sha[:7] }} </a></td>
 
         <!-- Commit title -->
-        <td class="no-wrap"> <a href="commit/{{sha}}">{{commit_message}}</a> </td>
+        <td class="commit-title"> <a href="commit/{{sha}}">{{commit_message}}</a> </td>
 
         <!-- Pull Request link -->
         <td>
