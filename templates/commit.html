@@ -31,6 +31,10 @@
     pre {
         background-color: aliceblue;
     }
+
+    code {
+        background-color: aliceblue;
+    }
 </style>
 
 <html>
@@ -55,12 +59,13 @@
     <ul>
         <li>
             <span class="conclusion" style="color: red">X</span>
-            <a href="https://ossci-raw-job-status.s3.amazonaws.com/logs/{{job.id}}">[log]</a>
+            <a href="https://ossci-raw-job-status.s3.amazonaws.com/log/{{job.id}}">[log]</a>
             <a href="{{ job.html_url }}">{{job.workflow_name}} / {{ job.job_name }}</a>
             {% if job.failure_line %}
-            <pre>{{job.failure_line}}</pre>
             <details>
-                <summary><strong>More context</strong></summary>
+                <summary>
+                    <code>{{job.failure_line}}</code>
+                </summary>
                 <pre>{{job.failure_context}}</pre>
             </details>
             {% endif %}
