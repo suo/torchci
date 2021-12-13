@@ -1,10 +1,12 @@
 import os
 from flask import Flask
+from flask.templating import render_template
 from flask_compress import Compress
 from flask_caching import Cache
 
 import hud
 import commit
+from common import query_rockset, ParamDict
 
 config = {
     "CACHE_TYPE": "SimpleCache",  # Flask-Caching related configs
@@ -35,6 +37,15 @@ def root():
 def commit_(sha):
     return commit.get(sha)
 
+# Really we could have queried Rockset directly from JSON, but that requires
+# figuring out API authentication from the client. Making the server act as a
+# proxy lets us avoid that.
+#
+# It also lets us render tooltip html in jinja.
+@application.route("/job_dialog/<int:id>")
+def job_dialog(id):
+    result = query_rockset("job_dialog", "34dbbaad6aa13fc0", ParamDict({"job_id": id}))[0]
+    return {"html": render_template("job_dialog.html", result=result)}
 
 if __name__ == "__main__":
     application.run()

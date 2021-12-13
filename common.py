@@ -12,14 +12,14 @@ client = Client(
 )
 
 
-def query_rockset(query_name, version, workspace="commons"):
+def query_rockset(query_name, version, params=None, workspace="commons"):
     global client
     # retrieve Query Lambda
     qlambda = client.QueryLambda.retrieve(
         query_name, version=version, workspace="commons"
     )
-
-    params = ParamDict()
+    if params == None:
+        params = ParamDict()
 
     results = qlambda.execute(parameters=params)
     return results.results

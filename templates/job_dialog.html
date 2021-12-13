@@ -1,0 +1,10 @@
+<p><a href={{result.html_url}}>{{ result.workflow_name }} / {{ result.job_name }}</a><p>
+<p>Conclusion: {{ result.conclusion or "pending" }}</p>
+{% if result.failure_line %}
+<details>
+    <summary>
+        <strong>Click for context </strong><code>{{result.failure_line}}</code>
+    </summary>
+    <pre>{{result.failure_context}}</pre>
+</details>
+{% endif %}

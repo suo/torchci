@@ -7,34 +7,15 @@
     color: #0064cf;
   }
 
-  /* Tooltip container */
-  .tooltip {
-    position: relative;
-    display: line-block;
-    text-decoration: none;
-
-  }
-
-  /* Tooltip text */
-  .tooltip .tooltiptext {
-    visibility: hidden;
-    background-color: black;
-    color: #fff;
-    text-align: center;
+  .job-dialog {
+    background-color: lightgray;
     padding: 5px 0;
     border-radius: 6px;
 
-    top: 100%;
-    /* Position the tooltip text - see examples below! */
     position: absolute;
     z-index: 1;
 
     white-space: nowrap;
-  }
-
-  /* Show the tooltip text when you mouse over the tooltip container */
-  .tooltip:hover .tooltiptext {
-    visibility: visible;
   }
 
   th {
@@ -46,6 +27,7 @@
     font-family: sans-serif;
     height: 220px;
     white-space: nowrap;
+    font-family: sans-serif;
   }
 
   .job-header__name {
@@ -57,12 +39,13 @@
   }
 
   .regular-header {
+    font-family: sans-serif;
     vertical-align: bottom;
   }
 
   .job-metadata {
-    font-family: sans-serif;
     white-space: nowrap;
+    font-family: sans-serif;
   }
 
   .conclusion {
@@ -70,23 +53,41 @@
     font-size: 1rem;
     font-weight: bold;
   }
+
   .conclusion-success {
     color: green;
   }
+
   .conclusion-failure {
     color: red;
   }
+
+  .conclusion-skipped {
+    color: grey;
+  }
+
   .conclusion-neutral {
     color: grey;
   }
+
   .conclusion-cancelled {
     color: red;
   }
+
   .conclusion-timed-out {
     color: red;
   }
+
   .conclusion-pending {
     color: goldenrod;
+  }
+
+  .conclusion-none {
+    color: lightgray;
+  }
+
+  .clickable {
+    cursor: pointer;
   }
 </style>
 
@@ -95,6 +96,27 @@
 <head>
   <meta charset="UTF-8" />
   <title>Janky HUD</title>
+
+  <!-- scripts to get display times in local timezone
+    TODO this can be done natively with a little extra work
+   -->
+  <script src="https://unpkg.com/dayjs@1.8.21/dayjs.min.js"></script>
+  <script src="https://unpkg.com/dayjs@1.8.21/plugin/utc.js"></script>
+  <script>dayjs.extend(window.dayjs_plugin_utc)</script>
+  <script>
+    customElements.define("time-formatted", class extends HTMLElement {
+      connectedCallback() {
+        let time = dayjs(this.getAttribute('timestamp')).local();
+        if (dayjs().isSame(time, 'day')) {
+          // "6:55 PM"
+          this.innerHTML = time.format('h:mm A')
+        } else {
+          // "Wed, Dec 8"
+          this.innerHTML = time.format('ddd, MMM D')
+        }
+      }
+    });
+  </script>
 </head>
 <h1>PyTorch Janky HUD</h1>
 
@@ -122,9 +144,7 @@
       <tr>
         <!-- Time -->
         <td class="job-metadata">
-          <span class="inner-timestamp" style="display:none">
-            {{time}}
-          </span>
+          <time-formatted timestamp='{{time}}'></time-formatted>
         </td>
 
         <!-- SHA -->
@@ -142,46 +162,20 @@
 
         <!-- All the jobs -->
         {% for job in jobs %}
-        <td>
-          {% if job %}
-          <a href={{job.html_url}} class="tooltip">
-            <span class="conclusion">
-              {{ macros.emoji_for_conclusion(job.conclusion) }}
-            </span>
-            <span class="tooltiptext">[{{job.conclusion}}] {{job.workflow_name}} / {{job.job_name}}</span>
-          </a>
-          {% else %}
-          <div class="tooltip">
-            <span class="tooltiptext">[not run] {{names[loop.index0]}}</span>
-            <span class="conclusion">
-              <span class="conclusion-none" style="color: lightgray">O</span>
-            </span>
+        <td class="clickable" onClick="jobDialog(this)" job-id={{job.id}}>
+          <div class="conclusion">
+            {% if job %}
+            {{ macros.emoji_for_conclusion(job.conclusion) }}
+            {% else %}
+            <span class="conclusion-none">O</span>
+            {% endif %}
           </div>
-          {% endif %}
         </td>
         {% endfor %}
       </tr>
       {% endfor %}
     </tbody>
   </table>
-
-  <!-- scripts to get display times in local timezone -->
-  <script src="https://unpkg.com/dayjs@1.8.21/dayjs.min.js"></script>
-  <script src="https://unpkg.com/dayjs@1.8.21/plugin/utc.js"></script>
-  <script>dayjs.extend(window.dayjs_plugin_utc)</script>
-  <script>
-    document.querySelectorAll('span.inner-timestamp').forEach(function (elem) {
-      let time = dayjs(elem.innerHTML).local();
-      if (dayjs().isSame(time, 'day')) {
-        // "6:55 PM"
-        elem.innerHTML = time.format('h:mm A')
-      } else {
-        // "Wed, Dec 8"
-        elem.innerHTML = time.format('ddd, MMM D')
-      }
-      elem.style.display = null;
-    });
-  </script>
 
   <script>
     // Optimization to avoid needless re-flowing as the table HTML loads. Our
@@ -190,5 +184,39 @@
     // See: https://patdavid.net/2019/02/displaying-a-big-html-table/
     document.getElementById("hud-table").style.display = null;
   </script>
+
+  <script>
+    function jobDialog(elem) {
+      let existingDialog = elem.querySelector('.job-dialog');
+      if (existingDialog !== null) {
+        return;
+      }
+
+      let newDialog = document.createElement("div")
+      newDialog.className = "job-dialog";
+      newDialog.innerHTML = "Loading…";
+      elem.append(newDialog);
+
+      const id = elem.getAttribute("job-id");
+      let response = fetch("job_dialog/" + id)
+        .then(response => response.json())
+        .then(data => {
+          newDialog.innerHTML = data.html;
+        },
+          error => {
+            newDialog.innerHTML = "Error loading job data";
+          }).then(() => {
+            // Add an event listener to close the dialog when the user clicks outside
+            document.addEventListener('click', function cb(event) {
+              if (!newDialog.contains(event.target)) {
+                newDialog.remove();
+                // Remove this listener when the dialog is removed.
+                event.currentTarget.removeEventListener(event.type, cb);
+              }
+            });
+          });
+    }
+  </script>
 </body>
+
 </html>
