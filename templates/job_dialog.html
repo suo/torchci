@@ -1,4 +1,5 @@
-<p><a href={{result.html_url}}>{{ result.workflow_name }} / {{ result.job_name }}</a><p>
+{{ result.workflow_name }} / {{ result.job_name }}
+<div><a target="_blank" href={{result.html_url}}>GitHub</a> | <a target="_blank" href=commit/{{result.sha}}>PR HUD</a></div>
 <p>Conclusion: {{ result.conclusion or "pending" }}</p>
 {% if result.failure_line %}
 <details>

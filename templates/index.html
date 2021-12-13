@@ -5,6 +5,10 @@
 <link rel="stylesheet" href="{{ url_for('static', filename='common.css') }}">
 
 <style>
+  .dialog-target {
+    cursor: pointer;
+  }
+
   .job-dialog {
     background-color: lightgray;
     padding: 5px 0;
@@ -44,10 +48,6 @@
   .job-metadata {
     white-space: nowrap;
     font-family: sans-serif;
-  }
-
-  .clickable {
-    cursor: pointer;
   }
 </style>
 
@@ -91,9 +91,7 @@
 
         {% for name in names %}
         <th class="job-header">
-          <div class="job-header__name">
-            {{name}}
-          </div>
+          <div class="job-header__name">{{name}}</div>
         </th>
         {% endfor %}
       </tr>
@@ -122,7 +120,7 @@
 
         <!-- All the jobs -->
         {% for job in jobs %}
-        <td class="clickable" onClick="jobDialog(this)" job-id={{job.id}}>
+        <td class="dialog-target" job-id={{job.id}}>
           <div class="conclusion">
             {% if job %}
             {{ macros.emoji_for_conclusion(job.conclusion) }}
@@ -146,36 +144,78 @@
   </script>
 
   <script>
-    function jobDialog(elem) {
-      let existingDialog = elem.querySelector('.job-dialog');
+    function newDialog(jobTarget) {
+      const th = jobTarget.closest("table").querySelector(`th:nth-child(${jobTarget.cellIndex + 1})`);
+      const jobName = th.querySelector('.job-header__name').innerHTML
+      const newDialog = document.createElement("div")
+      newDialog.className = "job-dialog";
+      newDialog.innerHTML = jobName;
+
+      const box = jobTarget.getBoundingClientRect();
+      newDialog.style.left = box.x + 20 + "px";
+      newDialog.style.top = box.y + 20 + "px";
+      document.body.append(newDialog);
+      return newDialog;
+    }
+
+    function jobMouseOver(event) {
+      const elem = event.currentTarget;
+      const existingDialog = document.querySelector('.job-dialog');
       if (existingDialog !== null) {
         return;
       }
+      // Find the corresponding header name (cellIndex+1 because nth-child is 1-indexed);
+      newDialog(elem);
+    }
 
-      let newDialog = document.createElement("div")
-      newDialog.className = "job-dialog";
-      newDialog.innerHTML = "Loading…";
-      elem.append(newDialog);
+    function jobMouseLeave(event) {
+      const elem = event.currentTarget;
+      const existingDialog = document.querySelector('.job-dialog');
+      if (existingDialog === null || existingDialog.getAttribute("pinned") === "true") {
+        return;
+      }
+      existingDialog.remove();
+    }
+
+    function jobClick(event) {
+      const elem = event.currentTarget;
+      let dialog = document.querySelector('.job-dialog');
+
+      if (dialog === null) {
+        dialog = newDialog(elem);
+      }
+      // const newDialog = document.createElement("div")
+      // newDialog.className = "job-dialog";
+      dialog.setAttribute("pinned", "true");
+      dialog.innerHTML += "<div class='loading'>Loading…</div>";
+      // elem.append(newDialog);
 
       const id = elem.getAttribute("job-id");
       let response = fetch("job_dialog/" + id)
         .then(response => response.json())
         .then(data => {
-          newDialog.innerHTML = data.html;
+          dialog.querySelector(".loading").remove();
+          dialog.innerHTML = data.html;
         },
           error => {
-            newDialog.innerHTML = "Error loading job data";
+            dialog.innerHTML = "Error loading job data";
           }).then(() => {
             // Add an event listener to close the dialog when the user clicks outside
             document.addEventListener('click', function cb(event) {
-              if (!newDialog.contains(event.target)) {
-                newDialog.remove();
+              if (!dialog.contains(event.target)) {
+                dialog.remove();
                 // Remove this listener when the dialog is removed.
                 event.currentTarget.removeEventListener(event.type, cb);
               }
             });
           });
     }
+    document.querySelectorAll(".dialog-target")
+      .forEach(function (element) {
+        element.addEventListener('click', jobClick)
+        element.addEventListener('mouseover', jobMouseOver)
+        element.addEventListener('mouseleave', jobMouseLeave)
+      });
   </script>
 </body>
 
