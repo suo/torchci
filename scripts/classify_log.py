@@ -73,6 +73,7 @@ rules = [
     Rule("MSVC out of memory", r"Catastrophic error", 998),
     Rule("Compile error", r"(.*\d+:\d+): error: (.*)", 997),
     Rule("Curl error", r"curl: .* error:", 997),
+    Rule("Dirty checkout", r"Build left local git repository checkout dirty", 997),
 ]
 
 s3 = boto3.resource("s3")
