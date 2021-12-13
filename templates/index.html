@@ -2,10 +2,6 @@
 
 {% import 'macros.jinja' as macros %}
 <style>
-  * {
-    font-family: sans-serif;
-  }
-
   a {
     text-decoration: none;
     color: #0064cf;
@@ -47,6 +43,7 @@
 
   /* code to roatate the workflow name headers */
   .job-header {
+    font-family: sans-serif;
     height: 220px;
     white-space: nowrap;
   }
@@ -63,12 +60,8 @@
     vertical-align: bottom;
   }
 
-  .timestamp {
-    min-width: 90px;
-    white-space: nowrap;
-  }
-
-  .commit-title {
+  .job-metadata {
+    font-family: sans-serif;
     white-space: nowrap;
   }
 
@@ -76,6 +69,24 @@
     font-family: monospace;
     font-size: 1rem;
     font-weight: bold;
+  }
+  .conclusion-success {
+    color: green;
+  }
+  .conclusion-failure {
+    color: red;
+  }
+  .conclusion-neutral {
+    color: grey;
+  }
+  .conclusion-cancelled {
+    color: red;
+  }
+  .conclusion-timed-out {
+    color: red;
+  }
+  .conclusion-pending {
+    color: goldenrod;
   }
 </style>
 
@@ -110,20 +121,20 @@
       {% for (time, sha, commit_url, commit_message, pr_num), jobs in sha_grid.items() %}
       <tr>
         <!-- Time -->
-        <td class="timestamp">
+        <td class="job-metadata">
           <span class="inner-timestamp" style="display:none">
             {{time}}
           </span>
         </td>
 
         <!-- SHA -->
-        <td><a href={{commit_url}}> {{ sha[:7] }} </a></td>
+        <td class="job-metadata"><a href={{commit_url}}> {{ sha[:7] }} </a></td>
 
         <!-- Commit title -->
-        <td class="commit-title"> <a href="commit/{{sha}}">{{commit_message}}</a> </td>
+        <td class="job-metadata"> <a href="commit/{{sha}}">{{commit_message}}</a> </td>
 
         <!-- Pull Request link -->
-        <td>
+        <td class="job-metadata">
           {% if pr_num %}
           <a href=https://github.com/pytorch/pytorch/pull/{{pr_num}}>#{{pr_num}}</a>
           {% endif %}
@@ -134,13 +145,17 @@
         <td>
           {% if job %}
           <a href={{job.html_url}} class="tooltip">
-            {{ macros.emoji_for_conclusion(job.conclusion) }}
+            <span class="conclusion">
+              {{ macros.emoji_for_conclusion(job.conclusion) }}
+            </span>
             <span class="tooltiptext">[{{job.conclusion}}] {{job.workflow_name}} / {{job.job_name}}</span>
           </a>
           {% else %}
           <div class="tooltip">
             <span class="tooltiptext">[not run] {{names[loop.index0]}}</span>
-            <span class="conclusion" style="color: lightgray">O</span>
+            <span class="conclusion">
+              <span class="conclusion-none" style="color: lightgray">O</span>
+            </span>
           </div>
           {% endif %}
         </td>
