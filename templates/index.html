@@ -1,12 +1,10 @@
 <!DOCTYPE html>
 
 {% import 'macros.jinja' as macros %}
-<style>
-  a {
-    text-decoration: none;
-    color: #0064cf;
-  }
 
+<link rel="stylesheet" href="{{ url_for('static', filename='common.css') }}">
+
+<style>
   .job-dialog {
     background-color: lightgray;
     padding: 5px 0;
@@ -46,44 +44,6 @@
   .job-metadata {
     white-space: nowrap;
     font-family: sans-serif;
-  }
-
-  .conclusion {
-    font-family: monospace;
-    font-size: 1rem;
-    font-weight: bold;
-  }
-
-  .conclusion-success {
-    color: green;
-  }
-
-  .conclusion-failure {
-    color: red;
-  }
-
-  .conclusion-skipped {
-    color: grey;
-  }
-
-  .conclusion-neutral {
-    color: grey;
-  }
-
-  .conclusion-cancelled {
-    color: red;
-  }
-
-  .conclusion-timed-out {
-    color: red;
-  }
-
-  .conclusion-pending {
-    color: goldenrod;
-  }
-
-  .conclusion-none {
-    color: lightgray;
   }
 
   .clickable {
