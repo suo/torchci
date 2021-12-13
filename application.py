@@ -1,3 +1,4 @@
+import os
 from flask import Flask
 from flask_compress import Compress
 from flask_caching import Cache
@@ -5,11 +6,14 @@ from flask_caching import Cache
 import hud
 import commit
 
-
 config = {
     "CACHE_TYPE": "SimpleCache",  # Flask-Caching related configs
     "CACHE_DEFAULT_TIMEOUT": 180,
 }
+
+# turn off caching in debug mode, since it breaks edit-reload.
+if os.environ.get("FLASK_DEBUG") == "1":
+    config["CACHE_TYPE"] = "NullCache"
 
 application = Flask(__name__)
 application.config.from_mapping(config)
