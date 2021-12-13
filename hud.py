@@ -59,4 +59,4 @@ def get():
             )
             sha_grid[key].append(names_to_results.get(name))
 
-    return render_template("index.html", sha_grid=sha_grid, names=names)
+    return sha_grid, names
