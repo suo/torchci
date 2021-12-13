@@ -6,7 +6,7 @@ from common import query_rockset
 
 
 def get():
-    results = query_rockset("hud_query", "b3adbf3da21a2fae")
+    results = query_rockset("hud_query", "fdcded4522bbc4d6")
     master_commits = query_rockset("master_commits", "4d94a9d08bb397fd")
 
     # dict of:
@@ -25,6 +25,15 @@ def get():
         sha = result["sha"]
 
         names.add(name)
+
+        # Q: How can there be more than one job with the same name for a given sha?
+        # A: Periodic builds can be scheduled multiple times for one sha. In
+        # this case, display the most recent periodic job.
+        if name in results_by_sha[sha]:
+            current_result = results_by_sha[sha][name]
+            if result["id"] < current_result["id"]:
+                continue
+
         results_by_sha[sha][name] = result
 
     # sort names alphabetically
