@@ -1,5 +1,9 @@
 {{ result.workflow_name }} / {{ result.job_name }}
-<div><a target="_blank" href={{result.html_url}}>GitHub</a> | <a target="_blank" href=commit/{{result.sha}}>PR HUD</a></div>
+<div>
+    <a target="_blank" href={{result.html_url}}>GitHub</a> |
+    <a target="_blank" href=commit/{{result.sha}}>PR HUD</a> |
+    <a target="_blank" href="https://ossci-raw-job-status.s3.amazonaws.com/log/{{id}}">raw logs</a>
+</div>
 <p>Conclusion: {{ result.conclusion or "pending" }}</p>
 {% if result.failure_line %}
 <details>

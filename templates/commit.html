@@ -70,7 +70,7 @@
                 <li>
                     <span class="conclusion">{{ macros.emoji_for_conclusion(job.conclusion) }}</span>
                     {% if job.status == 'completed' %}
-                    <a href="https://ossci-raw-job-status.s3.amazonaws.com/logs/{{job.id}}">[log]</a>
+                    <a href="https://ossci-raw-job-status.s3.amazonaws.com/log/{{job.id}}">[log]</a>
                     {% endif %}
                     <a href="{{ job.html_url }}">{{ job.job_name }}</a>
                 </li>

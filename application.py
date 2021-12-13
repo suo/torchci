@@ -45,7 +45,7 @@ def commit_(sha):
 @application.route("/job_dialog/<int:id>")
 def job_dialog(id):
     result = query_rockset("job_dialog", "eab61f7f2ada1044", ParamDict({"job_id": id}))[0]
-    return {"html": render_template("job_dialog.html", result=result)}
+    return {"html": render_template("job_dialog.html", result=result, id=id)}
 
 if __name__ == "__main__":
     application.run()
