@@ -164,7 +164,14 @@ def lambda_handler(event, context):
 
 
 if __name__ == "__main__":
+    import sys
     import argparse
+    logging.basicConfig(
+        format="<%(levelname)s> %(message)s",
+        level=logging.INFO,
+        stream=sys.stderr,
+    )
+
 
     parser = argparse.ArgumentParser()
     parser.add_argument(
