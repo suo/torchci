@@ -11,9 +11,10 @@ This is intended to be run from a lambda, but can be run manually as well.
 
 import gzip
 import json
-import re
-
 import logging
+import re
+from itertools import cycle
+from multiprocessing import Pipe, Process
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -51,7 +52,64 @@ class RuleEngine:
         self.rules = sorted(rules, key=lambda rule: rule.priority, reverse=True)
         self._best_match = RuleMatch(self.DUMMY_RULE, "")
 
-    def process(self, line_num, line):
+    def run(self, lines):
+        """Find the highest-priority matching rule from this log.
+
+        This uses multiple processes to match lines in parallel. Certain logs
+        (long logs with long lines, e.g. windows logs) cause a non-parallel
+        implementation to timeout on lambda.
+        """
+        # Split the work into buckets so we can parallelize.
+        num_buckets = 6  # hard-coded because AWS Lambda supports max 6 vcpus.
+        buckets = [[] for _ in range(num_buckets)]
+        lines_with_num = list(enumerate(lines))
+        for elem, bucket in zip(lines_with_num, cycle(buckets)):
+            bucket.append(elem)
+
+        # create a list to keep all processes
+        processes = []
+
+        # create a list to keep connections
+        parent_connections = []
+
+        # create a process per bucket
+        for bucket in buckets:
+            # create a pipe for communication
+            # we are doing this manually because AWS lambda doesn't have shm
+            # (and thus can't use most higher-order multiprocessing primitives)
+            parent_conn, child_conn = Pipe()
+            parent_connections.append(parent_conn)
+
+            # send the work over
+            process = Process(
+                target=self.process_bucket,
+                args=(
+                    bucket,
+                    child_conn,
+                ),
+            )
+            processes.append(process)
+
+        for process in processes:
+            process.start()
+        for process in processes:
+            process.join()
+
+        # get the best match from all the processes
+        for parent_conn in parent_connections:
+            match = parent_conn.recv()
+            if match == None:
+                continue
+            if match.rule.priority > self._best_match.rule.priority:
+                self._best_match = match
+
+    def process_bucket(self, bucket, conn):
+        for num, line in bucket:
+            self.process_line(num, line)
+        conn.send(self.best_match())
+        conn.close()
+
+    def process_line(self, line_num, line):
         for rule in self.rules:
             match = rule.match(line)
             if match is not None:
@@ -76,13 +134,14 @@ rules = [
         "Python unittest error", r"FAIL \[.*\]: (test.*) \((?:__main__\.)?(.*)\)", 999
     ),
     Rule("MSVC out of memory", r"Catastrophic error", 998),
+    Rule("MSVC compielr error", r"^.*\(\d+\): error C\d+:", 999),
     Rule("Compile error", r"(.*\d+:\d+): error: (.*)", 997),
-    Rule("Curl error", r"curl: .* error:", 997),
-    Rule("Dirty checkout", r"^Build left local git repository checkout dirty", 997),
+    Rule("Curl error", r"curl: .* error:", 996),
+    Rule("Dirty checkout", r"^Build left local git repository checkout dirty", 995),
     Rule(
         "Docker manifest error",
         r"^ERROR: Something has gone wrong and the previous image isn't available for the merge-base of your branch",
-        997,
+        994,
     ),
 ]
 
@@ -111,6 +170,7 @@ def match_to_json(id, match, lines):
 
 def classify(id):
     logger.info(f"classifying {id}")
+    logger.info("fetching from s3")
     log_obj = s3.Object(BUCKET_NAME, f"log/{id}")
     log_obj.load()
 
@@ -121,18 +181,19 @@ def classify(id):
 
     log = log_obj.get()
 
-    engine = RuleEngine(rules)
-
     # logs are stored gzip-compressed
+    logger.info("decompressing")
     log = gzip.decompress(log["Body"].read())
     lines = log.split(b"\n")
 
     # GHA adds a timestamp to the front of every log. Strip it before matching.
+    logger.info("stripping timestamps")
     for idx, line in enumerate(lines):
         lines[idx] = line.partition(b" ")[2]
 
-    for i, line in enumerate(lines):
-        engine.process(i, line)
+    logger.info("running engine")
+    engine = RuleEngine(rules)
+    engine.run(lines)
     match = engine.best_match()
     if not match:
         logger.info("no match found")
@@ -140,9 +201,14 @@ def classify(id):
 
     json = match_to_json(id, match, lines)
     if WRITE_TO_S3:
+        logger.info("writing to s3")
         s3.Object(BUCKET_NAME, f"classification/{id}").put(
             Body=json, ContentType="application/json"
         )
+    else:
+        logger.info("writing to stdout")
+        print(json)
+    logger.info("done")
     return json
 
 
@@ -167,8 +233,8 @@ def lambda_handler(event, context):
 
 
 if __name__ == "__main__":
-    import sys
     import argparse
+    import sys
 
     logging.basicConfig(
         format="<%(levelname)s> [%(asctime)s] %(message)s",
