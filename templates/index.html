@@ -85,7 +85,7 @@
 
 <body>
   <h1>PyTorch Janky HUD</h1>
-  <div>This page reloads every 15 seconds.</div>
+  <div>This page reloads every minute.</div>
   <table id="hud-table" style="display:none">
     <thead>
       <tr>
@@ -157,6 +157,8 @@
       let conclusion = jobTarget.getAttribute("conclusion");
       if (conclusion === null) {
         conclusion = "does not exist";
+      } else if (conclusion === "None") {
+        conclusion = "pending";
       }
       const th = jobTarget.closest("table").querySelector(`th:nth-child(${jobTarget.cellIndex + 1})`);
       const jobName = th.querySelector('.job-header__name').innerHTML
@@ -243,7 +245,7 @@
       if (elem === null) {
         location.reload();
       }
-    }, 15000);
+    }, 60000);
 
   </script>
 
