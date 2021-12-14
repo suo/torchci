@@ -9,6 +9,10 @@
     cursor: pointer;
   }
 
+  .dialog-target-no-click {
+    cursor: default;
+  }
+
   .job-dialog {
     background-color: lightgray;
     padding: 5px 0;
@@ -81,7 +85,7 @@
 
 <body>
   <h1>PyTorch Janky HUD</h1>
-  <div>This page reloads every 15 seconds</div>
+  <div>This page reloads every 15 seconds.</div>
   <table id="hud-table" style="display:none">
     <thead>
       <tr>
@@ -121,15 +125,19 @@
 
         <!-- All the jobs -->
         {% for job in jobs %}
+        {% if job %}
         <td class="dialog-target" job-id={{job.id}}>
           <div class="conclusion">
-            {% if job %}
             {{ macros.emoji_for_conclusion(job.conclusion) }}
-            {% else %}
-            <span class="conclusion-none">O</span>
-            {% endif %}
           </div>
         </td>
+        {% else %}
+        <td class="dialog-target-no-click">
+          <div class="conclusion">
+            <span class="conclusion-none">O</span>
+          </div>
+        </td>
+        {% endif %}
         {% endfor %}
       </tr>
       {% endfor %}
@@ -180,16 +188,17 @@
 
     function jobClick(event) {
       const elem = event.currentTarget;
+      if (elem.querySelector(".conclusion-none") !== null) {
+        // Don't fetch for non-existent jobs.
+        return;
+      }
       let dialog = document.querySelector('.job-dialog');
 
       if (dialog === null) {
         dialog = newDialog(elem);
       }
-      // const newDialog = document.createElement("div")
-      // newDialog.className = "job-dialog";
       dialog.setAttribute("pinned", "true");
       dialog.innerHTML += "<div class='loading'>Loading…</div>";
-      // elem.append(newDialog);
 
       const id = elem.getAttribute("job-id");
       let response = fetch("job_dialog/" + id)
@@ -214,6 +223,11 @@
     document.querySelectorAll(".dialog-target")
       .forEach(function (element) {
         element.addEventListener('click', jobClick)
+        element.addEventListener('mouseover', jobMouseOver)
+        element.addEventListener('mouseleave', jobMouseLeave)
+      });
+    document.querySelectorAll(".dialog-target-no-click")
+      .forEach(function (element) {
         element.addEventListener('mouseover', jobMouseOver)
         element.addEventListener('mouseleave', jobMouseLeave)
       });
