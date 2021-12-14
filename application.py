@@ -62,7 +62,7 @@ def commit_(sha):
 # It also lets us render tooltip html in jinja.
 @application.route("/job_dialog/<int:id>")
 def job_dialog(id):
-    result = query_rockset("job_dialog", "eab61f7f2ada1044", ParamDict({"job_id": id}))
+    result = query_rockset("job_dialog", "e74f51dd2fa6fc39", ParamDict({"job_id": id}))
     result = result[0]
     return {"html": render_template("job_dialog.html", result=result, id=id)}
 
