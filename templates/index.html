@@ -188,8 +188,8 @@
       newDialog.innerHTML = `[${conclusion}] ${jobName}`;
 
       const box = jobTarget.getBoundingClientRect();
-      newDialog.style.left = box.x + 20 + "px";
-      newDialog.style.top = box.y + 20 + "px";
+      newDialog.style.left = box.x + 20 + window.scrollX + "px";
+      newDialog.style.top = box.y + 20 + window.scrollY + "px";
       document.body.append(newDialog);
       return newDialog;
     }
