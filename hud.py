@@ -6,8 +6,8 @@ from common import query_rockset
 
 
 def get():
-    results = query_rockset("hud_query", "3a1a9c9dc234906c")
-    master_commits = query_rockset("master_commits", "4d94a9d08bb397fd")
+    results = query_rockset("hud_query", "7891fc43906b5684")
+    master_commits = query_rockset("master_commits", "0eb2bb9ba5c3fcab")
 
     # dict of:
     # sha => commit info
@@ -39,15 +39,16 @@ def get():
     # sort names alphabetically
     names = sorted(list(names))
 
-    # subtle: our query is sorted by time desc, so `shas_to_time` will
+    # subtle: our query is sorted by time desc, so `sha_to_commit` will
     # always be in the right order already.
     sha_grid = defaultdict(list)
-    for sha, names_to_results in results_by_sha.items():
-        commit_url = sha_to_commit[sha]["url"]
-        truncated_commit_message = sha_to_commit[sha]["truncated_message"]
-        time = sha_to_commit[sha]["timestamp"]
+    for sha, commit in sha_to_commit.items():
+        name_to_results = results_by_sha[sha]
+        commit_url = commit["url"]
+        time = commit["timestamp"]
         time = datetime.fromisoformat(time)
-        pr_num = sha_to_commit[sha]["pr_num"]
+        pr_num = commit["pr_num"]
+        truncated_commit_message = commit["truncated_message"]
 
         for name in names:
             key = (
@@ -57,6 +58,6 @@ def get():
                 f"{truncated_commit_message}...",
                 pr_num,
             )
-            sha_grid[key].append(names_to_results.get(name))
+            sha_grid[key].append(name_to_results.get(name))
 
     return sha_grid, names
