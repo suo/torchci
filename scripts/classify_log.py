@@ -74,6 +74,11 @@ rules = [
     Rule("Compile error", r"(.*\d+:\d+): error: (.*)", 997),
     Rule("Curl error", r"curl: .* error:", 997),
     Rule("Dirty checkout", r"Build left local git repository checkout dirty", 997),
+    Rule(
+        "Docker manifest error",
+        r"ERROR: Something has gone wrong and the previous image isn't available for the merge-base of your branch",
+        997,
+    ),
 ]
 
 s3 = boto3.resource("s3")
@@ -165,11 +170,11 @@ if __name__ == "__main__":
         help="ids to classify",
     )
     parser.add_argument(
-        "--do-write",
+        "--update-s3",
         action="store_true",
         help="If set, write the resulting classification to s3.",
     )
     args = parser.parse_args()
-    WRITE_TO_S3 = args.do_write
+    WRITE_TO_S3 = args.update_s3
     for id in args.ids:
         classify(id)
