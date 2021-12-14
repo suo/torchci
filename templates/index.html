@@ -126,7 +126,7 @@
         <!-- All the jobs -->
         {% for job in jobs %}
         {% if job %}
-        <td class="dialog-target" job-id={{job.id}}>
+        <td class="dialog-target" job-id={{job.id}} conclusion={{job.conclusion}}>
           <div class="conclusion">
             {{ macros.emoji_for_conclusion(job.conclusion) }}
           </div>
@@ -154,11 +154,15 @@
 
   <script>
     function newDialog(jobTarget) {
+      let conclusion = jobTarget.getAttribute("conclusion");
+      if (conclusion === null) {
+        conclusion = "does not exist";
+      }
       const th = jobTarget.closest("table").querySelector(`th:nth-child(${jobTarget.cellIndex + 1})`);
       const jobName = th.querySelector('.job-header__name').innerHTML
       const newDialog = document.createElement("div")
       newDialog.className = "job-dialog";
-      newDialog.innerHTML = jobName;
+      newDialog.innerHTML = `[${conclusion}] ${jobName}`;
 
       const box = jobTarget.getBoundingClientRect();
       newDialog.style.left = box.x + 20 + "px";
