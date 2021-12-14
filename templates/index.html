@@ -258,6 +258,19 @@
         element.addEventListener('mouseover', jobMouseOver)
         element.addEventListener('mouseleave', jobMouseLeave)
       });
+
+    document.addEventListener('keydown', (e) => {
+      // Esc removes existing dialog.
+      if (e.code === "Escape") {
+        const existingDialog = document.querySelector('.job-dialog');
+        console.log(existingDialog);
+        if (existingDialog === null) {
+          return;
+        }
+        existingDialog.remove();
+      }
+    });
+
   </script>
   <script>
     setInterval(() => {
