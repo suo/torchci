@@ -134,7 +134,7 @@ rules = [
         "Python unittest error", r"FAIL \[.*\]: (test.*) \((?:__main__\.)?(.*)\)", 999
     ),
     Rule("MSVC out of memory", r"Catastrophic error", 998),
-    Rule("MSVC compielr error", r"^.*\(\d+\): error C\d+:", 999),
+    Rule("MSVC compiler error", r"^.*\(\d+\): error C\d+:", 999),
     Rule("Compile error", r"(.*\d+:\d+): error: (.*)", 997),
     Rule("Curl error", r"curl: .* error:", 996),
     Rule("Dirty checkout", r"^Build left local git repository checkout dirty", 995),
@@ -143,6 +143,8 @@ rules = [
         r"^ERROR: Something has gone wrong and the previous image isn't available for the merge-base of your branch",
         994,
     ),
+    Rule("Python AttributeError", r"^AttributeError: ", 100),
+    Rule("Python RuntimeError", r"^RuntimeError: ", 99),
 ]
 
 s3 = boto3.resource("s3")
