@@ -12,7 +12,11 @@ This is intended to be run from a lambda, but can be run manually as well.
 import gzip
 import json
 import re
-from argparse import ArgumentParser
+
+import logging
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
+
 
 import boto3  # type: ignore
 
@@ -73,10 +77,10 @@ rules = [
     Rule("MSVC out of memory", r"Catastrophic error", 998),
     Rule("Compile error", r"(.*\d+:\d+): error: (.*)", 997),
     Rule("Curl error", r"curl: .* error:", 997),
-    Rule("Dirty checkout", r"Build left local git repository checkout dirty", 997),
+    Rule("Dirty checkout", r"^Build left local git repository checkout dirty", 997),
     Rule(
         "Docker manifest error",
-        r"ERROR: Something has gone wrong and the previous image isn't available for the merge-base of your branch",
+        r"^ERROR: Something has gone wrong and the previous image isn't available for the merge-base of your branch",
         997,
     ),
 ]
@@ -105,13 +109,13 @@ def match_to_json(id, match, lines):
 
 
 def classify(id):
-    print(f"classifying {id}")
+    logger.info(f"classifying {id}")
     log_obj = s3.Object(BUCKET_NAME, f"log/{id}")
     log_obj.load()
 
     if log_obj.metadata.get("conclusion") != "failure":
         # only classify failed jobs
-        print("skipping non-failing job")
+        logger.info("skipping non-failing job")
         return
 
     log = log_obj.get()
@@ -130,13 +134,12 @@ def classify(id):
         engine.process(i, line)
     match = engine.best_match()
     if not match:
-        print("no match found")
+        logger.info("no match found")
         return "no match found"
 
     json = match_to_json(id, match, lines)
     if WRITE_TO_S3:
         s3.Object(BUCKET_NAME, f"classification/{id}").put(Body=json)
-    print(json)
     return json
 
 
