@@ -60,9 +60,9 @@ def commit_(sha):
 # proxy lets us avoid that.
 #
 # It also lets us render tooltip html in jinja.
-@application.route("/job_dialog/<int:id>")
+@application.route("/job_dialog/<string:id>")
 def job_dialog(id):
-    result = query_rockset("job_dialog", "e74f51dd2fa6fc39", ParamDict({"job_id": id}))
+    result = query_rockset("job_dialog", "ea00e3c4436b6c6b", ParamDict({"job_id": id}))
     result = result[0]
     return {"html": render_template("job_dialog.html", result=result, id=id)}
 

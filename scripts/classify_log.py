@@ -14,6 +14,7 @@ import json
 import re
 
 import logging
+
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
@@ -139,7 +140,9 @@ def classify(id):
 
     json = match_to_json(id, match, lines)
     if WRITE_TO_S3:
-        s3.Object(BUCKET_NAME, f"classification/{id}").put(Body=json)
+        s3.Object(BUCKET_NAME, f"classification/{id}").put(
+            Body=json, ContentType="application/json"
+        )
     return json
 
 
@@ -166,12 +169,12 @@ def lambda_handler(event, context):
 if __name__ == "__main__":
     import sys
     import argparse
+
     logging.basicConfig(
         format="<%(levelname)s> %(message)s",
         level=logging.INFO,
         stream=sys.stderr,
     )
-
 
     parser = argparse.ArgumentParser()
     parser.add_argument(
