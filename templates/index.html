@@ -99,6 +99,10 @@
           <div class="job-header__name">{{name}}</div>
         </th>
         {% endfor %}
+        <th class="regular-header" style="text-align: right">PR</th>
+        <th class="regular-header">Commit</th>
+        <th class="regular-header">SHA</th>
+        <th class="regular-header">Time</th>
       </tr>
     </thead>
 
@@ -139,6 +143,23 @@
         </td>
         {% endif %}
         {% endfor %}
+        <!-- Pull Request link -->
+        <td class="job-metadata">
+          {% if pr_num %}
+          <a href=https://github.com/pytorch/pytorch/pull/{{pr_num}}>#{{pr_num}}</a>
+          {% endif %}
+        </td>
+
+        <!-- Commit title -->
+        <td class="job-metadata"> <a href="commit/{{sha}}">{{commit_message}}</a> </td>
+
+        <!-- SHA -->
+        <td class="job-metadata"><a href={{commit_url}}> {{ sha[:7] }} </a></td>
+
+        <!-- Time -->
+        <td class="job-metadata">
+          <time-formatted timestamp='{{time}}'></time-formatted>
+        </td>
       </tr>
       {% endfor %}
     </tbody>
