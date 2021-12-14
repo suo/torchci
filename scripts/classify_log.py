@@ -171,7 +171,7 @@ if __name__ == "__main__":
     import argparse
 
     logging.basicConfig(
-        format="<%(levelname)s> %(message)s",
+        format="<%(levelname)s> [%(asctime)s] %(message)s",
         level=logging.INFO,
         stream=sys.stderr,
     )
