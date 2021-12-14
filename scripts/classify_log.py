@@ -130,6 +130,7 @@ class RuleEngine:
 
 
 rules = [
+    Rule("NVIDIA installation failure", r"^ERROR: Installation has failed.*?nvidia", 1000),
     Rule(
         "Python unittest error", r"FAIL \[.*\]: (test.*) \((?:__main__\.)?(.*)\)", 999
     ),
