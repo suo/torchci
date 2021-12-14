@@ -6,7 +6,7 @@ from common import query_rockset
 
 
 def get():
-    results = query_rockset("hud_query", "984165a6638cbd8b")
+    results = query_rockset("hud_query", "e6a600ee2c08b24b")
     master_commits = query_rockset("master_commits", "0eb2bb9ba5c3fcab")
 
     # dict of:

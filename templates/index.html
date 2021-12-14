@@ -78,9 +78,10 @@
     });
   </script>
 </head>
-<h1>PyTorch Janky HUD</h1>
 
 <body>
+  <h1>PyTorch Janky HUD</h1>
+  <div>This page reloads every 15 seconds</div>
   <table id="hud-table" style="display:none">
     <thead>
       <tr>
@@ -217,6 +218,17 @@
         element.addEventListener('mouseleave', jobMouseLeave)
       });
   </script>
+  <script>
+    setInterval(() => {
+      // Reload if someone didn't have a dialog box open.
+      const elem = document.querySelector(".job-dialog");
+      if (elem === null) {
+        location.reload();
+      }
+    }, 15000);
+
+  </script>
+
 </body>
 
 </html>
