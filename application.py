@@ -1,5 +1,5 @@
 import os
-from flask import Flask
+from flask import Flask, send_from_directory
 from flask.templating import render_template
 from flask_compress import Compress
 from flask_caching import Cache
@@ -53,6 +53,15 @@ def hud_():
 @application.route("/commit/<sha>")
 def commit_(sha):
     return commit.get(sha)
+
+
+@application.route("/favicon.ico")
+def favicon():
+    return send_from_directory(
+        os.path.join(application.root_path, "static"),
+        "favicon.ico",
+        mimetype="image/vnd.microsoft.icon",
+    )
 
 
 # Really we could have queried Rockset directly from JSON, but that requires
