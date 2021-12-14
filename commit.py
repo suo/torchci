@@ -1,42 +1,19 @@
+import re
 from collections import defaultdict
+
 from flask import render_template
-from rockset import Client, ParamDict
-from common import ROCKSET_API_KEY
+from common import query_rockset, ParamDict
 
 
-def do_commit_query(sha):
-    rs = Client(
-        api_key=ROCKSET_API_KEY,
-        api_server="https://api.rs2.usw2.rockset.com",
-    )
-    qlambda = rs.QueryLambda.retrieve(
-        "commit_query", version="a7158163d4bb8846", workspace="commons"
-    )
-
-    params = ParamDict()
-    params["sha"] = sha
-    results = qlambda.execute(parameters=params)
-    return results.results[0]["commit"]
-
-
-def do_commit_jobs_query(sha):
-    rs = Client(
-        api_key=ROCKSET_API_KEY,
-        api_server="https://api.rs2.usw2.rockset.com",
-    )
-    qlambda = rs.QueryLambda.retrieve(
-        "commit_jobs_query", version="4e6742b17bf7e947", workspace="commons"
-    )
-
-    params = ParamDict()
-    params["sha"] = sha
-    results = qlambda.execute(parameters=params)
-    return results.results
+PR_URL_REGEX = re.compile(r"Pull Request resolved: (.*)")
+PHAB_REGEX = re.compile(r"Differential Revision: (.*)")
 
 
 def get(sha):
-    commit = do_commit_query(sha)
-    jobs = do_commit_jobs_query(sha)
+    commit = query_rockset("commit_query", "a7158163d4bb8846", ParamDict(sha=sha))[0][
+        "commit"
+    ]
+    jobs = query_rockset("commit_jobs_query", "4e6742b17bf7e947", ParamDict(sha=sha))
 
     # dict of workflow -> jobs
     jobs_by_workflow = defaultdict(list)
@@ -47,14 +24,29 @@ def get(sha):
         if job["conclusion"] == "failure":
             failed_jobs.append(job)
 
+    failed_jobs.sort(key=lambda x: x["workflow_name"] + x["job_name"])
+
     # sort jobs by job id, which gets us the same sorting as in the GH UI
     for jobs in jobs_by_workflow.values():
         jobs.sort(key=lambda j: j["id"])
 
     commit_title, _, commit_message_body = commit["message"].partition("\n")
+    match = PR_URL_REGEX.search(commit_message_body)
+    if match is None:
+        pr_url = None
+    else:
+        pr_url = match.group(1)
+
+    match = PHAB_REGEX.search(commit_message_body)
+    if match is None:
+        diff_num = None
+    else:
+        diff_num = match.group(1)
 
     return render_template(
         "commit.html",
+        pr_url=pr_url,
+        diff_num=diff_num,
         commit_title=commit_title,
         commit_message_body=commit_message_body,
         commit=commit,

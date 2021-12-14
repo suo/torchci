@@ -35,6 +35,13 @@
 <body>
     <h1>PyTorch Janky PR HUD</h1>
     <h2>{{ commit_title }} </h2>
+    {% if pr_url %}
+        <a href={{pr_url}}>GitHub</a>
+    {% endif %}
+    {% if pr_url and diff_num %} | {% endif %}
+    {% if diff_num %}
+        <a href=https://www.internalfb.com/diff/{{diff_num}}>Phabricator</a>
+    {% endif %}
     <article class="commit-message">
         {{ commit_message_body }}
     </article>
