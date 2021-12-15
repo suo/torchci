@@ -22,6 +22,10 @@ import boto3  # type: ignore
 s3 = boto3.resource("s3")
 BUCKET_NAME = "ossci-raw-job-status"
 WRITE_TO_S3 = True
+# https://stackoverflow.com/questions/14693701/how-can-i-remove-the-ansi-escape-sequences-from-a-string-in-python
+ESCAPE_CODE_REGEX = re.compile(
+    br'(?:\x1B[@-Z\\-_]|[\x80-\x9A\x9C-\x9F]|(?:\x1B\[|\x9B)[0-?]*[ -/]*[@-~])'
+)
 
 
 class Rule:
@@ -191,8 +195,11 @@ def classify(rules, id):
 
     # GHA adds a timestamp to the front of every log. Strip it before matching.
     logger.info("stripping timestamps")
-    for idx, line in enumerate(lines):
-        lines[idx] = line.partition(b" ")[2]
+    lines = [line.partition(b" ")[2] for line in lines]
+
+    # Color, etc. in terminal output should be removed
+    logger.info("stripping escape codes")
+    lines = [ESCAPE_CODE_REGEX.sub(b"", line) for line in lines]
 
     logger.info("running engine")
     engine = RuleEngine(rules)
