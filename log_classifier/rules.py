@@ -24,6 +24,22 @@ class Rule:
 #     good capture group, as it filters out test timings which might be
 #     variable.
 rules = [
+    Rule("gtest failure", r"(^\[  FAILED  \].*) \(\d+", 1001),
+    Rule(
+        "No trailing spaces",
+        r"^The above lines have trailing spaces; please remove them",
+        1000,
+    ),
+    Rule(
+        "GitHub workflows weren't regenerated",
+        r"^As shown by the above diff, the committed \.github\/workflows",
+        1000,
+    ),
+    Rule(
+        "Docker image push failure",
+        r"^name unknown: The repository with name '.*' does not exist in the registry",
+        1001,
+    ),
     Rule(
         "Windows PyLong API usage check",
         r"^Usage of PyLong_{From,As}{Unsigned}Long API may lead to overflow errors on Windows",
@@ -45,6 +61,7 @@ rules = [
         r"^ERROR: Something has gone wrong and the previous image isn't available for the merge-base of your branch",
         994,
     ),
+    Rule("flake8 error", r"^.*:\d+:\d: [EBFW]\d+ .*", 800),
     Rule("Python AttributeError", r"^AttributeError: .*", 100),
     Rule("Python RuntimeError", r"^RuntimeError: .*", 99),
 ]

@@ -1,5 +1,25 @@
 [
     {
+        "name": "gtest failure",
+        "pattern": "(^\\[  FAILED  \\].*) \\(\\d+",
+        "priority": 1001
+    },
+    {
+        "name": "No trailing spaces",
+        "pattern": "^The above lines have trailing spaces; please remove them",
+        "priority": 1000
+    },
+    {
+        "name": "GitHub workflows weren't regenerated",
+        "pattern": "^As shown by the above diff, the committed \\.github\\/workflows",
+        "priority": 1000
+    },
+    {
+        "name": "Docker image push failure",
+        "pattern": "^name unknown: The repository with name '.*' does not exist in the registry",
+        "priority": 1001
+    },
+    {
         "name": "Windows PyLong API usage check",
         "pattern": "^Usage of PyLong_{From,As}{Unsigned}Long API may lead to overflow errors on Windows",
         "priority": 1001
@@ -43,6 +63,11 @@
         "name": "Docker manifest error",
         "pattern": "^ERROR: Something has gone wrong and the previous image isn't available for the merge-base of your branch",
         "priority": 994
+    },
+    {
+        "name": "flake8 error",
+        "pattern": "^.*:\\d+:\\d: [EBFW]\\d+ .*",
+        "priority": 800
     },
     {
         "name": "Python AttributeError",

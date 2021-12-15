@@ -25,7 +25,7 @@ def send_lambda_request(id):
 
 def do_backfill(n):
     # Import here to avoid requiring these dependencies in lambda
-    from rockset import Client, Q, F
+    from rockset import Client, Q, F, ParamDict
     from concurrent.futures import ThreadPoolExecutor, wait
 
     # query rockset for failed GHA job ids
@@ -33,13 +33,19 @@ def do_backfill(n):
         api_key=ROCKSET_API_KEY,
         api_server="https://api.rs2.usw2.rockset.com",
     )
-    q = (
-        Q("GitHub-Actions.workflow_job")
-        .where(F["conclusion"] == "failure")
-        .highest(n, F["_event_time"])
-        .select(F["id"])
+    qlambda = client.QueryLambda.retrieve(
+        "unclassified", version="d39e66c0ed0aa238", workspace="commons"
     )
-    results = client.sql(q)
+
+    params = ParamDict()
+    results = qlambda.execute(parameters=params).results
+    # q = (
+    #     Q("GitHub-Actions.workflow_job")
+    #     .where(F["conclusion"] == "failure")
+    #     .highest(n, F["_event_time"])
+    #     .select(F["id"])
+    # )
+    # results = client.sql(q)
     ids = [result["id"] for result in results]
     with ThreadPoolExecutor() as executor:
         futures = []

@@ -3,7 +3,7 @@
 {% for result in results %}
     <tr>
         <td><a target="_blank" href={{result.html_url}}>html</a></td>
-        <td><a target="_blank" href=https://ossci-raw-job-status.s3.amazonaws.com/log/{{result.id}}>log</a></td>
+        <td><a target="_blank" href={{result.log_url}}>log</a></td>
     </tr>
 {% endfor %}
 
