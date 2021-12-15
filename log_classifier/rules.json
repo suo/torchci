@@ -1,5 +1,10 @@
 [
     {
+        "name": "bazel build failure",
+        "pattern": "^Target \\/\\/:\\w+ failed to build",
+        "priority": 1002
+    },
+    {
         "name": "gtest failure",
         "pattern": "(^\\[  FAILED  \\].*) \\(\\d+",
         "priority": 1001

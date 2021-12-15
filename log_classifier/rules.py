@@ -24,6 +24,7 @@ class Rule:
 #     good capture group, as it filters out test timings which might be
 #     variable.
 rules = [
+    Rule("bazel build failure", r"^Target \/\/:\w+ failed to build", 1002),
     Rule("gtest failure", r"(^\[  FAILED  \].*) \(\d+", 1001),
     Rule(
         "No trailing spaces",
@@ -68,6 +69,7 @@ rules = [
 
 dict_rules = [asdict(rule) for rule in rules]
 
+# Write the rules to rules.json
 with open(Path(__file__).parent / "rules.json", "w") as f:
     json.dump(dict_rules, f, indent=4)
 
