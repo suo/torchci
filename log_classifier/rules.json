@@ -75,6 +75,11 @@
         "priority": 800
     },
     {
+        "name": "undefined reference linker error",
+        "pattern": "undefined reference to .*",
+        "priority": 200
+    },
+    {
         "name": "Python AttributeError",
         "pattern": "^AttributeError: .*",
         "priority": 100

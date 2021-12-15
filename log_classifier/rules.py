@@ -63,6 +63,7 @@ rules = [
         994,
     ),
     Rule("flake8 error", r"^.*:\d+:\d: [EBFW]\d+ .*", 800),
+    Rule("undefined reference linker error", r"undefined reference to .*", 200),
     Rule("Python AttributeError", r"^AttributeError: .*", 100),
     Rule("Python RuntimeError", r"^RuntimeError: .*", 99),
 ]
