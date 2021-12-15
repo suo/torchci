@@ -1,0 +1,52 @@
+[
+    {
+        "name": "NVIDIA installation failure",
+        "pattern": "^ERROR: Installation has failed.*?nvidia",
+        "priority": 1000
+    },
+    {
+        "name": "Python unittest error",
+        "pattern": "FAIL \\[.*\\]: (test.*) \\((?:__main__\\.)?(.*)\\)",
+        "priority": 999
+    },
+    {
+        "name": "MSVC out of memory",
+        "pattern": "Catastrophic error: .*",
+        "priority": 998
+    },
+    {
+        "name": "MSVC compiler error",
+        "pattern": "^.*\\(\\d+\\): error C\\d+:.*",
+        "priority": 999
+    },
+    {
+        "name": "Compile error",
+        "pattern": "^.*\\d+:\\d+: error: .*",
+        "priority": 997
+    },
+    {
+        "name": "Curl error",
+        "pattern": "curl: .* error:",
+        "priority": 996
+    },
+    {
+        "name": "Dirty checkout",
+        "pattern": "^Build left local git repository checkout dirty",
+        "priority": 995
+    },
+    {
+        "name": "Docker manifest error",
+        "pattern": "^ERROR: Something has gone wrong and the previous image isn't available for the merge-base of your branch",
+        "priority": 994
+    },
+    {
+        "name": "Python AttributeError",
+        "pattern": "^AttributeError: .*",
+        "priority": 100
+    },
+    {
+        "name": "Python RuntimeError",
+        "pattern": "^RuntimeError: .*",
+        "priority": 99
+    }
+]

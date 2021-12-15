@@ -5,10 +5,9 @@ from flask_compress import Compress
 from flask_caching import Cache
 from flask_apscheduler import APScheduler
 
-import requests
-
 import hud
 import commit
+import unclassified
 from common import query_rockset, ParamDict
 
 FLASK_DEBUG = os.environ.get("FLASK_DEBUG") == "1"
@@ -74,6 +73,11 @@ def job_dialog(id):
     result = query_rockset("job_dialog", "f8ae2de9d86f1c4e", ParamDict({"job_id": id}))
     result = result[0]
     return {"html": render_template("job_dialog.html", result=result, id=id)}
+
+
+@application.route("/_unclassified")
+def unclassified_():
+    return unclassified.get()
 
 
 # Periodically prefetch the hud query so that users always hit cache.

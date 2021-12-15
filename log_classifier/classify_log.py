@@ -1,11 +1,6 @@
 """
 classify_log.py
 
-Given an GitHub workflow job id or set of ids,
-- Download the logs from s3.
-- Classify them according to provided rules.
-- Optionally, write the classification back to s3.
-
 This is intended to be run from a lambda, but can be run manually as well.
 """
 
@@ -15,6 +10,8 @@ import logging
 import re
 from itertools import cycle
 from multiprocessing import Pipe, Process
+from pathlib import Path
+from urllib.request import urlopen
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -22,6 +19,8 @@ logger.setLevel(logging.INFO)
 
 import boto3  # type: ignore
 
+s3 = boto3.resource("s3")
+BUCKET_NAME = "ossci-raw-job-status"
 WRITE_TO_S3 = True
 
 
@@ -129,42 +128,18 @@ class RuleEngine:
         return self._best_match
 
 
-# Guidelines for writing rules:
-# - Start with ^ if you can, it makes filtering out non-matching lines faster.
-# - Try to make sure the produced "captures" field is useful:
-#   - It should have enough information to identify the failure.
-#   - It should be groupable; e.g. there should be no random noise in the capture group.
-# - If no capture groups are specified, the "captures" field is the whole match.
-#
-# - Try to match against as much information as possible, so that captures are interesting.
-#     For example, instead of 'error: ', do 'error: .*'
-# - You can use capture groups to filter out line noise, so that we can aggregate on captures.
-#     For example, for the failure 'FAIL [10.2s]: test_foo', 'test_foo' is a
-#     good capture group, as it filters out test timings which might be
-#     variable.
-rules = [
-    Rule(
-        "NVIDIA installation failure", r"^ERROR: Installation has failed.*?nvidia", 1000
-    ),
-    Rule(
-        "Python unittest error", r"FAIL \[.*\]: (test.*) \((?:__main__\.)?(.*)\)", 999
-    ),
-    Rule("MSVC out of memory", r"Catastrophic error: .*", 998),
-    Rule("MSVC compiler error", r"^.*\(\d+\): error C\d+:.*", 999),
-    Rule("Compile error", r"^.*\d+:\d+: error: .*", 997),
-    Rule("Curl error", r"curl: .* error:", 996),
-    Rule("Dirty checkout", r"^Build left local git repository checkout dirty", 995),
-    Rule(
-        "Docker manifest error",
-        r"^ERROR: Something has gone wrong and the previous image isn't available for the merge-base of your branch",
-        994,
-    ),
-    Rule("Python AttributeError", r"^AttributeError: .*", 100),
-    Rule("Python RuntimeError", r"^RuntimeError: .*", 99),
-]
+def get_rules_from_gh():
+    with urlopen("https://suo.github.io/torchci/log_classifier/rules.json") as data:
+        rules = json.load(data)
+        rules = [Rule(**r) for r in rules]
+    return rules
 
-s3 = boto3.resource("s3")
-BUCKET_NAME = "ossci-raw-job-status"
+
+def get_rules_from_local():
+    with open(Path(__file__).parent / "rules.json") as data:
+        rules = json.load(data)
+        rules = [Rule(**r) for r in rules]
+    return rules
 
 
 def match_to_json(id, rule_match, lines):
@@ -196,7 +171,7 @@ def match_to_json(id, rule_match, lines):
     )
 
 
-def classify(id):
+def classify(rules, id):
     logger.info(f"classifying {id}")
     logger.info("fetching from s3")
     log_obj = s3.Object(BUCKET_NAME, f"log/{id}")
@@ -240,23 +215,24 @@ def classify(id):
     return json
 
 
-def handle_s3_trigger(event):
+def handle_s3_trigger(rules, event):
     log_key = event["Records"][0]["s3"]["object"]["key"]
     # chop off the leading "logs/"
     id = log_key.partition("/")[2]
-    return classify(id)
+    return classify(rules, id)
 
 
-def handle_http_trigger(event):
+def handle_http_trigger(rules, event):
     id = event["rawQueryString"]
-    return classify(id)
+    return classify(rules, id)
 
 
 def lambda_handler(event, context):
+    rules = get_rules_from_gh()
     if "Records" in event:
-        body = handle_s3_trigger(event)
+        body = handle_s3_trigger(rules, event)
     else:
-        body = handle_http_trigger(event)
+        body = handle_http_trigger(rules, event)
     return {"statusCode": 200, "body": body}
 
 
@@ -270,11 +246,16 @@ if __name__ == "__main__":
         stream=sys.stderr,
     )
 
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(
+        description="""\
+            Download logs from s3 and classify them. Optionally, write the
+            classification back to s3.
+        """
+    )
     parser.add_argument(
         "ids",
         nargs="+",
-        help="ids to classify",
+        help="GitHub actions job ids to classify",
     )
     parser.add_argument(
         "--update-s3",
@@ -283,5 +264,7 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
     WRITE_TO_S3 = args.update_s3
+
+    rules = get_rules_from_local()
     for id in args.ids:
-        classify(id)
+        classify(rules, id)
