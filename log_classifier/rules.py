@@ -25,6 +25,11 @@ class Rule:
 #     variable.
 rules = [
     Rule(
+        "Windows PyLong API usage check",
+        r"^Usage of PyLong_{From,As}{Unsigned}Long API may lead to overflow errors on Windows",
+        1001,
+    ),
+    Rule(
         "NVIDIA installation failure", r"^ERROR: Installation has failed.*?nvidia", 1000
     ),
     Rule(

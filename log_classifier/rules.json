@@ -1,5 +1,10 @@
 [
     {
+        "name": "Windows PyLong API usage check",
+        "pattern": "^Usage of PyLong_{From,As}{Unsigned}Long API may lead to overflow errors on Windows",
+        "priority": 1001
+    },
+    {
         "name": "NVIDIA installation failure",
         "pattern": "^ERROR: Installation has failed.*?nvidia",
         "priority": 1000
