@@ -54,7 +54,7 @@
     <ul>
         <li>
             <span class="conclusion conclusion-failure">X</span>
-            <a href="https://ossci-raw-job-status.s3.amazonaws.com/log/{{job.id}}">[log]</a>
+            <a href="{{ job.log_url }}">[log]</a>
             <a href="{{ job.html_url }}">{{job.workflow_name}} / {{ job.job_name }}</a>
             {% if job.failure_line %}
             <details>
@@ -77,7 +77,7 @@
                 <li>
                     <span class="conclusion">{{ macros.emoji_for_conclusion(job.conclusion) }}</span>
                     {% if job.status == 'completed' %}
-                    <a href="https://ossci-raw-job-status.s3.amazonaws.com/log/{{job.id}}">[log]</a>
+                    <a href="{{ job.log_url }}">[log]</a>
                     {% endif %}
                     <a href="{{ job.html_url }}">{{ job.job_name }}</a>
                 </li>

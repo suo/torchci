@@ -13,7 +13,7 @@ def get(sha):
     commit = query_rockset("commit_query", "a7158163d4bb8846", ParamDict(sha=sha))[0][
         "commit"
     ]
-    jobs = query_rockset("commit_jobs_query", "4e6742b17bf7e947", ParamDict(sha=sha))
+    jobs = query_rockset("commit_jobs_query", "cc3fca439be1fc7d", ParamDict(sha=sha))
 
     # dict of workflow -> jobs
     jobs_by_workflow = defaultdict(list)

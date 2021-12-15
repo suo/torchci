@@ -71,7 +71,7 @@ def favicon():
 # It also lets us render tooltip html in jinja.
 @application.route("/job_dialog/<string:id>")
 def job_dialog(id):
-    result = query_rockset("job_dialog", "6c26fe080c5c7717", ParamDict({"job_id": id}))
+    result = query_rockset("job_dialog", "f8ae2de9d86f1c4e", ParamDict({"job_id": id}))
     result = result[0]
     return {"html": render_template("job_dialog.html", result=result, id=id)}
 
