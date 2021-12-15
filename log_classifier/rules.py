@@ -66,6 +66,7 @@ rules = [
     Rule("undefined reference linker error", r"undefined reference to .*", 200),
     Rule("Python AttributeError", r"^AttributeError: .*", 100),
     Rule("Python RuntimeError", r"^RuntimeError: .*", 99),
+    Rule("Python ModuleNotFoundError", r"^ModuleNotFoundError: .*", 99),
 ]
 
 dict_rules = [asdict(rule) for rule in rules]

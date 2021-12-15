@@ -88,5 +88,10 @@
         "name": "Python RuntimeError",
         "pattern": "^RuntimeError: .*",
         "priority": 99
+    },
+    {
+        "name": "Python ModuleNotFoundError",
+        "pattern": "^ModuleNotFoundError: .*",
+        "priority": 99
     }
 ]
