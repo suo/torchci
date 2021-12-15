@@ -24,7 +24,13 @@ BUCKET_NAME = "ossci-raw-job-status"
 WRITE_TO_S3 = True
 # https://stackoverflow.com/questions/14693701/how-can-i-remove-the-ansi-escape-sequences-from-a-string-in-python
 ESCAPE_CODE_REGEX = re.compile(
-    br'(?:\x1B[@-Z\\-_]|[\x80-\x9A\x9C-\x9F]|(?:\x1B\[|\x9B)[0-?]*[ -/]*[@-~])'
+    br"(?:\x1B[@-Z\\-_]|[\x80-\x9A\x9C-\x9F]|(?:\x1B\[|\x9B)[0-?]*[ -/]*[@-~])"
+)
+
+
+ignore = (
+    re.compile(rb"=================== sccache compilation log ==================="),
+    re.compile(rb"=========== If your build fails, please take a look at the log above for possible reasons ==========="),
 )
 
 
@@ -200,6 +206,23 @@ def classify(rules, id):
     # Color, etc. in terminal output should be removed
     logger.info("stripping escape codes")
     lines = [ESCAPE_CODE_REGEX.sub(b"", line) for line in lines]
+
+    logger.info("stripping ignore rules")
+    ignore_start, ignore_stop = ignore
+    is_ignoring = False
+    for idx, line in enumerate(lines):
+        match = ignore_start.search(line)
+        if match:
+            is_ignoring = True
+        match = ignore_stop.search(line)
+        if match:
+            is_ignoring = False
+
+        if is_ignoring:
+            lines[idx] = b""
+
+    if is_ignoring:
+        logger.warn("still ignoring at the end of the log, probably you got the stop condition wrong")
 
     logger.info("running engine")
     engine = RuleEngine(rules)
