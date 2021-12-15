@@ -49,6 +49,9 @@ def hud_():
     except ValueError:
         # just ignore weird input
         page = 0
+    # and negative input
+    if page < 0:
+        page = 0
 
     sha_grid, names = _cached_hud(page)
 
