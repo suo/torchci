@@ -14,8 +14,10 @@ by AWS Lambda (called `ossci-log-analyzer` in PyTorch's AWS account).
 3. You can run `classify_log.py <id>` to test the new rule on your local changes.
 4. Commit both changes and push the result to `origin/main`.
 
-`rules.json` is hosted on GitHub pages, and the lambda code will automatically
-fetch it and use it as its ruleset, so you don't need to change the lambda code.
+`rules.json` is hosted on
+[GitHub pages](https://suo.github.io/torchci/log_classifier/rules.json), and the
+lambda code will automatically fetch it and use it as its ruleset, so you don't
+need to change the lambda code.
 
 ## How to backfill a new rule
 Run `backfill.py`. Note that this uses the Lambda to run the rules, so you need
