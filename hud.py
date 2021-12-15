@@ -8,19 +8,26 @@ from common import client
 # workaround rockset's somewhat clunky Python API.
 NO_LIMIT = 99999999999999
 PAGE_SIZE = 50
+MASTER_COMMIT_TABLE = "master_commit"
+MASTER_JOB_TABLE = "master_job"
+# Switch to use test view
+if False:
+    MASTER_COMMIT_TABLE = "test_master_commit"
+    MASTER_JOB_TABLE = "test_master_job"
 
 
 def get(page=0):
     master_commit_query = (
-        Q("master_commit")
+        Q(MASTER_COMMIT_TABLE)
         # weird kink in Rockset querybuilder--we can't sort with a skip, but we
         # can't sort without a limit. So just sort with no limit, then do the
         # skip/take after.
         .highest(NO_LIMIT, F["timestamp"]).limit(PAGE_SIZE, skip=page * PAGE_SIZE)
     )
     results = client.sql(
-        Q("master_job").join(
-            master_commit_query, on=F["master_job"]["sha"] == F["master_commit"]["sha"]
+        Q(MASTER_JOB_TABLE).join(
+            master_commit_query,
+            on=F[MASTER_JOB_TABLE]["sha"] == F[MASTER_COMMIT_TABLE]["sha"],
         )
     )
     master_commits = client.sql(master_commit_query)
