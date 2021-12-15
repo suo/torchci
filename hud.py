@@ -1,13 +1,29 @@
 from collections import defaultdict
 from datetime import datetime
-from flask import render_template
 
-from common import query_rockset
+from rockset import Q, F
+
+from common import client
+
+# workaround rockset's somewhat clunky Python API.
+NO_LIMIT = 99999999999999
+PAGE_SIZE = 50
 
 
-def get():
-    results = query_rockset("hud_query", "950f66785209744b")
-    master_commits = query_rockset("master_commits", "0eb2bb9ba5c3fcab")
+def get(page=0):
+    master_commit_query = (
+        Q("master_commit")
+        # weird kink in Rockset querybuilder--we can't sort with a skip, but we
+        # can't sort without a limit. So just sort with no limit, then do the
+        # skip/take after.
+        .highest(NO_LIMIT, F["timestamp"]).limit(PAGE_SIZE, skip=page * PAGE_SIZE)
+    )
+    results = client.sql(
+        Q("master_job").join(
+            master_commit_query, on=F["master_job"]["sha"] == F["master_commit"]["sha"]
+        )
+    )
+    master_commits = client.sql(master_commit_query)
 
     # dict of:
     # sha => commit info
@@ -60,4 +76,6 @@ def get():
             )
             sha_grid[key].append(name_to_results.get(name))
 
+    print("job query stats", results.stats())
+    print("master query stats", master_commits.stats())
     return sha_grid, names

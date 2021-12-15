@@ -1,5 +1,5 @@
 import os
-from flask import Flask, send_from_directory
+from flask import Flask, send_from_directory, request
 from flask.templating import render_template
 from flask_compress import Compress
 from flask_caching import Cache
@@ -31,22 +31,34 @@ cache = Cache(application)
 Compress(application)
 
 
-@cache.cached(key_prefix="hud_query")
-def _cached_hud():
+@cache.memoize()
+def _cached_hud(page):
     """Cache the results of the HUD query so that we don't have to hit rockset on every request."""
-    return hud.get()
+    return hud.get(page)
 
 
 @application.route("/")
-@cache.cached()
 def hud_():
     """Main PyTorch HUD page.
 
     NOTE: there is a second cache.cached() decorator on this function. This is
     so that template rendering is cached as well, not just the rockset query.
     """
-    sha_grid, names = _cached_hud()
-    return render_template("index.html", sha_grid=sha_grid, names=names)
+    try:
+        page = int(request.args.get("page", 0))
+    except ValueError:
+        # just ignore weird input
+        page = 0
+
+    sha_grid, names = _cached_hud(page)
+
+    # Cache the template rendering as well. This needs to be memoized on page
+    # since the rendered result is different for different pages.
+    @cache.memoize()
+    def cached_render(page):
+        return render_template("index.html", page=page, sha_grid=sha_grid, names=names)
+
+    return cached_render(page)
 
 
 @application.route("/commit/<sha>")

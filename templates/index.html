@@ -87,6 +87,13 @@
 <body>
   <h1>PyTorch Janky HUD</h1>
   <div>This page reloads every minute.</div>
+  <div>
+  Page through commits:
+  {% if page %}
+  <a href="?page={{page - 1}}">back</a> |
+  {% endif %}
+  <a href="?page={{page + 1}}">forward</a>
+  </div>
   <table id="hud-table" style="display:none">
     <thead>
       <tr>
