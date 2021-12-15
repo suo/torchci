@@ -129,14 +129,29 @@ class RuleEngine:
         return self._best_match
 
 
+# Guidelines for writing rules:
+# - Start with ^ if you can, it makes filtering out non-matching lines faster.
+# - Try to make sure the produced "captures" field is useful:
+#   - It should have enough information to identify the failure.
+#   - It should be groupable; e.g. there should be no random noise in the capture group.
+# - If no capture groups are specified, the "captures" field is the whole match.
+#
+# - Try to match against as much information as possible, so that captures are interesting.
+#     For example, instead of 'error: ', do 'error: .*'
+# - You can use capture groups to filter out line noise, so that we can aggregate on captures.
+#     For example, for the failure 'FAIL [10.2s]: test_foo', 'test_foo' is a
+#     good capture group, as it filters out test timings which might be
+#     variable.
 rules = [
-    Rule("NVIDIA installation failure", r"^ERROR: Installation has failed.*?nvidia", 1000),
+    Rule(
+        "NVIDIA installation failure", r"^ERROR: Installation has failed.*?nvidia", 1000
+    ),
     Rule(
         "Python unittest error", r"FAIL \[.*\]: (test.*) \((?:__main__\.)?(.*)\)", 999
     ),
-    Rule("MSVC out of memory", r"Catastrophic error", 998),
-    Rule("MSVC compiler error", r"^.*\(\d+\): error C\d+:", 999),
-    Rule("Compile error", r"(.*\d+:\d+): error: (.*)", 997),
+    Rule("MSVC out of memory", r"Catastrophic error: .*", 998),
+    Rule("MSVC compiler error", r"^.*\(\d+\): error C\d+:.*", 999),
+    Rule("Compile error", r"^.*\d+:\d+: error: .*", 997),
     Rule("Curl error", r"curl: .* error:", 996),
     Rule("Dirty checkout", r"^Build left local git repository checkout dirty", 995),
     Rule(
@@ -144,28 +159,38 @@ rules = [
         r"^ERROR: Something has gone wrong and the previous image isn't available for the merge-base of your branch",
         994,
     ),
-    Rule("Python AttributeError", r"^AttributeError: ", 100),
-    Rule("Python RuntimeError", r"^RuntimeError: ", 99),
+    Rule("Python AttributeError", r"^AttributeError: .*", 100),
+    Rule("Python RuntimeError", r"^RuntimeError: .*", 99),
 ]
 
 s3 = boto3.resource("s3")
 BUCKET_NAME = "ossci-raw-job-status"
 
 
-def match_to_json(id, match, lines):
-    context_start = max(0, match.line_num - 25)
-    context_end = match.line_num + 25
+def match_to_json(id, rule_match, lines):
+    context_start = max(0, rule_match.line_num - 25)
+    context_end = rule_match.line_num + 25
     context = lines[context_start:context_end]
     context = [line.rstrip() for line in context]
     context = b"\n".join(context)
 
+    # perform matching to get capture groups
+    line = lines[rule_match.line_num]
+    match = rule_match.rule.match(line)
+    capture_groups = match.groups(default="<no capture>")
+    if len(capture_groups) == 0:
+        captures = match.group(0)
+    else:
+        captures = b", ".join(match.groups(default="<no capture>"))
+
     return json.dumps(
         {
             "job_id": int(id),
-            "rule": match.rule.name,
+            "rule": rule_match.rule.name,
             # decode with replace to avoid raising errors on non-utf8 characters
-            "line": lines[match.line_num].decode(errors="replace").strip(),
+            "line": line.decode(errors="replace").strip(),
             "context": context.decode(errors="replace"),
+            "captures": captures.decode(errors="replace").strip(),
         },
         indent=4,
     )
