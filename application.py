@@ -9,9 +9,8 @@ import hud
 import commit
 import unclassified
 import pull
+import failure
 from common import (
-    query_rockset,
-    ParamDict,
     client,
     NO_LIMIT,
     HUD_PAGE_SIZE,
@@ -129,6 +128,11 @@ def failure_infos(page):
     # serialize keys properly
     by_id = {str(j["id"]): j for j in failed_jobs}
     return by_id
+
+
+@application.route("/failure")
+def failure_():
+    return failure.get(request.args.get("capture"))
 
 
 # Periodically prefetch the hud query so that users always hit cache.
