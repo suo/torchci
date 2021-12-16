@@ -236,6 +236,9 @@
         const fakeInput = new Event('input');
         event.target.dispatchEvent(fakeInput);
       } else if (event.code === "Enter") {
+        if (even.target.value === "") {
+          return;
+        }
         const urlParams = new URLSearchParams(window.location.search);
         urlParams.set('jobFilter', event.target.value);
         window.location.search = urlParams;
