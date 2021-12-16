@@ -25,17 +25,18 @@ To set up the Elastic Beanstalk CI with this repo, follow these steps:
 2. Select `us-east-1` as the default region.
 3. Select `pytorch-ci-hud` as the application to use.
 4. Do not continue with CodeCommit (why do they even ask for this?)
+5. Run `eb use torchci`
 
 After this, `eb status` should show something like:
 ```
-Environment details for: flask-env
+Environment details for: torchci
   Application name: pytorch-ci-hud
   Region: us-east-1
   Deployed Version: app-14e9-211209_212625
   Environment ID: e-ikdb6gev2s
   Platform: arn:aws:elasticbeanstalk:us-east-1::platform/Python 3.8 running on 64bit Amazon Linux 2/3.3.8
   Tier: WebServer-Standard-1.0
-  CNAME: flask-env.eba-hgmjcuka.us-east-1.elasticbeanstalk.com
+  CNAME: torchci.eba-hgmjcuka.us-east-1.elasticbeanstalk.com
   Updated: 2021-12-10 05:45:28.818000+00:00
   Status: Ready
   Health: Green
