@@ -11,55 +11,16 @@ function newDialog(jobTarget) {
   const jobName = th.querySelector(".job-header__name").innerHTML;
   const newDialog = document.createElement("div");
   newDialog.className = "job-dialog";
-  newDialog.innerHTML = `[${conclusion}] ${jobName}`;
-
-  const box = jobTarget.getBoundingClientRect();
-  newDialog.style.left = box.x + 20 + window.scrollX + "px";
-  newDialog.style.top = box.y + 20 + window.scrollY + "px";
-  document.body.append(newDialog);
-  return newDialog;
-}
-
-function jobMouseOver(event) {
-  const elem = event.currentTarget;
-  const existingDialog = document.querySelector(".job-dialog");
-  if (existingDialog !== null) {
-    return;
-  }
-  // Find the corresponding header name (cellIndex+1 because nth-child is 1-indexed);
-  newDialog(elem);
-}
-
-function jobMouseLeave(event) {
-  const elem = event.currentTarget;
-  const existingDialog = document.querySelector(".job-dialog");
-  if (
-    existingDialog === null ||
-    existingDialog.getAttribute("pinned") === "true"
-  ) {
-    return;
-  }
-  existingDialog.remove();
-}
-
-function jobClick(event) {
-  const elem = event.currentTarget;
-  if (elem.querySelector(".conclusion-none") !== null) {
-    // Don't fetch for non-existent jobs.
-    return;
-  }
-  let dialog = document.querySelector(".job-dialog");
-
-  if (dialog === null) {
-    dialog = newDialog(elem);
-  }
-  dialog.setAttribute("pinned", "true");
+  newDialog.innerHTML = `[${conclusion}] ${jobName} (click to pin)`;
 
   // Retrieve job info from our prefetched global state.
-  const id = elem.getAttribute("job-id");
+  const id = jobTarget.getAttribute("job-id");
+  if (!("jobFailuresById" in window)) {
+    return;
+  }
   if (id in window.jobFailuresById) {
     job = window.jobFailuresById[id]
-    dialog.innerHTML +=
+    newDialog.innerHTML +=
       `\
     <div>
       <a target="_blank" href=${job.html_url}>Job page</a>
@@ -83,6 +44,48 @@ function jobClick(event) {
     </div>
     `
   }
+
+
+  const box = jobTarget.getBoundingClientRect();
+  newDialog.style.left = box.x + 20 + window.scrollX + "px";
+  newDialog.style.top = box.y + 20 + window.scrollY + "px";
+  document.body.append(newDialog);
+  return newDialog;
+}
+
+function jobMouseOver(event) {
+  const elem = event.currentTarget;
+  const existingDialog = document.querySelector(".job-dialog");
+  if (existingDialog !== null) {
+    return;
+  }
+  // Find the corresponding header name (cellIndex+1 because nth-child is 1-indexed);
+  newDialog(elem);
+}
+
+function jobMouseLeave(event) {
+  const existingDialog = document.querySelector(".job-dialog");
+  if (
+    existingDialog === null ||
+    existingDialog.getAttribute("pinned") === "true"
+  ) {
+    return;
+  }
+  existingDialog.remove();
+}
+
+function jobClick(event) {
+  const elem = event.currentTarget;
+  if (elem.querySelector(".conclusion-none") !== null) {
+    // Don't fetch for non-existent jobs.
+    return;
+  }
+  let dialog = document.querySelector(".job-dialog");
+
+  if (dialog === null) {
+    dialog = newDialog(elem);
+  }
+  dialog.setAttribute("pinned", "true");
 
   setTimeout(() => {
     document.addEventListener("click", function cb(event) {
