@@ -26,9 +26,19 @@ def get(page=0, branch_name="master"):
         .highest(NO_LIMIT, F["timestamp"])
         .limit(PAGE_SIZE, skip=page * PAGE_SIZE)
     )
-    jobs_query = Q(JOB_TABLE).join(
-        master_commit_query,
-        on=F[JOB_TABLE]["sha"] == F[COMMIT_TABLE]["sha"],
+    jobs_query = (
+        Q(JOB_TABLE)
+        .join(
+            master_commit_query,
+            on=F[JOB_TABLE]["sha"] == F[COMMIT_TABLE]["sha"],
+        )
+        .select(
+            F["workflow_name"],
+            F["job_name"],
+            F["conclusion"],
+            F[JOB_TABLE]["sha"],
+            F[JOB_TABLE]["id"],
+        )
     )
     jobs = client.sql(jobs_query)
     master_commits = client.sql(master_commit_query)

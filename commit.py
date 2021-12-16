@@ -4,6 +4,10 @@ from collections import defaultdict
 from flask import render_template
 from common import query_rockset, ParamDict
 
+from rockset import Q, F
+
+from common import client
+
 
 PR_URL_REGEX = re.compile(r"Pull Request resolved: (.*)")
 PHAB_REGEX = re.compile(r"Differential Revision: (.*)")
@@ -13,7 +17,7 @@ def get(sha):
     commit = query_rockset("commit_query", "a7158163d4bb8846", ParamDict(sha=sha))[0][
         "commit"
     ]
-    jobs = query_rockset("commit_jobs_query", "cc3fca439be1fc7d", ParamDict(sha=sha))
+    jobs = client.sql(Q("job").where(F["sha"] == sha))
 
     # dict of workflow -> jobs
     jobs_by_workflow = defaultdict(list)
