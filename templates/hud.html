@@ -88,13 +88,28 @@
   <h1>PyTorch Janky HUD</h1>
   <div>This page reloads every minute.</div>
   <div>
-  Page through commits:
-  {% if page %}
-  <a href="?page={{page - 1}}">back</a> |
-  {% endif %}
-  <a href="?page={{page + 1}}">forward</a>
+    Page through commits:
+    {% if page %}
+    <a href="?page={{page - 1}}">back</a> |
+    {% endif %}
+    <a href="?page={{page + 1}}">forward</a>
   </div>
+  <label for="job-filter">Filter jobs (press enter to change url):</label>
+  <input type="text" name="job-filter" id="job-filter">
   <table id="hud-table" style="display:none">
+    <colgroup>
+      <col>
+      <col>
+      <col>
+      <col>
+      {% for name in names %}
+      <col class="col-job" name="{{name}}">
+      {% endfor %}
+      <col>
+      <col>
+      <col>
+      <col>
+    </colgroup>
     <thead>
       <tr>
         <th class="regular-header">Time</th>
@@ -104,7 +119,7 @@
 
         {% for name in names %}
         <th class="job-header">
-          <div class="job-header__name">{{name}}</div>
+          <div class="job-header__name" id="{{name}}">{{name}}</div>
         </th>
         {% endfor %}
         <th class="regular-header" style="text-align: right">PR</th>
@@ -187,6 +202,64 @@
         location.reload();
       }
     }, 60000);
+
+  </script>
+  <script>
+    function onInput(event) {
+      const col = event.target;
+      const query = col.value.toLowerCase();
+      document.querySelectorAll(".col-job").forEach((elem) => {
+        let jobName = elem.getAttribute("name");
+        const th = document.getElementById(jobName);
+
+        jobName = jobName.toLowerCase();
+        if (query == "") {
+          elem.style.visibility = null;
+          th.style.visibility = null;
+          return;
+        }
+
+        if (jobName.includes(query)) {
+          elem.style.visibility = null;
+          th.style.visibility = null;
+        } else {
+          elem.style.visibility = "collapse";
+          th.style.visibility = "collapse";
+        }
+      })
+      window.sessionStorage.setItem("job-filter", query);
+    }
+    function onKeyDown(event) {
+      if (event.code === "Escape") {
+        event.target.value = ""
+        // Trigger fake input to reset the view.
+        const fakeInput = new Event('input');
+        event.target.dispatchEvent(fakeInput);
+      } else if (event.code === "Enter") {
+        const urlParams = new URLSearchParams(window.location.search);
+        urlParams.set('jobFilter', event.target.value);
+        window.location.search = urlParams;
+      }
+    }
+    document.getElementById("job-filter").addEventListener('input', onInput);
+    document.getElementById("job-filter").addEventListener('keydown', onKeyDown);
+    function initJobFilter() {
+      // first try url params
+      const urlParams = new URLSearchParams(window.location.search);
+      let jobFilter = urlParams.get("jobFilter");
+      // then local storage if that's missing
+      if (jobFilter === null) {
+        jobFilter = window.sessionStorage.getItem("job-filter");
+      }
+      if (jobFilter === null) {
+        return;
+      }
+      const searchBox = document.getElementById("job-filter")
+      searchBox.value = jobFilter;
+      const fakeInput = new Event('input');
+      searchBox.dispatchEvent(fakeInput);
+    }
+    initJobFilter();
 
   </script>
 

@@ -95,7 +95,6 @@ document.addEventListener("keydown", (e) => {
   // Esc removes existing dialog.
   if (e.code === "Escape") {
     const existingDialog = document.querySelector(".job-dialog");
-    console.log(existingDialog);
     if (existingDialog === null) {
       return;
     }
