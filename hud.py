@@ -6,7 +6,6 @@ from rockset import Q, F
 from common import client, NO_LIMIT, HUD_PAGE_SIZE, COMMIT_TABLE, JOB_TABLE
 
 
-
 def get(page=0, branch_name="master"):
     master_commit_query = (
         Q(COMMIT_TABLE)

@@ -150,7 +150,8 @@ if not FLASK_DEBUG:
 
     @scheduler.task("interval", seconds=10)
     def prefetch_hud():
-        _cached_hud()
+        # cache first page
+        _cached_hud(page=0)
 
     scheduler.init_app(application)
     scheduler.start()
