@@ -3,17 +3,8 @@ from datetime import datetime
 
 from rockset import Q, F
 
-from common import client
+from common import client, NO_LIMIT, HUD_PAGE_SIZE, COMMIT_TABLE, JOB_TABLE
 
-# workaround rockset's somewhat clunky Python API.
-NO_LIMIT = 99999999999999
-PAGE_SIZE = 50
-COMMIT_TABLE = "commit"
-JOB_TABLE = "job"
-
-# Switch to use test view
-# COMMIT_TABLE = "test_commit"
-# JOB_TABLE = "test_job"
 
 
 def get(page=0, branch_name="master"):
@@ -24,7 +15,7 @@ def get(page=0, branch_name="master"):
         # can't sort without a limit. So just sort with no limit, then do the
         # skip/take after.
         .highest(NO_LIMIT, F["timestamp"])
-        .limit(PAGE_SIZE, skip=page * PAGE_SIZE)
+        .limit(HUD_PAGE_SIZE, skip=page * HUD_PAGE_SIZE)
     )
     jobs_query = (
         Q(JOB_TABLE)

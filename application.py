@@ -9,7 +9,16 @@ import hud
 import commit
 import unclassified
 import pull
-from common import query_rockset, ParamDict
+from common import (
+    query_rockset,
+    ParamDict,
+    client,
+    NO_LIMIT,
+    HUD_PAGE_SIZE,
+    COMMIT_TABLE,
+    JOB_TABLE,
+)
+from rockset import Q, F
 
 FLASK_DEBUG = os.environ.get("FLASK_DEBUG") == "1"
 
@@ -100,9 +109,39 @@ def unclassified_():
 def pull_(pull_number):
     return pull.get(pull_number, None)
 
+
 @application.route("/pytorch/pytorch/pull/<int:pull_number>/<string:selected_sha>")
 def pull_sha_(pull_number, selected_sha):
     return pull.get(pull_number, selected_sha)
+
+
+@application.route("/failure_infos/<int:page>")
+def failure_infos(page):
+    # TODO when we support multiple branches we'll need to fix this
+    branch_name = "master"
+    master_commit_query = (
+        Q(COMMIT_TABLE)
+        .where(F["ref"] == f"refs/heads/{branch_name}")
+        # weird kink in Rockset querybuilder--we can't sort with a skip, but we
+        # can't sort without a limit. So just sort with no limit, then do the
+        # skip/take after.
+        .highest(NO_LIMIT, F["timestamp"])
+        .limit(HUD_PAGE_SIZE, skip=page * HUD_PAGE_SIZE)
+    )
+    failed_jobs_query = (
+        Q(JOB_TABLE)
+        .join(
+            master_commit_query,
+            on=F[JOB_TABLE]["sha"] == F[COMMIT_TABLE]["sha"],
+        )
+        .where(F["conclusion"] == "failure")
+    )
+    failed_jobs = client.sql(failed_jobs_query)
+    # ids are returned as both ints and string, cast them all to strings to
+    # serialize keys properly
+    by_id = {str(j["id"]): j for j in failed_jobs}
+    return by_id
+
 
 # Periodically prefetch the hud query so that users always hit cache.
 # Turned off in debug mode, since we don't cache in debug mode.

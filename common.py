@@ -5,6 +5,14 @@ from datetime import datetime
 from rockset import Client, ParamDict
 
 ROCKSET_API_KEY = os.environ.get("ROCKSET_API_KEY")
+NO_LIMIT = 99999999999999
+HUD_PAGE_SIZE = 50
+COMMIT_TABLE = "commit"
+JOB_TABLE = "job"
+
+# Switch to use test view
+# COMMIT_TABLE = "test_commit"
+# JOB_TABLE = "test_job"
 
 client = Client(
     api_key=ROCKSET_API_KEY,

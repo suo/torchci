@@ -54,30 +54,45 @@ function jobClick(event) {
     dialog = newDialog(elem);
   }
   dialog.setAttribute("pinned", "true");
-  dialog.innerHTML += "<div class='loading'>Loading…</div>";
 
+  // Retrieve job info from our prefetched global state.
   const id = elem.getAttribute("job-id");
-  let response = fetch("job_dialog/" + id)
-    .then((response) => response.json())
-    .then(
-      (data) => {
-        dialog.querySelector(".loading").remove();
-        dialog.innerHTML = data.html;
-      },
-      (error) => {
-        dialog.innerHTML = "Error loading job data";
+  if (id in window.jobFailuresById) {
+    job = window.jobFailuresById[id]
+    dialog.innerHTML +=
+      `\
+    <div>
+      <a target="_blank" href=${job.html_url}>Job page</a>
+      | <a target="_blank" href=commit/${job.sha}>PR HUD</a>
+
+      ${job.conclusion !== null
+        ? `| <a target="_blank" href=${job.log_url}>raw logs</a>`
+        : ""}
+
+      ${job.failure_line !== null ?
+        `<details>
+        <summary>
+          <strong>Click for context </strong>
+          <code>${job.failure_line}</code>
+        </summary>
+        <pre>${job.failure_context}</pre>
+      </details>
+      `
+        : ""}
+
+    </div>
+    `
+  }
+
+  setTimeout(() => {
+    document.addEventListener("click", function cb(event) {
+      if (!dialog.contains(event.target)) {
+        dialog.remove();
+        // Remove this listener when the dialog is removed.
+        event.currentTarget.removeEventListener(event.type, cb);
       }
-    )
-    .then(() => {
-      // Add an event listener to close the dialog when the user clicks outside
-      document.addEventListener("click", function cb(event) {
-        if (!dialog.contains(event.target)) {
-          dialog.remove();
-          // Remove this listener when the dialog is removed.
-          event.currentTarget.removeEventListener(event.type, cb);
-        }
-      });
     });
+  }, 100);
 }
 document.querySelectorAll(".dialog-target").forEach(function (element) {
   element.addEventListener("click", jobClick);
@@ -101,3 +116,15 @@ document.addEventListener("keydown", (e) => {
     existingDialog.remove();
   }
 });
+
+// Prefetch failure info for this page so that clicking the X is fast. We do it
+// here instead of loading it from the main request because the payload is large
+// and we don't want to block the main view rendering on it.
+const urlParams = new URLSearchParams(window.location.search);
+const pageParam = urlParams.get("page");
+const page = pageParam === null ? 0 : pageParam;
+fetch("failure_infos/" + page)
+  .then((response) => response.json())
+  .then((data) => {
+    window.jobFailuresById = data
+  });
