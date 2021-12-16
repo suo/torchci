@@ -29,18 +29,26 @@
 
 <head>
     <meta charset="UTF-8" />
-    <title>Janky Commit HUD</title>
+    <title>Janky PR HUD</title>
 </head>
 
 <body>
     <h1>PyTorch Janky PR HUD</h1>
-    <h2>{{ commit_title }} </h2>
-    {% if pr_url %}
-    <a href={{pr_url}}>GitHub</a>
-    {% endif %}
-    {% if pr_url and diff_num %} | {% endif %}
+    <h2>PR versions</h2>
+    <ol>
+        {% for sha in shas %}
+        {% if sha == selected_sha %}
+        <li>{{sha}} ← <strong>you are here</strong></li>
+        {% else %}
+        <li><a href="/pytorch/pytorch/pull/{{pull_number}}/{{sha}}">{{sha}}</a></li>
+        {% endif %}
+        {% endfor %}
+    </ol>
+
+    <h3>{{ commit_title }} </h3>
+    <a href=https://github.com/pytorch/pytorch/pull/{{pull_number}}>GitHub</a>
     {% if diff_num %}
-    <a href=https://www.internalfb.com/diff/{{diff_num}}>Phabricator</a>
+    | <a href=https://www.internalfb.com/diff/{{diff_num}}>Phabricator</a>
     {% endif %}
 
     {% include "commit_body.html" %}

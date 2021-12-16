@@ -8,6 +8,7 @@ from flask_apscheduler import APScheduler
 import hud
 import commit
 import unclassified
+import pull
 from common import query_rockset, ParamDict
 
 FLASK_DEBUG = os.environ.get("FLASK_DEBUG") == "1"
@@ -94,6 +95,14 @@ def job_dialog(id):
 def unclassified_():
     return unclassified.get()
 
+
+@application.route("/pytorch/pytorch/pull/<int:pull_number>")
+def pull_(pull_number):
+    return pull.get(pull_number, None)
+
+@application.route("/pytorch/pytorch/pull/<int:pull_number>/<string:selected_sha>")
+def pull_sha_(pull_number, selected_sha):
+    return pull.get(pull_number, selected_sha)
 
 # Periodically prefetch the hud query so that users always hit cache.
 # Turned off in debug mode, since we don't cache in debug mode.

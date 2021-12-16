@@ -10,25 +10,27 @@ from common import client
 
 
 PR_URL_REGEX = re.compile(r"Pull Request resolved: (.*)")
-PHAB_REGEX = re.compile(r"Differential Revision: (.*)")
+PHAB_REGEX = re.compile(r"Differential Revision: \[(.*)\]")
 
 
-def get(sha):
+def _get(sha):
     commit = query_rockset("commit_query", "a7158163d4bb8846", ParamDict(sha=sha))[0][
         "commit"
     ]
     jobs = client.sql(Q("job").where(F["sha"] == sha))
 
+    jobs = sorted(jobs, key=lambda job: job["workflow_name"] + job["job_name"])
     # dict of workflow -> jobs
     jobs_by_workflow = defaultdict(list)
     failed_jobs = []
+    pending_jobs = []
     for job in jobs:
         jobs_by_workflow[job["workflow_name"]].append(job)
 
         if job["conclusion"] in ("failure", "cancelled", "timed_out"):
             failed_jobs.append(job)
-
-    failed_jobs.sort(key=lambda x: x["workflow_name"] + x["job_name"])
+        elif job["conclusion"] == None:
+            pending_jobs.append(job)
 
     # sort jobs by job id, which gets us the same sorting as in the GH UI
     for jobs in jobs_by_workflow.values():
@@ -47,13 +49,22 @@ def get(sha):
     else:
         diff_num = match.group(1)
 
+    return {
+        "pr_url": pr_url,
+        "diff_num": diff_num,
+        "commit_title": commit_title,
+        "commit_message_body": commit_message_body,
+        "commit": commit,
+        "jobs_by_workflow": jobs_by_workflow,
+        "failed_jobs": failed_jobs,
+        "pending_jobs": pending_jobs,
+    }
+
+
+def get(sha):
+    data = _get(sha)
+
     return render_template(
         "commit.html",
-        pr_url=pr_url,
-        diff_num=diff_num,
-        commit_title=commit_title,
-        commit_message_body=commit_message_body,
-        commit=commit,
-        jobs_by_workflow=jobs_by_workflow,
-        failed_jobs=failed_jobs,
+        **data,
     )
