@@ -59,7 +59,7 @@ def hud_():
     # since the rendered result is different for different pages.
     @cache.memoize()
     def cached_render(page):
-        return render_template("index.html", page=page, sha_grid=sha_grid, names=names)
+        return render_template("hud.html", page=page, sha_grid=sha_grid, names=names)
 
     return cached_render(page)
 
