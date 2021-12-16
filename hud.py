@@ -12,9 +12,8 @@ COMMIT_TABLE = "commit"
 JOB_TABLE = "job"
 
 # Switch to use test view
-if False:
-    COMMIT_TABLE = "test_master_commit"
-    JOB_TABLE = "test_job"
+# COMMIT_TABLE = "test_commit"
+# JOB_TABLE = "test_job"
 
 
 def get(page=0, branch_name="master"):
