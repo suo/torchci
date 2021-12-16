@@ -21,7 +21,7 @@ def get(sha):
     for job in jobs:
         jobs_by_workflow[job["workflow_name"]].append(job)
 
-        if job["conclusion"] == "failure":
+        if job["conclusion"] in ("failure", "cancelled", "timed_out"):
             failed_jobs.append(job)
 
     failed_jobs.sort(key=lambda x: x["workflow_name"] + x["job_name"])

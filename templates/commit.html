@@ -53,7 +53,7 @@
     {% for job in failed_jobs %}
     <ul>
         <li>
-            <span class="conclusion conclusion-failure">X</span>
+            <span class="conclusion">{{ macros.emoji_for_conclusion(job.conclusion) }}</span>
             <a href="{{ job.log_url }}">[log]</a>
             <a href="{{ job.html_url }}">{{job.workflow_name}} / {{ job.job_name }}</a>
             {% if job.failure_line %}
