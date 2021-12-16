@@ -10,7 +10,8 @@ from common import client
 
 
 PR_URL_REGEX = re.compile(r"Pull Request resolved: (.*)")
-PHAB_REGEX = re.compile(r"Differential Revision: \[(.*)\]")
+EXPORTED_PHAB_REGEX = re.compile(r"Differential Revision: \[(.*)\]")
+COMMITED_PHAB_REGEX = re.compile(r"Differential Revision: (D.*)")
 
 
 def _get(sha):
@@ -43,7 +44,9 @@ def _get(sha):
     else:
         pr_url = match.group(1)
 
-    match = PHAB_REGEX.search(commit_message_body)
+    match = EXPORTED_PHAB_REGEX.search(commit_message_body)
+    if match is None:
+        match = COMMITED_PHAB_REGEX.search(commit_message_body)
     if match is None:
         diff_num = None
     else:
