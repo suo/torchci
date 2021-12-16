@@ -5,15 +5,15 @@
 <link rel="stylesheet" href="{{ url_for('static', filename='common.css') }}">
 
 <style>
-  .dialog-target {
+  .tooltip-target {
     cursor: pointer;
   }
 
-  .dialog-target-no-click {
+  .tooltip-target-no-click {
     cursor: default;
   }
 
-  .job-dialog {
+  .job-tooltip {
     background-color: lightgray;
     padding: 5px 0;
     border-radius: 6px;
@@ -81,7 +81,7 @@
       }
     });
   </script>
-  <script defer src="{{ url_for('static', filename='job_dialog.js') }}"></script>
+  <script defer src="{{ url_for('static', filename='job_tooltip.js') }}"></script>
 </head>
 
 <body>
@@ -153,13 +153,13 @@
         <!-- All the jobs -->
         {% for job in jobs %}
         {% if job %}
-        <td class="dialog-target" job-id={{job.id}} conclusion={{job.conclusion}}>
+        <td class="tooltip-target" job-id={{job.id}} conclusion={{job.conclusion}}>
           <div class="conclusion">
             {{ macros.emoji_for_conclusion(job.conclusion) }}
           </div>
         </td>
         {% else %}
-        <td class="dialog-target-no-click">
+        <td class="tooltip-target-no-click">
           <div class="conclusion">
             <span class="conclusion-none">O</span>
           </div>
@@ -196,8 +196,8 @@
     document.getElementById("hud-table").style.display = null;
 
     setInterval(() => {
-      // Reload if someone didn't have a dialog box open.
-      const elem = document.querySelector(".job-dialog");
+      // Reload if someone didn't have a tooltip box open.
+      const elem = document.querySelector(".job-tooltip");
       if (elem === null) {
         location.reload();
       }

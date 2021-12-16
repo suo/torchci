@@ -88,18 +88,6 @@ def favicon():
     )
 
 
-# Really we could have queried Rockset directly from JSON, but that requires
-# figuring out API authentication from the client. Making the server act as a
-# proxy lets us avoid that.
-#
-# It also lets us render tooltip html in jinja.
-@application.route("/job_dialog/<string:id>")
-def job_dialog(id):
-    result = query_rockset("job_dialog", "f8ae2de9d86f1c4e", ParamDict({"job_id": id}))
-    result = result[0]
-    return {"html": render_template("job_dialog.html", result=result, id=id)}
-
-
 @application.route("/_unclassified")
 def unclassified_():
     return unclassified.get()
