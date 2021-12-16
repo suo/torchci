@@ -8,56 +8,58 @@ from common import client
 # workaround rockset's somewhat clunky Python API.
 NO_LIMIT = 99999999999999
 PAGE_SIZE = 50
-MASTER_COMMIT_TABLE = "master_commit"
-MASTER_JOB_TABLE = "master_job"
+COMMIT_TABLE = "commit"
+JOB_TABLE = "job"
+
 # Switch to use test view
 if False:
-    MASTER_COMMIT_TABLE = "test_master_commit"
-    MASTER_JOB_TABLE = "test_master_job"
+    COMMIT_TABLE = "test_master_commit"
+    JOB_TABLE = "test_job"
 
 
-def get(page=0):
+def get(page=0, branch_name="master"):
     master_commit_query = (
-        Q(MASTER_COMMIT_TABLE)
+        Q(COMMIT_TABLE)
+        .where(F["ref"] == f"refs/heads/{branch_name}")
         # weird kink in Rockset querybuilder--we can't sort with a skip, but we
         # can't sort without a limit. So just sort with no limit, then do the
         # skip/take after.
-        .highest(NO_LIMIT, F["timestamp"]).limit(PAGE_SIZE, skip=page * PAGE_SIZE)
+        .highest(NO_LIMIT, F["timestamp"])
+        .limit(PAGE_SIZE, skip=page * PAGE_SIZE)
     )
-    results = client.sql(
-        Q(MASTER_JOB_TABLE).join(
-            master_commit_query,
-            on=F[MASTER_JOB_TABLE]["sha"] == F[MASTER_COMMIT_TABLE]["sha"],
-        )
+    jobs_query = Q(JOB_TABLE).join(
+        master_commit_query,
+        on=F[JOB_TABLE]["sha"] == F[COMMIT_TABLE]["sha"],
     )
+    jobs = client.sql(jobs_query)
     master_commits = client.sql(master_commit_query)
 
     # dict of:
     # sha => commit info
     sha_to_commit = {}
-    for result in master_commits:
-        sha = result["sha"]
-        sha_to_commit[sha] = result
+    for commit in master_commits:
+        sha = commit["sha"]
+        sha_to_commit[sha] = commit
 
     # dictionary of
     # sha => workflow_name => results
-    results_by_sha = defaultdict(dict)
+    jobs_by_sha = defaultdict(dict)
     names = set()
-    for result in results:
-        name = f"{result['workflow_name']} / {result['job_name']}"
-        sha = result["sha"]
+    for job in jobs:
+        name = f"{job['workflow_name']} / {job['job_name']}"
+        sha = job["sha"]
 
         names.add(name)
 
         # Q: How can there be more than one job with the same name for a given sha?
         # A: Periodic builds can be scheduled multiple times for one sha. In
         # this case, display the most recent periodic job.
-        if name in results_by_sha[sha]:
-            current_result = results_by_sha[sha][name]
-            if result["id"] < current_result["id"]:
+        if name in jobs_by_sha[sha]:
+            current_job = jobs_by_sha[sha][name]
+            if job["id"] < current_job["id"]:
                 continue
 
-        results_by_sha[sha][name] = result
+        jobs_by_sha[sha][name] = job
 
     # sort names alphabetically
     names = sorted(list(names))
@@ -66,7 +68,7 @@ def get(page=0):
     # always be in the right order already.
     sha_grid = defaultdict(list)
     for sha, commit in sha_to_commit.items():
-        name_to_results = results_by_sha[sha]
+        name_to_jobs = jobs_by_sha[sha]
         commit_url = commit["url"]
         time = commit["timestamp"]
         time = datetime.fromisoformat(time)
@@ -81,8 +83,8 @@ def get(page=0):
                 f"{truncated_commit_message}...",
                 pr_num,
             )
-            sha_grid[key].append(name_to_results.get(name))
+            sha_grid[key].append(name_to_jobs.get(name))
 
-    print("job query stats", results.stats())
+    print("job query stats", jobs.stats())
     print("master query stats", master_commits.stats())
     return sha_grid, names
