@@ -98,5 +98,10 @@
         "name": "Python ModuleNotFoundError",
         "pattern": "^ModuleNotFoundError: .*",
         "priority": 99
+    },
+    {
+        "name": "Docker login failure",
+        "pattern": "Docker login for '.*' failed.*",
+        "priority": 98
     }
 ]

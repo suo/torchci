@@ -70,6 +70,7 @@ rules = [
     Rule("Python AttributeError", r"^AttributeError: .*", 100),
     Rule("Python RuntimeError", r"^RuntimeError: .*", 99),
     Rule("Python ModuleNotFoundError", r"^ModuleNotFoundError: .*", 99),
+    Rule("Docker login failure", r"Docker login for '.*' failed.*", 98),
 ]
 
 dict_rules = [asdict(rule) for rule in rules]
