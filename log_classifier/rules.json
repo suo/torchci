@@ -35,44 +35,49 @@
         "priority": 1000
     },
     {
+        "name": "Bazel build failure",
+        "pattern": "^FAILED: Build did NOT complete successfully",
+        "priority": 999
+    },
+    {
         "name": "Python unittest failure",
         "pattern": "FAIL \\[.*\\]: (test.*) \\((?:__main__\\.)?(.*)\\)",
-        "priority": 999
+        "priority": 998
     },
     {
         "name": "Python unittest error",
         "pattern": "ERROR \\[.*\\]: (test.*) \\((?:__main__\\.)?(.*)\\)",
-        "priority": 999
+        "priority": 997
     },
     {
         "name": "MSVC out of memory",
         "pattern": "Catastrophic error: .*",
-        "priority": 998
+        "priority": 996
     },
     {
         "name": "MSVC compiler error",
         "pattern": "^.*\\(\\d+\\): error C\\d+:.*",
-        "priority": 999
+        "priority": 995
     },
     {
         "name": "Compile error",
         "pattern": "^.*\\d+:\\d+: error: .*",
-        "priority": 997
+        "priority": 994
     },
     {
         "name": "Curl error",
         "pattern": "curl: .* error:",
-        "priority": 996
+        "priority": 993
     },
     {
         "name": "Dirty checkout",
         "pattern": "^Build left local git repository checkout dirty",
-        "priority": 995
+        "priority": 992
     },
     {
         "name": "Docker manifest error",
         "pattern": "^ERROR: Something has gone wrong and the previous image isn't available for the merge-base of your branch",
-        "priority": 994
+        "priority": 991
     },
     {
         "name": "flake8 error",
@@ -90,6 +95,11 @@
         "priority": 100
     },
     {
+        "name": "CUDA out of memory error",
+        "pattern": "^RuntimeError: CUDA out of memory.",
+        "priority": 100
+    },
+    {
         "name": "Python RuntimeError",
         "pattern": "^RuntimeError: .*",
         "priority": 99
@@ -97,11 +107,16 @@
     {
         "name": "Python ModuleNotFoundError",
         "pattern": "^ModuleNotFoundError: .*",
-        "priority": 99
+        "priority": 98
+    },
+    {
+        "name": "Python ImportError",
+        "pattern": "^ImportError: .*",
+        "priority": 97
     },
     {
         "name": "Docker login failure",
         "pattern": "Docker login for '.*' failed.*",
-        "priority": 98
+        "priority": 96
     }
 ]

@@ -49,28 +49,31 @@ rules = [
     Rule(
         "NVIDIA installation failure", r"^ERROR: Installation has failed.*?nvidia", 1000
     ),
+    Rule("Bazel build failure", r"^FAILED: Build did NOT complete successfully", 999),
     Rule(
-        "Python unittest failure", r"FAIL \[.*\]: (test.*) \((?:__main__\.)?(.*)\)", 999
+        "Python unittest failure", r"FAIL \[.*\]: (test.*) \((?:__main__\.)?(.*)\)", 998
     ),
     Rule(
-        "Python unittest error", r"ERROR \[.*\]: (test.*) \((?:__main__\.)?(.*)\)", 999
+        "Python unittest error", r"ERROR \[.*\]: (test.*) \((?:__main__\.)?(.*)\)", 997
     ),
-    Rule("MSVC out of memory", r"Catastrophic error: .*", 998),
-    Rule("MSVC compiler error", r"^.*\(\d+\): error C\d+:.*", 999),
-    Rule("Compile error", r"^.*\d+:\d+: error: .*", 997),
-    Rule("Curl error", r"curl: .* error:", 996),
-    Rule("Dirty checkout", r"^Build left local git repository checkout dirty", 995),
+    Rule("MSVC out of memory", r"Catastrophic error: .*", 996),
+    Rule("MSVC compiler error", r"^.*\(\d+\): error C\d+:.*", 995),
+    Rule("Compile error", r"^.*\d+:\d+: error: .*", 994),
+    Rule("Curl error", r"curl: .* error:", 993),
+    Rule("Dirty checkout", r"^Build left local git repository checkout dirty", 992),
     Rule(
         "Docker manifest error",
         r"^ERROR: Something has gone wrong and the previous image isn't available for the merge-base of your branch",
-        994,
+        991,
     ),
     Rule("flake8 error", r"^.*:\d+:\d: [EBFW]\d+ .*", 800),
     Rule("undefined reference linker error", r"undefined reference to .*", 200),
     Rule("Python AttributeError", r"^AttributeError: .*", 100),
+    Rule("CUDA out of memory error", r"^RuntimeError: CUDA out of memory.", 100),
     Rule("Python RuntimeError", r"^RuntimeError: .*", 99),
-    Rule("Python ModuleNotFoundError", r"^ModuleNotFoundError: .*", 99),
-    Rule("Docker login failure", r"Docker login for '.*' failed.*", 98),
+    Rule("Python ModuleNotFoundError", r"^ModuleNotFoundError: .*", 98),
+    Rule("Python ImportError", r"^ImportError: .*", 97),
+    Rule("Docker login failure", r"Docker login for '.*' failed.*", 96),
 ]
 
 dict_rules = [asdict(rule) for rule in rules]
