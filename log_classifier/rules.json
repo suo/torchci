@@ -35,8 +35,13 @@
         "priority": 1000
     },
     {
-        "name": "Python unittest error",
+        "name": "Python unittest failure",
         "pattern": "FAIL \\[.*\\]: (test.*) \\((?:__main__\\.)?(.*)\\)",
+        "priority": 999
+    },
+    {
+        "name": "Python unittest error",
+        "pattern": "ERROR \\[.*\\]: (test.*) \\((?:__main__\\.)?(.*)\\)",
         "priority": 999
     },
     {

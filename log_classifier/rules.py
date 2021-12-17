@@ -50,7 +50,10 @@ rules = [
         "NVIDIA installation failure", r"^ERROR: Installation has failed.*?nvidia", 1000
     ),
     Rule(
-        "Python unittest error", r"FAIL \[.*\]: (test.*) \((?:__main__\.)?(.*)\)", 999
+        "Python unittest failure", r"FAIL \[.*\]: (test.*) \((?:__main__\.)?(.*)\)", 999
+    ),
+    Rule(
+        "Python unittest error", r"ERROR \[.*\]: (test.*) \((?:__main__\.)?(.*)\)", 999
     ),
     Rule("MSVC out of memory", r"Catastrophic error: .*", 998),
     Rule("MSVC compiler error", r"^.*\(\d+\): error C\d+:.*", 999),
