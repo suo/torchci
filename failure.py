@@ -45,4 +45,3 @@ def get(capture):
     print("failure count query stats", count.stats())
     return render
 
-
