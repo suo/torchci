@@ -23,13 +23,14 @@ def _get(sha):
     jobs = sorted(jobs, key=lambda job: job["workflow_name"] + job["job_name"])
     # dict of workflow -> jobs
     jobs_by_workflow = defaultdict(list)
+    failed_workflows = set()
     failed_jobs = []
     pending_jobs = []
     for job in jobs:
         jobs_by_workflow[job["workflow_name"]].append(job)
-
         if job["conclusion"] in ("failure", "cancelled", "timed_out"):
             failed_jobs.append(job)
+            failed_workflows.add(job["workflow_name"])
         elif job["conclusion"] == None:
             pending_jobs.append(job)
 
@@ -59,6 +60,7 @@ def _get(sha):
         "commit_message_body": commit_message_body,
         "commit": commit,
         "jobs_by_workflow": jobs_by_workflow,
+        "failed_workflows": failed_workflows,
         "failed_jobs": failed_jobs,
         "pending_jobs": pending_jobs,
     }
