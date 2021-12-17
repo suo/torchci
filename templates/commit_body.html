@@ -39,7 +39,11 @@
 
 <div class="workflow-container">
     {% for workflow, jobs in jobs_by_workflow.items() %}
-    <div class="workflow-box">
+    {% if workflow in failed_workflows %}
+    <div class="workflow-box-fail">
+    {% else %}
+    <div class="workflow-box-pass">
+    {% endif %}
         <h3>{{ workflow }}</h3>
         <ul>
             {% for job in jobs %}
