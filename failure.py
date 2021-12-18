@@ -44,3 +44,4 @@ def get(capture):
     print("failure query stats", results.stats())
     print("failure count query stats", count.stats())
     return render
+
