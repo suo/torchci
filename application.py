@@ -101,9 +101,8 @@ def pull_(pull_number):
 def pull_sha_(pull_number, selected_sha):
     return pull.get(pull_number, selected_sha)
 
-
-@application.route("/failure_infos/<int:page>")
-def failure_infos(page):
+@cache.memoize()
+def _cached_job_info(page):
     # TODO when we support multiple branches we'll need to fix this
     branch_name = "master"
     master_commit_query = (
@@ -115,19 +114,22 @@ def failure_infos(page):
         .highest(NO_LIMIT, F["timestamp"])
         .limit(HUD_PAGE_SIZE, skip=page * HUD_PAGE_SIZE)
     )
-    failed_jobs_query = (
+    jobs_query = (
         Q(JOB_TABLE)
         .join(
             master_commit_query,
             on=F[JOB_TABLE]["sha"] == F[COMMIT_TABLE]["sha"],
         )
-        .where(F["conclusion"] == "failure")
     )
-    failed_jobs = client.sql(failed_jobs_query)
+    jobs = client.sql(jobs_query)
     # ids are returned as both ints and string, cast them all to strings to
     # serialize keys properly
-    by_id = {str(j["id"]): j for j in failed_jobs}
+    by_id = {str(j["id"]): j for j in jobs}
     return by_id
+
+@application.route("/job_info/<int:page>")
+def job_info(page):
+    return _cached_job_info(page)
 
 
 @application.route("/failure")
@@ -144,6 +146,11 @@ if not FLASK_DEBUG:
     def prefetch_hud():
         # cache first page
         _cached_hud(page=0)
+
+    @scheduler.task("interval", seconds=10)
+    def prefetch_job_info():
+        # cache first page
+        _cached_job_info(page=0)
 
     scheduler.init_app(application)
     scheduler.start()

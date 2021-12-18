@@ -13,14 +13,26 @@ function newTooltip(jobTarget) {
   newTooltip.className = "job-tooltip";
   newTooltip.innerHTML = `[${conclusion}] ${jobName}`;
 
-  // Retrieve job info from our prefetched global state.
+  const box = jobTarget.getBoundingClientRect();
+  newTooltip.style.left = box.x + 20 + window.scrollX + "px";
+  newTooltip.style.top = box.y + 20 + window.scrollY + "px";
+  document.body.append(newTooltip);
+
   const id = jobTarget.getAttribute("job-id");
-  if (!("jobFailuresById" in window)) {
+  newTooltip.job_id = id;
+  // Retrieve job info from our prefetched global state.
+  if (!("jobInfo" in window)) {
+    newTooltip.innerHTML += "<div id='loading-job-info'><em>Loading job info...</em></div>";
     return;
   }
-  if (id in window.jobFailuresById) {
-    job = window.jobFailuresById[id]
-    newTooltip.innerHTML +=
+  populateJobInfo(newTooltip);
+  return newTooltip;
+}
+
+function populateJobInfo(tooltip) {
+  if (tooltip.job_id in window.jobInfo) {
+    job = window.jobInfo[tooltip.job_id]
+    tooltip.innerHTML +=
       `\
     <div>
       <div><em>click to pin this tooltip</em></div>
@@ -48,13 +60,6 @@ function newTooltip(jobTarget) {
     </div>
     `
   }
-
-
-  const box = jobTarget.getBoundingClientRect();
-  newTooltip.style.left = box.x + 20 + window.scrollX + "px";
-  newTooltip.style.top = box.y + 20 + window.scrollY + "px";
-  document.body.append(newTooltip);
-  return newTooltip;
 }
 
 function jobMouseOver(event) {
@@ -130,8 +135,13 @@ document.addEventListener("keydown", (e) => {
 const urlParams = new URLSearchParams(window.location.search);
 const pageParam = urlParams.get("page");
 const page = pageParam === null ? 0 : pageParam;
-fetch("failure_infos/" + page)
+window.jobPromise = fetch("job_info/" + page)
   .then((response) => response.json())
   .then((data) => {
-    window.jobFailuresById = data
+    window.jobInfo = data
+    const existingTooltip = document.querySelector(".job-tooltip");
+    if (existingTooltip !== null) {
+      document.getElementById("loading-job-info").remove();
+      populateJobInfo(existingTooltip);
+    }
   });
