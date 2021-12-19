@@ -126,6 +126,7 @@ def _cached_job_info(page):
     # ids are returned as both ints and string, cast them all to strings to
     # serialize keys properly
     by_id = {str(j["id"]): j for j in jobs}
+    print("job info query stats", jobs.stats())
     return by_id
 
 
