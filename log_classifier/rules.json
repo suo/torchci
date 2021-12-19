@@ -30,6 +30,11 @@
         "priority": 1001
     },
     {
+        "name": "npm error",
+        "pattern": "^npm ERR! code .*",
+        "priority": 1001
+    },
+    {
         "name": "NVIDIA installation failure",
         "pattern": "^ERROR: Installation has failed.*?nvidia",
         "priority": 1000
@@ -60,6 +65,11 @@
         "priority": 995
     },
     {
+        "name": "MSVC compiler fatal",
+        "pattern": "^.*\\(\\d+\\): fatal error C\\d+:.*",
+        "priority": 995
+    },
+    {
         "name": "Compile error",
         "pattern": "^.*\\d+:\\d+: error: .*",
         "priority": 994
@@ -83,6 +93,11 @@
         "name": "flake8 error",
         "pattern": "^.*:\\d+:\\d: [EBFW]\\d+ .*",
         "priority": 800
+    },
+    {
+        "name": "apt-get update failure",
+        "pattern": "^E: Failed to fetch.*",
+        "priority": 799
     },
     {
         "name": "undefined reference linker error",

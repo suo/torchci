@@ -46,6 +46,7 @@ rules = [
         r"^Usage of PyLong_{From,As}{Unsigned}Long API may lead to overflow errors on Windows",
         1001,
     ),
+    Rule("npm error", r"^npm ERR! code .*", 1001),
     Rule(
         "NVIDIA installation failure", r"^ERROR: Installation has failed.*?nvidia", 1000
     ),
@@ -58,6 +59,7 @@ rules = [
     ),
     Rule("MSVC out of memory", r"Catastrophic error: .*", 996),
     Rule("MSVC compiler error", r"^.*\(\d+\): error C\d+:.*", 995),
+    Rule("MSVC compiler fatal", r"^.*\(\d+\): fatal error C\d+:.*", 995),
     Rule("Compile error", r"^.*\d+:\d+: error: .*", 994),
     Rule("Curl error", r"curl: .* error:", 993),
     Rule("Dirty checkout", r"^Build left local git repository checkout dirty", 992),
@@ -67,6 +69,7 @@ rules = [
         991,
     ),
     Rule("flake8 error", r"^.*:\d+:\d: [EBFW]\d+ .*", 800),
+    Rule("apt-get update failure", r"^E: Failed to fetch.*", 799),
     Rule("undefined reference linker error", r"undefined reference to .*", 200),
     Rule("Python AttributeError", r"^AttributeError: .*", 100),
     Rule("CUDA out of memory error", r"^RuntimeError: CUDA out of memory.", 100),
