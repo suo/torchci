@@ -101,6 +101,7 @@ def pull_(pull_number):
 def pull_sha_(pull_number, selected_sha):
     return pull.get(pull_number, selected_sha)
 
+
 @cache.memoize()
 def _cached_job_info(page):
     # TODO when we support multiple branches we'll need to fix this
@@ -126,6 +127,7 @@ def _cached_job_info(page):
     # serialize keys properly
     by_id = {str(j["id"]): j for j in jobs}
     return by_id
+
 
 @application.route("/job_info/<int:page>")
 def job_info(page):

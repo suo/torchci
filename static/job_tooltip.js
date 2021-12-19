@@ -29,6 +29,25 @@ function newTooltip(jobTarget) {
   return newTooltip;
 }
 
+// from: https://gist.github.com/g1eb/62d9a48164fe7336fdf4845e22ae3d2c
+function convertTime(seconds) {
+  var hours = Math.floor(seconds / 3600)
+  var minutes = Math.floor((seconds - (hours * 3600)) / 60)
+  var seconds = seconds - (hours * 3600) - (minutes * 60)
+  if (!!hours) {
+    if (!!minutes) {
+      return `${hours}h ${minutes}m ${seconds}s`
+    } else {
+      return `${hours}h ${seconds}s`
+    }
+  }
+  if (!!minutes) {
+    return `${minutes}m ${seconds}s`
+  }
+  return `${seconds}s`
+}
+
+
 function populateJobInfo(tooltip) {
   if (tooltip.job_id in window.jobInfo) {
     job = window.jobInfo[tooltip.job_id]
@@ -40,7 +59,10 @@ function populateJobInfo(tooltip) {
       | <a target="_blank" href=commit/${job.sha}>PR HUD</a>
 
       ${job.conclusion !== null
-        ? `| <a target="_blank" href=${job.log_url}>raw logs</a>`
+        ? `\
+          | <a target="_blank" href=${job.log_url}>raw logs</a>
+          | Duration: ${convertTime(job.duration_s)}</a>
+        `
         : ""}
 
 
