@@ -236,7 +236,7 @@
         const fakeInput = new Event('input');
         event.target.dispatchEvent(fakeInput);
       } else if (event.code === "Enter") {
-        if (even.target.value === "") {
+        if (event.target.value === "") {
           return;
         }
         const urlParams = new URLSearchParams(window.location.search);
