@@ -20,6 +20,8 @@ ROCKSET_API_KEY=<key from above> FLASK_DEBUG=1 FLASK_APP=application.py flask ru
 You will need first need to install and configure the [Elastic Beanstalk CLI](https://docs.aws.amazon.com/elasticbeanstalk/latest/dg/eb-cli3.html)
 and the [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-welcome.html).
 
+Note: the Elastic Beanstalk installation instructions recommend cloning their repo and using their setup scripts, but the "manual" setup may be easier, especially if you're on a Mac/Linux system.
+
 To set up the Elastic Beanstalk CI with this repo, follow these steps:
 1. `eb init`
 2. Select `us-east-1` as the default region.
