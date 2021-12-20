@@ -20,9 +20,9 @@
         {% endfor %}
     </table>
 
-    <h3>Failures by samples ({{most_recent_count}} most recent)</h3>
+    <h3>Failures samples ({{most_recent_count}} most recent)</h3>
     <ul>
-        {% for job in captures %}
+        {% for job in samples %}
         <li>
             <a href="{{ job.log_url }}">[log]</a>
             <a href="{{ job.html_url }}">{{job.workflow_name}} / {{ job.job_name }}</a>

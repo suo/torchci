@@ -10,14 +10,8 @@ import commit
 import unclassified
 import pull
 import failure
-from common import (
-    client,
-    NO_LIMIT,
-    HUD_PAGE_SIZE,
-    COMMIT_TABLE,
-    JOB_TABLE,
-)
-from rockset import Q, F
+
+from common import query_rockset
 
 FLASK_DEBUG = os.environ.get("FLASK_DEBUG") == "1"
 
@@ -104,29 +98,10 @@ def pull_sha_(pull_number, selected_sha):
 
 @cache.memoize()
 def _cached_job_info(page):
-    # TODO when we support multiple branches we'll need to fix this
-    branch_name = "master"
-    master_commit_query = (
-        Q(COMMIT_TABLE)
-        .where(F["ref"] == f"refs/heads/{branch_name}")
-        # weird kink in Rockset querybuilder--we can't sort with a skip, but we
-        # can't sort without a limit. So just sort with no limit, then do the
-        # skip/take after.
-        .highest(NO_LIMIT, F["timestamp"])
-        .limit(HUD_PAGE_SIZE, skip=page * HUD_PAGE_SIZE)
-    )
-    jobs_query = (
-        Q(JOB_TABLE)
-        .join(
-            master_commit_query,
-            on=F[JOB_TABLE]["sha"] == F[COMMIT_TABLE]["sha"],
-        )
-    )
-    jobs = client.sql(jobs_query)
+    jobs = query_rockset("job_info", "prod", page=page)
     # ids are returned as both ints and string, cast them all to strings to
     # serialize keys properly
     by_id = {str(j["id"]): j for j in jobs}
-    print("job info query stats", jobs.stats())
     return by_id
 
 

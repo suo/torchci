@@ -2,12 +2,8 @@ import re
 from collections import defaultdict
 
 from flask import render_template
-from common import query_rockset, ParamDict
 
-from rockset import Q, F
-
-from common import client
-
+from common import query_rockset
 
 PR_URL_REGEX = re.compile(r"Pull Request resolved: (.*)")
 EXPORTED_PHAB_REGEX = re.compile(r"Differential Revision: \[(.*)\]")
@@ -15,10 +11,8 @@ COMMITED_PHAB_REGEX = re.compile(r"Differential Revision: (D.*)")
 
 
 def _get(sha):
-    commit = query_rockset("commit_query", "a7158163d4bb8846", ParamDict(sha=sha))[0][
-        "commit"
-    ]
-    jobs = client.sql(Q("job").where(F["sha"] == sha))
+    commit = query_rockset("commit_query", "prod", sha=sha)[0]["commit"]
+    jobs = query_rockset("commit_jobs_query", "latest", sha=sha)
 
     jobs = sorted(jobs, key=lambda job: job["workflow_name"] + job["job_name"])
     # dict of workflow -> jobs

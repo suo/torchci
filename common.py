@@ -1,18 +1,8 @@
 import os
-import time
-from datetime import datetime
 
 from rockset import Client, ParamDict
 
 ROCKSET_API_KEY = os.environ.get("ROCKSET_API_KEY")
-NO_LIMIT = 99999999999999
-HUD_PAGE_SIZE = 50
-COMMIT_TABLE = "commit"
-JOB_TABLE = "job"
-
-# Switch to use test view
-# COMMIT_TABLE = "test_commit"
-# JOB_TABLE = "test_job"
 
 client = Client(
     api_key=ROCKSET_API_KEY,
@@ -20,14 +10,11 @@ client = Client(
 )
 
 
-def query_rockset(query_name, version, params=None, workspace="commons"):
+def query_rockset(query_name, tag, **kwargs):
     global client
-    # retrieve Query Lambda
-    qlambda = client.QueryLambda.retrieve(
-        query_name, version=version, workspace="commons"
-    )
-    if params == None:
-        params = ParamDict()
+    qlambda = client.QueryLambda.retrieveByTag(query_name, tag=tag, workspace="commons")
+    params = ParamDict(**kwargs)
 
     results = qlambda.execute(parameters=params)
+    print(query_name, "stats:", results.stats)
     return results.results
