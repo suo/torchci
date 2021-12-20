@@ -236,7 +236,7 @@
         event.target.dispatchEvent(fakeInput);
       } else if (event.code === "Enter") {
         const urlParams = new URLSearchParams(window.location.search);
-        urlParams.set('jobFilter', event.target.value);
+        urlParams.set('name_filter', event.target.value);
         window.location.search = urlParams;
       }
     }
@@ -245,7 +245,7 @@
     function initJobFilter() {
       // first try url params
       const urlParams = new URLSearchParams(window.location.search);
-      let jobFilter = urlParams.get("jobFilter");
+      let jobFilter = urlParams.get("name_filter");
       // then local storage if that's missing
       if (jobFilter === null) {
         jobFilter = window.sessionStorage.getItem("job-filter");
