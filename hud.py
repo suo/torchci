@@ -5,13 +5,14 @@ from common import query_rockset
 
 
 def get(page=0, branch_name="master"):
-    master_commits = query_rockset("master_commits", "prod", page=page)
-    jobs = query_rockset("hud_query", "prod", page=page)
+    branch = f"refs/heads/{branch_name}"
+    branch_commits = query_rockset("master_commits", "latest", branch=branch, page=page)
+    jobs = query_rockset("hud_query", "latest", branch=branch, page=page)
 
     # dict of:
     # sha => commit info
     sha_to_commit = {}
-    for commit in master_commits:
+    for commit in branch_commits:
         sha = commit["sha"]
         sha_to_commit[sha] = commit
 

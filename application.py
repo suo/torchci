@@ -62,9 +62,29 @@ def hud_():
     # since the rendered result is different for different pages.
     @cache.memoize()
     def cached_render(page):
-        return render_template("hud.html", page=page, sha_grid=sha_grid, names=names)
+        return render_template(
+            "hud.html", branch="master", page=page, sha_grid=sha_grid, names=names
+        )
 
     return cached_render(page)
+
+
+@application.route("/branch/<path:branch_name>")
+def hud_branch(branch_name):
+    """HUD page for a specific branch."""
+    try:
+        page = int(request.args.get("page", 0))
+    except ValueError:
+        # just ignore weird input
+        page = 0
+    # and negative input
+    if page < 0:
+        page = 0
+
+    sha_grid, names = hud.get(page, branch_name)
+    return render_template(
+        "hud.html", branch=branch_name, page=page, sha_grid=sha_grid, names=names
+    )
 
 
 @application.route("/commit/<sha>")

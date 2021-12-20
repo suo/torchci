@@ -84,7 +84,7 @@
 </head>
 
 <body>
-  <h1>PyTorch Janky HUD</h1>
+  <h1>PyTorch HUD: <code>{{branch}}</code></h1>
   <div>This page reloads every minute.</div>
   <div>
     Page through commits:
@@ -140,7 +140,7 @@
         <td class="job-metadata"><a href={{commit_url}}> {{ sha[:7] }} </a></td>
 
         <!-- Commit title -->
-        <td class="job-metadata"> <a href="commit/{{sha}}">{{commit_message}}</a> </td>
+        <td class="job-metadata"> <a href="/commit/{{sha}}">{{commit_message}}</a> </td>
 
         <!-- Pull Request link -->
         <td class="job-metadata">

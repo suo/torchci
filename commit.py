@@ -12,7 +12,7 @@ COMMITED_PHAB_REGEX = re.compile(r"Differential Revision: (D.*)")
 
 def _get(sha):
     commit = query_rockset("commit_query", "prod", sha=sha)[0]["commit"]
-    jobs = query_rockset("commit_jobs_query", "latest", sha=sha)
+    jobs = query_rockset("commit_jobs_query", "prod", sha=sha)
 
     jobs = sorted(jobs, key=lambda job: job["workflow_name"] + job["job_name"])
     # dict of workflow -> jobs
