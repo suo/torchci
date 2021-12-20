@@ -1,9 +1,7 @@
-<!DOCTYPE html>
-
+{% extends "base.jinja" %}
 {% import 'macros.jinja' as macros %}
 
-<link rel="stylesheet" href="{{ url_for('static', filename='common.css') }}">
-
+{% block style %}
 <style>
   .tooltip-target {
     cursor: pointer;
@@ -54,13 +52,9 @@
     font-family: sans-serif;
   }
 </style>
+{% endblock %}
 
-<html>
-
-<head>
-  <meta charset="UTF-8" />
-  <title>Janky HUD</title>
-
+{% block head %}
   <script>
     customElements.define("time-formatted", class extends HTMLElement {
       connectedCallback() {
@@ -81,9 +75,9 @@
     });
   </script>
   <script defer src="{{ url_for('static', filename='job_tooltip.js') }}"></script>
-</head>
+{% endblock %}
 
-<body>
+{% block body %}
   <h1>PyTorch HUD: <code>{{branch}}</code></h1>
   <div>This page reloads every minute.</div>
   <div>
@@ -261,7 +255,4 @@
     initJobFilter();
 
   </script>
-
-</body>
-
-</html>
+{% endblock %}

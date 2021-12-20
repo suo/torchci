@@ -11,7 +11,7 @@ import unclassified
 import pull
 import failure
 
-from common import query_rockset
+from common import query_rockset, get_sev_issues
 
 FLASK_DEBUG = os.environ.get("FLASK_DEBUG") == "1"
 
@@ -62,8 +62,9 @@ def hud_():
     # since the rendered result is different for different pages.
     @cache.memoize()
     def cached_render(page):
+        import time
         return render_template(
-            "hud.html", branch="master", page=page, sha_grid=sha_grid, names=names
+            "hud.html", branch="master", page=page, sha_grid=sha_grid, names=names, sevs=get_sev_issues()
         )
 
     return cached_render(page)

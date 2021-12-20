@@ -1,8 +1,8 @@
-<!DOCTYPE html>
+{% extends "base.jinja" %}
 {% import 'macros.jinja' as macros %}
 
-<link rel="stylesheet" href="{{ url_for('static', filename='common.css') }}">
 
+{% block style %}
 <style>
     .commit-message {
         white-space: pre;
@@ -31,15 +31,9 @@
         background-color: azure;
     }
 </style>
+{% endblock %}
 
-<html>
-
-<head>
-    <meta charset="UTF-8" />
-    <title>Janky Commit HUD</title>
-</head>
-
-<body>
+{% block body %}
     <h1>PyTorch Janky PR HUD</h1>
     <h2>{{ commit_title }} </h2>
     {% if pr_url %}
@@ -51,6 +45,4 @@
     {% endif %}
 
     {% include "commit_body.html" %}
-</body>
-
-</html>
+{% endblock %}

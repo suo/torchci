@@ -1,6 +1,8 @@
 import os
 
+from ghapi.all import GhApi
 from rockset import Client, ParamDict
+
 
 ROCKSET_API_KEY = os.environ.get("ROCKSET_API_KEY")
 
@@ -16,5 +18,9 @@ def query_rockset(query_name, tag, **kwargs):
     params = ParamDict(**kwargs)
 
     results = qlambda.execute(parameters=params)
-    print(query_name, "stats:", results.stats)
     return results.results
+
+
+def get_sev_issues():
+    api = GhApi()
+    return api.issues.list_for_repo("pytorch", "pytorch", labels="ci: sev")
