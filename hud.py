@@ -6,8 +6,8 @@ from common import query_rockset
 
 def get(page=0, branch_name="master"):
     branch = f"refs/heads/{branch_name}"
-    branch_commits = query_rockset("master_commits", "latest", branch=branch, page=page)
-    jobs = query_rockset("hud_query", "latest", branch=branch, page=page)
+    branch_commits = query_rockset("master_commits", "prod", branch=branch, page=page)
+    jobs = query_rockset("hud_query", "prod", branch=branch, page=page)
 
     # dict of:
     # sha => commit info
