@@ -24,14 +24,16 @@ config = {
 if FLASK_DEBUG:
     config["CACHE_TYPE"] = "NullCache"
 
-application = Flask(__name__)
-application.config.from_mapping(config)
-cache = Cache(application)
+app = Flask(__name__)
+# Elastic Beanstalk requires a variable called `application`.
+application = app
+app.config.from_mapping(config)
+cache = Cache(app)
 
 # Compress responses. The HUD is a really big HTML page, (~2MB) which actually
 # takes a bit of time to send. Enabling compression with default settings
 # reduces the size drastically (~40KB), which improves user-perceived perf.
-Compress(application)
+Compress(app)
 
 
 @cache.memoize()
@@ -40,7 +42,7 @@ def _cached_hud(page):
     return hud.get(page)
 
 
-@application.route("/")
+@app.route("/")
 def hud_():
     """Main PyTorch HUD page.
 
@@ -70,7 +72,7 @@ def hud_():
     return cached_render(page)
 
 
-@application.route("/branch/<path:branch_name>")
+@app.route("/branch/<path:branch_name>")
 def hud_branch(branch_name):
     """HUD page for a specific branch."""
     try:
@@ -88,31 +90,31 @@ def hud_branch(branch_name):
     )
 
 
-@application.route("/commit/<sha>")
+@app.route("/commit/<sha>")
 def commit_(sha):
     return commit.get(sha)
 
 
-@application.route("/favicon.ico")
+@app.route("/favicon.ico")
 def favicon():
     return send_from_directory(
-        os.path.join(application.root_path, "static"),
+        os.path.join(app.root_path, "static"),
         "favicon.ico",
         mimetype="image/vnd.microsoft.icon",
     )
 
 
-@application.route("/_unclassified")
+@app.route("/_unclassified")
 def unclassified_():
     return unclassified.get()
 
 
-@application.route("/pytorch/pytorch/pull/<int:pull_number>")
+@app.route("/pytorch/pytorch/pull/<int:pull_number>")
 def pull_(pull_number):
     return pull.get(pull_number, None)
 
 
-@application.route("/pytorch/pytorch/pull/<int:pull_number>/<string:selected_sha>")
+@app.route("/pytorch/pytorch/pull/<int:pull_number>/<string:selected_sha>")
 def pull_sha_(pull_number, selected_sha):
     return pull.get(pull_number, selected_sha)
 
@@ -126,12 +128,12 @@ def _cached_job_info(page):
     return by_id
 
 
-@application.route("/job_info/<int:page>")
+@app.route("/job_info/<int:page>")
 def job_info(page):
     return _cached_job_info(page)
 
 
-@application.route("/failure")
+@app.route("/failure")
 def failure_():
     return failure.get(request.args.get("capture"))
 
@@ -151,8 +153,8 @@ if not FLASK_DEBUG:
         # cache first page
         _cached_job_info(page=0)
 
-    scheduler.init_app(application)
+    scheduler.init_app(app)
     scheduler.start()
 
 if __name__ == "__main__":
-    application.run()
+    app.run()
