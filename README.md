@@ -17,10 +17,16 @@ ROCKSET_API_KEY=<key from above> FLASK_DEBUG=1 FLASK_APP=application.py flask ru
 
 ## Deploy
 
-You will need first need to install and configure the [Elastic Beanstalk CLI](https://docs.aws.amazon.com/elasticbeanstalk/latest/dg/eb-cli3.html)
-and the [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-welcome.html).
+You will need first need to install and configure the [Elastic Beanstalk
+CLI](https://docs.aws.amazon.com/elasticbeanstalk/latest/dg/eb-cli3.html) and
+the [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-welcome.html).
 
-Note: the Elastic Beanstalk installation instructions recommend cloning their repo and using their setup scripts, but the "manual" setup may be easier, especially if you're on a Mac/Linux system.
+Note: the Elastic Beanstalk installation instructions recommend cloning their
+repo and using their setup scripts, but the "manual" setup may be easier,
+especially if you're on a Mac/Linux system.
+
+Then, ask someone with AWS admin (e.g. Michael Suo) to attach the
+`AdministratorAccess-AWSElasticBeanstalk` policy to your IAM account.
 
 To set up the Elastic Beanstalk CI with this repo, follow these steps:
 1. `eb init`
@@ -48,3 +54,14 @@ If you are on your laptop (or something else with a web browser), `eb open` will
 open up a link to the site.
 
 Make some changes, commit them, then run `eb deploy` to deploy them!
+
+## Operations
+
+### Logging
+
+You can log by using the `logger` module. These logs will show up in [in
+CloudWatch](https://console.aws.amazon.com/cloudwatch/home?region=us-east-1#logsV2:log-groups/log-group/$252Faws$252Felasticbeanstalk$252Ftorchci$252Fvar$252Flog$252Fweb.stdout.log).
+
+### EB is stuck in some weird state and I can't do anything, halp
+
+You can "hard reset" everything by nuking the autoscaling group. See this [SO answer](https://serverfault.com/a/891421) for instructions.
