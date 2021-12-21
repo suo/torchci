@@ -9,6 +9,7 @@ from flask_compress import Compress
 
 import commit
 import failure
+import job_info
 import hud
 import pull
 import unclassified
@@ -128,15 +129,11 @@ def pull_sha_(pull_number, selected_sha):
 
 @cache.memoize()
 def _cached_job_info(page):
-    jobs = query_rockset("job_info", "prod", page=page)
-    # ids are returned as both ints and string, cast them all to strings to
-    # serialize keys properly
-    by_id = {str(j["id"]): j for j in jobs}
-    return by_id
+    return job_info.get(page)
 
 
 @app.route("/job_info/<int:page>")
-def job_info(page):
+def job_info_(page):
     return _cached_job_info(page)
 
 
@@ -151,7 +148,7 @@ if not FLASK_DEBUG:
     scheduler = APScheduler()
 
     # Suppress noisy logs from these tasks running every few seconds.
-    logging.getLogger('apscheduler.executors.default').setLevel(logging.WARNING)
+    logging.getLogger("apscheduler.executors.default").setLevel(logging.WARNING)
 
     @scheduler.task("interval", seconds=10)
     def prefetch_hud():

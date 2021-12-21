@@ -13,7 +13,7 @@ class JobToolTip extends HTMLElement {
     this.style.top = this.getAttribute("y-coord");
 
     // Retrieve job info from our prefetched global state.
-    if (!("jobInfo" in window)) {
+    if (!window.hasOwnProperty("jobInfo")) {
       this.innerHTML += "<div id='loading-job-info'><em>Loading job info...</em></div>";
       return;
     }
@@ -21,28 +21,26 @@ class JobToolTip extends HTMLElement {
   }
 
   _generateDisableIssueHTML(job) {
-    if (job.failure_line === null) {
-      return "";
+    if (job.existing_disable_issue !== null) {
+      return `| <a href=${job.existing_disable_issue}>test currently disabled</a>`
     }
 
-    const match = job.failure_line.match(/^(?:FAIL|ERROR) \[.*\]: (test_.* \(.*Test.*\))/);
-    if (match === null) {
-      return "";
-    }
-
-    const issueTitle = encodeURIComponent("DISABLED " + match[1]);
-    const examplesURL = `http://hud2.pytorch.org/failure?capture=${encodeURIComponent(job.failure_captures)}`;
-    const issueBody = encodeURIComponent(`Platforms: <fill this in or delete. Valid labels are: asan, linux, mac, macos, rocm, win, windows.>
+    if (job.disable_issue_title !== null) {
+      const issueTitle = encodeURIComponent(job.disable_issue_title);
+      const examplesURL = `http://hud2.pytorch.org/failure?capture=${encodeURIComponent(job.failure_captures)}`;
+      const issueBody = encodeURIComponent(`Platforms: <fill this in or delete. Valid labels are: asan, linux, mac, macos, rocm, win, windows.>
 
 This job was disabled because it is failing on master ([recent examples](${examplesURL})).`);
-    const issueCreateURL = `https://github.com/pytorch/pytorch/issues/new?title=${issueTitle}&body=${issueBody}`;
+      const issueCreateURL = `https://github.com/pytorch/pytorch/issues/new?title=${issueTitle}&body=${issueBody}`;
 
-    return "| <span id='disable-issue'><em>checking for disable issues...</em></span>"
+      return `| <a href=${issueCreateURL}>disable this test</a>`
+    }
+    return "";
   }
 
   getJobInfo() {
     const jobId = this.getAttribute('job-id');
-    if (jobId in window.jobInfo) {
+    if (window.jobInfo.hasOwnProperty(jobId)) {
       return window.jobInfo[jobId];
     }
     return null;
