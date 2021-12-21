@@ -23,4 +23,8 @@ def query_rockset(query_name, tag, **kwargs):
 
 def get_sev_issues():
     api = GhApi()
-    return api.issues.list_for_repo("pytorch", "pytorch", labels="ci: sev")
+    try:
+        return api.issues.list_for_repo("pytorch", "pytorch", labels="ci: sev")
+    except Exception as e:
+        print("ERROR:", e)
+        return []
