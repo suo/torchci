@@ -100,6 +100,11 @@
         "priority": 799
     },
     {
+        "name": "Dependency fetch error",
+        "pattern": "^Error downloading packages:",
+        "priority": 700
+    },
+    {
         "name": "undefined reference linker error",
         "pattern": "undefined reference to .*",
         "priority": 200

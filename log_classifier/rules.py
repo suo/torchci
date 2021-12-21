@@ -70,6 +70,7 @@ rules = [
     ),
     Rule("flake8 error", r"^.*:\d+:\d: [EBFW]\d+ .*", 800),
     Rule("apt-get update failure", r"^E: Failed to fetch.*", 799),
+    Rule("Dependency fetch error", r"^Error downloading packages:", 700),
     Rule("undefined reference linker error", r"undefined reference to .*", 200),
     Rule("Python AttributeError", r"^AttributeError: .*", 100),
     Rule("CUDA out of memory error", r"^RuntimeError: CUDA out of memory.", 100),
