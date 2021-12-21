@@ -11,7 +11,7 @@ jobs:
       uses: actions/checkout@v2
 
     - name: Generate deployment package
-      run: git archive main --output=deploy.zip
+      run: git archive ${{ github.sha }} --output=deploy.zip
 
     - name: Deploy
       uses: einaregilsson/beanstalk-deploy@v20
