@@ -59,8 +59,8 @@ Make some changes, commit them, then run `eb deploy` to deploy them!
 
 ### Logging
 
-You can log by using the `logger` module. These logs will show up in [in
-CloudWatch](https://console.aws.amazon.com/cloudwatch/home?region=us-east-1#logsV2:log-groups/log-group/$252Faws$252Felasticbeanstalk$252Ftorchci$252Fvar$252Flog$252Fweb.stdout.log).
+You can log by using the `logger` module. These logs will show up in
+[CloudWatch](https://console.aws.amazon.com/cloudwatch/home?region=us-east-1#logsV2:log-groups/log-group/$252Faws$252Felasticbeanstalk$252Ftorchci$252Fvar$252Flog$252Fweb.stdout.log).
 
 ### EB is stuck in some weird state and I can't do anything, halp
 
