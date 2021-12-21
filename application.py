@@ -150,6 +150,9 @@ def failure_():
 if not FLASK_DEBUG:
     scheduler = APScheduler()
 
+    # Suppress noisy logs from these tasks running every few seconds.
+    logging.getLogger('apscheduler.executors.default').setLevel(logging.WARNING)
+
     @scheduler.task("interval", seconds=10)
     def prefetch_hud():
         # cache first page
