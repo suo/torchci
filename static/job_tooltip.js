@@ -1,3 +1,116 @@
+class JobToolTip extends HTMLElement {
+  constructor() {
+    super()
+  }
+
+  connectedCallback() {
+    this.setAttribute("class", "job-tooltip")
+    const conclusion = this.getAttribute('conclusion');
+    const jobName = this.getAttribute('job-name');
+    this.innerHTML = `[${conclusion}] ${jobName}` +
+      `<div><em>click to pin this tooltip, double-click for job page</em></div>`;
+    this.style.left = this.getAttribute("x-coord");
+    this.style.top = this.getAttribute("y-coord");
+
+    // Retrieve job info from our prefetched global state.
+    if (!("jobInfo" in window)) {
+      this.innerHTML += "<div id='loading-job-info'><em>Loading job info...</em></div>";
+      return;
+    }
+    this.renderJobInfo();
+  }
+
+  _generateDisableIssueHTML(job) {
+    if (job.failure_line === null) {
+      return "";
+    }
+
+    const match = job.failure_line.match(/^(?:FAIL|ERROR) \[.*\]: (test_.* \(.*Test.*\))/);
+    if (match === null) {
+      return "";
+    }
+
+    const issueTitle = encodeURIComponent("DISABLED " + match[1]);
+    const examplesURL = `http://hud2.pytorch.org/failure?capture=${encodeURIComponent(job.failure_captures)}`;
+    const issueBody = encodeURIComponent(`Platforms: <fill this in or delete. Valid labels are: asan, linux, mac, macos, rocm, win, windows.>
+
+This job was disabled because it is failing on master ([recent examples](${examplesURL})).`);
+    const issueCreateURL = `https://github.com/pytorch/pytorch/issues/new?title=${issueTitle}&body=${issueBody}`;
+
+    return "| <span id='disable-issue'><em>checking for disable issues...</em></span>"
+  }
+
+  getJobInfo() {
+    const jobId = this.getAttribute('job-id');
+    if (jobId in window.jobInfo) {
+      return window.jobInfo[jobId];
+    }
+    return null;
+  }
+
+  renderJobInfo() {
+    const job = this.getJobInfo();
+    if (job === null) {
+      return;
+    }
+
+    const disableIssueHTML = this._generateDisableIssueHTML(job);
+
+    this.innerHTML +=
+      `\
+    <div>
+      <a target="_blank" href=${job.html_url}>Job page</a>
+      | <a target="_blank" href=commit/${job.sha}>PR HUD</a>
+
+      ${job.conclusion !== null
+        ? `\
+          | <a target="_blank" href=${job.log_url}>raw logs</a>
+          | Duration: ${this.convertTime(job.duration_s)}</a>
+        `
+        : ""}
+
+      ${job.failure_line !== null ?
+        `
+        | <a target="_blank" href="failure?capture=${encodeURIComponent(job.failure_captures)}">more like this</a>
+        ${disableIssueHTML}
+      <details>
+        <summary>
+          <strong>Click for context </strong>
+          <code>${job.failure_line}</code>
+        </summary>
+        <pre>${job.failure_context}</pre>
+      </details>
+      `
+        : ""}
+    </div>
+    `
+  }
+
+  // from: https://gist.github.com/g1eb/62d9a48164fe7336fdf4845e22ae3d2c
+  convertTime(seconds) {
+    var hours = Math.floor(seconds / 3600)
+    var minutes = Math.floor((seconds - (hours * 3600)) / 60)
+    var seconds = seconds - (hours * 3600) - (minutes * 60)
+    if (!!hours) {
+      if (!!minutes) {
+        return `${hours}h ${minutes}m ${seconds}s`
+      } else {
+        return `${hours}h ${seconds}s`
+      }
+    }
+    if (!!minutes) {
+      return `${minutes}m ${seconds}s`
+    }
+    return `${seconds}s`
+  }
+
+  onClick = () => {
+
+  }
+}
+
+customElements.define("job-tooltip", JobToolTip);
+
 function newTooltip(jobTarget) {
   let conclusion = jobTarget.getAttribute("conclusion");
   if (conclusion === null) {
@@ -9,91 +122,19 @@ function newTooltip(jobTarget) {
     .closest("table")
     .querySelector(`th:nth-child(${jobTarget.cellIndex + 1})`);
   const jobName = th.querySelector(".job-header__name").innerHTML;
-  const newTooltip = document.createElement("div");
-  newTooltip.className = "job-tooltip";
-  newTooltip.innerHTML = `[${conclusion}] ${jobName}` +
-    `<div><em>click to pin this tooltip, double-click for job page</em></div>`;
+
+  const newTooltip = document.createElement("job-tooltip");
+  newTooltip.setAttribute("conclusion", conclusion);
+  newTooltip.setAttribute("job-name", jobName);
+  newTooltip.setAttribute("job-id", jobTarget.getAttribute("job-id"));
 
   const box = jobTarget.getBoundingClientRect();
-  newTooltip.style.left = box.x + 20 + window.scrollX + "px";
-  newTooltip.style.top = box.y + 20 + window.scrollY + "px";
+  newTooltip.setAttribute("x-coord", box.x + 20 + window.scrollX + "px");
+  newTooltip.setAttribute("y-coord", box.y + 20 + window.scrollY + "px");
+
   document.body.append(newTooltip);
 
-  const id = jobTarget.getAttribute("job-id");
-  newTooltip.job_id = id;
-  // Retrieve job info from our prefetched global state.
-  if (!("jobInfo" in window)) {
-    newTooltip.innerHTML += "<div id='loading-job-info'><em>Loading job info...</em></div>";
-    return;
-  }
-  populateJobInfo(newTooltip);
   return newTooltip;
-}
-
-// from: https://gist.github.com/g1eb/62d9a48164fe7336fdf4845e22ae3d2c
-function convertTime(seconds) {
-  var hours = Math.floor(seconds / 3600)
-  var minutes = Math.floor((seconds - (hours * 3600)) / 60)
-  var seconds = seconds - (hours * 3600) - (minutes * 60)
-  if (!!hours) {
-    if (!!minutes) {
-      return `${hours}h ${minutes}m ${seconds}s`
-    } else {
-      return `${hours}h ${seconds}s`
-    }
-  }
-  if (!!minutes) {
-    return `${minutes}m ${seconds}s`
-  }
-  return `${seconds}s`
-}
-
-
-function populateJobInfo(tooltip) {
-  if (tooltip.job_id in window.jobInfo) {
-    job = window.jobInfo[tooltip.job_id]
-    let issueCreateURL = null;
-    if (job.failure_line !== null) {
-      const match = job.failure_line.match(/^(?:FAIL|ERROR) \[.*\]: (test_.* \(.*Test.*\))/);
-      if (match !== null) {
-        const issueTitle = encodeURIComponent("DISABLED " + match[1]);
-        const examplesURL = `http://hud2.pytorch.org/failure?capture=${encodeURIComponent(job.failure_captures)}`;
-        const issueBody = encodeURIComponent(`Platforms: <fill this in or delete. Valid labels are: asan, linux, mac, macos, rocm, win, windows.>
-
-This job was disabled because it is failing on master ([recent examples](${examplesURL})).`);
-        issueCreateURL = `https://github.com/pytorch/pytorch/issues/new?title=${issueTitle}&body=${issueBody}`;
-      }
-    }
-    tooltip.innerHTML +=
-      `\
-    <div>
-      <a target="_blank" href=${job.html_url}>Job page</a>
-      | <a target="_blank" href=commit/${job.sha}>PR HUD</a>
-
-      ${job.conclusion !== null
-        ? `\
-          | <a target="_blank" href=${job.log_url}>raw logs</a>
-          | Duration: ${convertTime(job.duration_s)}</a>
-        `
-        : ""}
-
-      ${job.failure_line !== null ?
-        `
-        | <a target="_blank" href="failure?capture=${encodeURIComponent(job.failure_captures)}">more like this</a>
-        ${issueCreateURL !== null ? `| <a target="_blank" href="${issueCreateURL}">disable this test</a>` : ""}
-      <details>
-        <summary>
-          <strong>Click for context </strong>
-          <code>${job.failure_line}</code>
-        </summary>
-        <pre>${job.failure_context}</pre>
-      </details>
-      `
-        : ""}
-
-    </div>
-    `
-  }
 }
 
 function jobMouseOver(event) {
@@ -188,6 +229,6 @@ window.jobPromise = fetch("job_info/" + page)
     const existingTooltip = document.querySelector(".job-tooltip");
     if (existingTooltip !== null) {
       document.getElementById("loading-job-info").remove();
-      populateJobInfo(existingTooltip);
+      existingTooltip.renderJobInfo();
     }
   });
