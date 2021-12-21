@@ -74,7 +74,6 @@
       }
     });
   </script>
-  <script defer src="{{ url_for('static', filename='job_tooltip.js') }}"></script>
 {% endblock %}
 
 {% block body %}
@@ -95,7 +94,7 @@
       <col>
       <col>
       <col>
-      {% for name in names %}
+      {% for name in names -%}
       <col class="col-job" name="{{name}}">
       {% endfor %}
       <col>
@@ -109,11 +108,8 @@
         <th class="regular-header">SHA</th>
         <th class="regular-header">Commit</th>
         <th class="regular-header">PR</th>
-
-        {% for name in names %}
-        <th class="job-header">
-          <div class="job-header__name" id="{{name}}">{{name}}</div>
-        </th>
+        {% for name in names -%}
+        <th class="job-header"> <div class="job-header__name" id="{{name}}">{{name}}</div> </th>
         {% endfor %}
         <th class="regular-header" style="text-align: right">PR</th>
         <th class="regular-header">Commit</th>
@@ -125,78 +121,43 @@
     <tbody>
       {% for (time, sha, commit_url, commit_message, pr_num), jobs in sha_grid.items() %}
       <tr>
-        <!-- Time -->
-        <td class="job-metadata">
-          <time-formatted timestamp='{{time}}'></time-formatted>
-        </td>
-
-        <!-- SHA -->
+        <td class="job-metadata"><time-formatted timestamp='{{time}}'></time-formatted></td>
         <td class="job-metadata"><a href={{commit_url}}> {{ sha[:7] }} </a></td>
-
-        <!-- Commit title -->
         <td class="job-metadata"> <a href="/commit/{{sha}}">{{commit_message}}</a> </td>
-
-        <!-- Pull Request link -->
         <td class="job-metadata">
-          {% if pr_num %}
+          {%- if pr_num %}
           <a href=https://github.com/pytorch/pytorch/pull/{{pr_num}}>#{{pr_num}}</a>
           {% endif %}
         </td>
 
-        <!-- All the jobs -->
-        {% for job in jobs %}
-        {% if job %}
+        {% for job in jobs -%}
+        {% if job -%}
         <td class="tooltip-target" job-id={{job.id}} conclusion={{job.conclusion}}>
           <div class="conclusion">
             {{ macros.emoji_for_conclusion(job.conclusion) }}
           </div>
         </td>
-        {% else %}
+        {% else -%}
         <td class="tooltip-target-no-click">
           <div class="conclusion">
             <span class="conclusion-none">O</span>
           </div>
         </td>
-        {% endif %}
+        {% endif -%}
         {% endfor %}
-        <!-- Pull Request link -->
+
         <td class="job-metadata">
           {% if pr_num %}
           <a href=https://github.com/pytorch/pytorch/pull/{{pr_num}}>#{{pr_num}}</a>
           {% endif %}
         </td>
-
-        <!-- Commit title -->
         <td class="job-metadata"> <a href="commit/{{sha}}">{{commit_message}}</a> </td>
-
-        <!-- SHA -->
         <td class="job-metadata"><a href={{commit_url}}> {{ sha[:7] }} </a></td>
-
-        <!-- Time -->
-        <td class="job-metadata">
-          <time-formatted timestamp='{{time}}'></time-formatted>
-        </td>
+        <td class="job-metadata"><time-formatted timestamp='{{time}}'></time-formatted></td>
       </tr>
       {% endfor %}
     </tbody>
   </table>
-
-  <script>
-    // Optimization to avoid needless re-flowing as the table HTML loads. Our
-    // table is static and very large, so we can just hide it until we have
-    // all the data then render it once.
-    // See: https://patdavid.net/2019/02/displaying-a-big-html-table/
-    document.getElementById("hud-table").style.display = null;
-
-    setInterval(() => {
-      // Reload if someone didn't have a tooltip box open.
-      const elem = document.querySelector(".job-tooltip");
-      if (elem === null) {
-        location.reload();
-      }
-    }, 60000);
-
-  </script>
   <script>
     function onInput(event) {
       const col = event.target;
@@ -253,6 +214,23 @@
       searchBox.dispatchEvent(fakeInput);
     }
     initJobFilter();
+
+  </script>
+  <script src="{{ url_for('static', filename='job_tooltip.js') }}"></script>
+  <script>
+    // Optimization to avoid needless re-flowing as the table HTML loads. Our
+    // table is static and very large, so we can just hide it until we have
+    // all the data then render it once.
+    // See: https://patdavid.net/2019/02/displaying-a-big-html-table/
+    document.getElementById("hud-table").style.display = null;
+
+    setInterval(() => {
+      // Reload if someone didn't have a tooltip box open.
+      const elem = document.querySelector(".job-tooltip");
+      if (elem === null) {
+        location.reload();
+      }
+    }, 60000);
 
   </script>
 {% endblock %}
