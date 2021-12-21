@@ -51,6 +51,18 @@ function convertTime(seconds) {
 function populateJobInfo(tooltip) {
   if (tooltip.job_id in window.jobInfo) {
     job = window.jobInfo[tooltip.job_id]
+    let issueCreateURL = null;
+    if (job.failure_line !== null) {
+      const match = job.failure_line.match(/^(?:FAIL|ERROR) \[.*\]: (test_.* \(.*Test.*\))/);
+      if (match !== null) {
+        const issueTitle = encodeURIComponent("DISABLED " + match[1]);
+        const examplesURL = `http://hud2.pytorch.org/failure?capture=${encodeURIComponent(job.failure_captures)}`;
+        const issueBody = encodeURIComponent(`Platforms: <fill this in or delete. Valid labels are: asan, linux, mac, macos, rocm, win, windows.>
+
+This job was disabled because it is failing on master ([recent examples](${examplesURL})).`);
+        issueCreateURL = `https://github.com/pytorch/pytorch/issues/new?title=${issueTitle}&body=${issueBody}`;
+      }
+    }
     tooltip.innerHTML +=
       `\
     <div>
@@ -65,10 +77,10 @@ function populateJobInfo(tooltip) {
         `
         : ""}
 
-
       ${job.failure_line !== null ?
         `
         | <a target="_blank" href="failure?capture=${encodeURIComponent(job.failure_captures)}">more like this</a>
+        ${issueCreateURL !== null ? `| <a target="_blank" href="${issueCreateURL}">disable this test</a>` : ""}
       <details>
         <summary>
           <strong>Click for context </strong>
