@@ -20,9 +20,45 @@ class JobToolTip extends HTMLElement {
     this.renderJobInfo();
   }
 
-  _generateDisableIssueHTML(job) {
+  renderJobInfo() {
+    const jobId = this.getAttribute('job-id');
+    if (!window.jobInfo.hasOwnProperty(jobId)) {
+      return;
+    }
+    const job = window.jobInfo[jobId];
+
+    this.innerHTML +=
+      `\
+    <div id="options-row">
+      <a target="_blank" href=${job.html_url}>Job page</a>
+      | <a target="_blank" href=commit/${job.sha}>Commit HUD</a>
+      ${this._finishedJobHTML(job)}
+      ${this._moreLikeThisHTML(job)}
+      ${this._disableIssueHTML(job)}
+      ${this._failureContextHTML(job)}
+    </div>
+    `
+  }
+
+  _finishedJobHTML(job) {
+    if (job.conclusion === null) {
+      return "";
+    }
+    return `\
+| <a target="_blank" href=${job.log_url}>raw logs</a>
+| Duration: ${this.convertTime(job.duration_s)}</a>`;
+  }
+
+  _moreLikeThisHTML(job) {
+    if (job.failure_line === null) {
+      return "";
+    }
+    return `| <a target="_blank" href="failure?capture=${encodeURIComponent(job.failure_captures)}">more like this</a>`;
+  }
+
+  _disableIssueHTML(job) {
     if (job.existing_disable_issue !== null) {
-      return `| <a href=${job.existing_disable_issue}>test currently disabled</a>`
+      return `| <a target="_blank" href=${job.existing_disable_issue}>test currently disabled</a>`
     }
 
     if (job.disable_issue_title !== null) {
@@ -33,55 +69,24 @@ class JobToolTip extends HTMLElement {
 This job was disabled because it is failing on master ([recent examples](${examplesURL})).`);
       const issueCreateURL = `https://github.com/pytorch/pytorch/issues/new?title=${issueTitle}&body=${issueBody}`;
 
-      return `| <a href=${issueCreateURL}>disable this test</a>`
+      return `| <a target="_blank" href=${issueCreateURL}>disable this test</a>`
     }
     return "";
   }
 
-  getJobInfo() {
-    const jobId = this.getAttribute('job-id');
-    if (window.jobInfo.hasOwnProperty(jobId)) {
-      return window.jobInfo[jobId];
-    }
-    return null;
-  }
-
-  renderJobInfo() {
-    const job = this.getJobInfo();
-    if (job === null) {
-      return;
+  _failureContextHTML(job) {
+    if (job.failure_line === null) {
+      return "";
     }
 
-    const disableIssueHTML = this._generateDisableIssueHTML(job);
-
-    this.innerHTML +=
-      `\
-    <div>
-      <a target="_blank" href=${job.html_url}>Job page</a>
-      | <a target="_blank" href=commit/${job.sha}>PR HUD</a>
-
-      ${job.conclusion !== null
-        ? `\
-          | <a target="_blank" href=${job.log_url}>raw logs</a>
-          | Duration: ${this.convertTime(job.duration_s)}</a>
-        `
-        : ""}
-
-      ${job.failure_line !== null ?
-        `
-        | <a target="_blank" href="failure?capture=${encodeURIComponent(job.failure_captures)}">more like this</a>
-        ${disableIssueHTML}
-      <details>
-        <summary>
-          <strong>Click for context </strong>
-          <code>${job.failure_line}</code>
-        </summary>
-        <pre>${job.failure_context}</pre>
-      </details>
-      `
-        : ""}
-    </div>
-    `
+    return `\
+<details>
+  <summary>
+    <strong>Click for context </strong>
+    <code>${job.failure_line}</code>
+  </summary>
+  <pre>${job.failure_context}</pre>
+</details>`
   }
 
   // from: https://gist.github.com/g1eb/62d9a48164fe7336fdf4845e22ae3d2c
