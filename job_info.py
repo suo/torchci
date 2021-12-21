@@ -1,4 +1,4 @@
-from logging import disable
+import logging
 import re
 
 from ghapi.all import GhApi
@@ -6,6 +6,7 @@ from ghapi.all import GhApi
 from common import query_rockset
 
 PYTHON_TEST_FAILURE_RE = re.compile(r"^(?:FAIL|ERROR) \[.*\]: (test_.* \(.*Test.*\))")
+logger = logging.getLogger(__name__)
 
 
 def get(page):
@@ -15,9 +16,14 @@ def get(page):
     by_id = {str(j["id"]): j for j in jobs}
 
     api = GhApi()
-    existing_disable_test_issues = api.issues.list_for_repo(
-        "pytorch", "pytorch", labels="module: flaky-tests"
-    )
+    try:
+        existing_disable_test_issues = api.issues.list_for_repo(
+            "pytorch", "pytorch", labels="module: flaky-tests"
+        )
+    except Exception as e:
+        logger.error(e)
+        existing_disable_test_issues = []
+
     existing_disable_test_issues_by_title = {}
     for issue in existing_disable_test_issues:
         if issue.title.startswith("DISABLED"):
