@@ -1,19 +1,22 @@
+import logging
 import os
-from flask import Flask, send_from_directory, request
+
+from flask import Flask, request, send_from_directory
 from flask.templating import render_template
-from flask_compress import Compress
-from flask_caching import Cache
 from flask_apscheduler import APScheduler
+from flask_caching import Cache
+from flask_compress import Compress
 
-import hud
 import commit
-import unclassified
-import pull
 import failure
-
-from common import query_rockset, get_sev_issues
+import hud
+import pull
+import unclassified
+from common import get_sev_issues, query_rockset
 
 FLASK_DEBUG = os.environ.get("FLASK_DEBUG") == "1"
+
+logging.basicConfig(level=logging.INFO)
 
 config = {
     "CACHE_TYPE": "SimpleCache",  # Flask-Caching related configs
@@ -64,9 +67,13 @@ def hud_():
     # since the rendered result is different for different pages.
     @cache.memoize()
     def cached_render(page):
-        import time
         return render_template(
-            "hud.html", branch="master", page=page, sha_grid=sha_grid, names=names, sevs=get_sev_issues()
+            "hud.html",
+            branch="master",
+            page=page,
+            sha_grid=sha_grid,
+            names=names,
+            sevs=get_sev_issues(),
         )
 
     return cached_render(page)

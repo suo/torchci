@@ -1,8 +1,10 @@
+import logging
 import os
 
 from ghapi.all import GhApi
 from rockset import Client, ParamDict
 
+logger = logging.getLogger(__name__)
 
 ROCKSET_API_KEY = os.environ.get("ROCKSET_API_KEY")
 
@@ -26,5 +28,5 @@ def get_sev_issues():
     try:
         return api.issues.list_for_repo("pytorch", "pytorch", labels="ci: sev")
     except Exception as e:
-        print("ERROR:", e)
+        logger.error("get_sev_issues failed:", e)
         return []
