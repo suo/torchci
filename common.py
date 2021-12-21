@@ -1,7 +1,6 @@
 import logging
 import os
 
-from ghapi.all import GhApi
 from rockset import Client, ParamDict
 
 logger = logging.getLogger(__name__)
@@ -24,9 +23,4 @@ def query_rockset(query_name, tag, **kwargs):
 
 
 def get_sev_issues():
-    api = GhApi()
-    try:
-        return api.issues.list_for_repo("pytorch", "pytorch", labels="ci: sev")
-    except Exception as e:
-        logger.error("get_sev_issues failed:", e)
-        return []
+    return query_rockset("issue_query", "latest", label="ci: sev")

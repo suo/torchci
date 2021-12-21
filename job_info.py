@@ -15,19 +15,11 @@ def get(page):
     # serialize keys properly
     by_id = {str(j["id"]): j for j in jobs}
 
-    api = GhApi()
-    try:
-        existing_disable_test_issues = api.issues.list_for_repo(
-            "pytorch", "pytorch", labels="module: flaky-tests"
-        )
-    except Exception as e:
-        logger.error(e)
-        existing_disable_test_issues = []
-
-    existing_disable_test_issues_by_title = {}
-    for issue in existing_disable_test_issues:
-        if issue.title.startswith("DISABLED"):
-            existing_disable_test_issues_by_title[issue.title] = issue
+    results = query_rockset("issue_query", "latest", label="skipped")
+    disable_issues = {}
+    for issue in results:
+        if issue["title"].startswith("DISABLED"):
+            disable_issues[issue["title"]] = issue
 
     for job in by_id.values():
         job["disable_issue_title"] = None
@@ -41,11 +33,9 @@ def get(page):
         if match is None:
             continue
 
-        disable_issue_title = f"DISABLED {match.group(1)}"
-        job["disable_issue_title"] = disable_issue_title
-        if disable_issue_title in existing_disable_test_issues_by_title:
-            job["existing_disable_issue"] = existing_disable_test_issues_by_title[
-                disable_issue_title
-            ].html_url
+        title = f"DISABLED {match.group(1)}"
+        job["disable_issue_title"] = title
+        if title in disable_issues:
+            job["existing_disable_issue"] = disable_issues[title]["html_url"]
 
     return by_id
