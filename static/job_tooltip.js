@@ -11,7 +11,8 @@ function newTooltip(jobTarget) {
   const jobName = th.querySelector(".job-header__name").innerHTML;
   const newTooltip = document.createElement("div");
   newTooltip.className = "job-tooltip";
-  newTooltip.innerHTML = `[${conclusion}] ${jobName}`;
+  newTooltip.innerHTML = `[${conclusion}] ${jobName}` +
+    `<div><em>click to pin this tooltip, double-click for job page</em></div>`;
 
   const box = jobTarget.getBoundingClientRect();
   newTooltip.style.left = box.x + 20 + window.scrollX + "px";
@@ -66,7 +67,6 @@ This job was disabled because it is failing on master ([recent examples](${examp
     tooltip.innerHTML +=
       `\
     <div>
-      <div><em>click to pin this tooltip</em></div>
       <a target="_blank" href=${job.html_url}>Job page</a>
       | <a target="_blank" href=commit/${job.sha}>PR HUD</a>
 
@@ -117,6 +117,17 @@ function jobMouseLeave(event) {
   existingTooltip.remove();
 }
 
+function jobDoubleClick(event) {
+  const elem = event.currentTarget;
+  if (elem.querySelector(".conclusion-none") !== null) {
+    // Don't do anything for non-existent jobs.
+    return;
+  }
+  let id = elem.getAttribute("job-id");
+  job = window.jobInfo[id]
+  window.open(job.html_url);
+}
+
 function jobClick(event) {
   const elem = event.currentTarget;
   if (elem.querySelector(".conclusion-none") !== null) {
@@ -142,6 +153,7 @@ function jobClick(event) {
 }
 document.querySelectorAll(".tooltip-target").forEach(function (element) {
   element.addEventListener("click", jobClick);
+  element.addEventListener("dblclick", jobDoubleClick);
   element.addEventListener("mouseover", jobMouseOver);
   element.addEventListener("mouseleave", jobMouseLeave);
 });
