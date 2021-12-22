@@ -7,13 +7,14 @@ from flask_apscheduler import APScheduler
 from flask_caching import Cache
 from flask_compress import Compress
 
+import ciflow_webhook
 import commit
 import failure
 import job_info
 import hud
 import pull
 import unclassified
-from common import get_sev_issues, query_rockset
+from common import get_sev_issues
 
 FLASK_DEBUG = os.environ.get("FLASK_DEBUG") == "1"
 
@@ -140,6 +141,11 @@ def job_info_(page):
 @app.route("/failure")
 def failure_():
     return failure.get(request.args.get("capture"))
+
+
+@app.route("/ciflow/webhook", methods=["POST"])
+def ciflow_webhook_():
+    return ciflow_webhook.post()
 
 
 # Periodically prefetch the hud query so that users always hit cache.
