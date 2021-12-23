@@ -61,6 +61,7 @@ rules = [
     Rule("MSVC compiler error", r"^.*\(\d+\): error C\d+:.*", 995),
     Rule("MSVC compiler fatal", r"^.*\(\d+\): fatal error C\d+:.*", 995),
     Rule("Compile error", r"^.*\d+:\d+: error: .*", 994),
+    Rule("MSVC mt.exe manifest error", r"^mt.exe : general error c101008d: Failed to write the updated manifest to the resource of file", 994),
     Rule("Curl error", r"curl: .* error:", 993),
     Rule("Dirty checkout", r"^Build left local git repository checkout dirty", 992),
     Rule(

@@ -75,6 +75,11 @@
         "priority": 994
     },
     {
+        "name": "MSVC mt.exe manifest error",
+        "pattern": "^mt.exe : general error c101008d: Failed to write the updated manifest to the resource of file",
+        "priority": 994
+    },
+    {
         "name": "Curl error",
         "pattern": "curl: .* error:",
         "priority": 993
