@@ -7,7 +7,7 @@ from common import query_rockset
 def get(page=0, branch_name="master"):
     branch = f"refs/heads/{branch_name}"
     branch_commits = query_rockset("master_commits", "prod", branch=branch, page=page)
-    jobs = query_rockset("hud_query", "prod", branch=branch, page=page)
+    jobs = query_rockset("hud_query", "latest", branch=branch, page=page)
 
     # dict of:
     # sha => commit info
@@ -21,7 +21,7 @@ def get(page=0, branch_name="master"):
     jobs_by_sha = defaultdict(dict)
     names = set()
     for job in jobs:
-        name = f"{job['workflow_name']} / {job['job_name']}"
+        name = (job["workflow_name"], job["job_name"])
         sha = job["sha"]
 
         names.add(name)
@@ -34,6 +34,8 @@ def get(page=0, branch_name="master"):
             if job["id"] < current_job["id"]:
                 continue
 
+        # remove this so that the payload doesn't contain repeated shas
+        del job["sha"]
         jobs_by_sha[sha][name] = job
 
     # sort names alphabetically
@@ -41,23 +43,27 @@ def get(page=0, branch_name="master"):
 
     # subtle: our query is sorted by time desc, so `sha_to_commit` will
     # always be in the right order already.
-    sha_grid = defaultdict(list)
+    sha_grid = []
     for sha, commit in sha_to_commit.items():
         name_to_jobs = jobs_by_sha[sha]
-        commit_url = commit["url"]
-        time = commit["timestamp"]
-        time = datetime.fromisoformat(time)
-        pr_num = commit["pr_num"]
-        truncated_commit_message = commit["truncated_message"]
+        row = {
+            "sha": sha,
+            "time": commit["timestamp"],
+            "commit_url": commit["url"],
+            "commit_message": f"{commit['truncated_message']}...",
+            "pr_num": commit["pr_num"],
+            "jobs": [
+                name_to_jobs.get(
+                    name,
+                    {
+                        "workflow_name": name[0],
+                        "job_name": name[1],
+                    },
+                )
+                for name in names
+            ],
+        }
 
-        for name in names:
-            key = (
-                time,
-                sha,
-                commit_url,
-                f"{truncated_commit_message}...",
-                pr_num,
-            )
-            sha_grid[key].append(name_to_jobs.get(name))
+        sha_grid.append(row)
 
-    return sha_grid, names
+    return sha_grid, [f"{name[0]} / {name[1]}" for name in names]

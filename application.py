@@ -62,6 +62,7 @@ def hud_():
     # and negative input
     if page < 0:
         page = 0
+    return render_template("hud.html", branch="master", page=page)
 
     sha_grid, names = _cached_hud(page)
 
@@ -147,6 +148,20 @@ def failure_():
 def ciflow_webhook_():
     return ciflow_webhook.post()
 
+
+@app.route("/api/hud")
+def hud_query():
+    try:
+        page = int(request.args.get("page", 0))
+    except ValueError:
+        # just ignore weird input
+        page = 0
+    # and negative input
+    if page < 0:
+        page = 0
+
+    sha_grid, names = _cached_hud(page)
+    return {"grid": sha_grid, "names": names}
 
 # Periodically prefetch the hud query so that users always hit cache.
 # Turned off in debug mode, since we don't cache in debug mode.
