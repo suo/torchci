@@ -228,7 +228,9 @@ function HudRow({ rowData }: { rowData: RowData }) {
         <a href={rowData.commitUrl}>{sha.substring(0, 7)}</a>
       </td>
       <td className="job-metadata">
-        <a href={`/commit/${sha}`}>{rowData.commitMessage}</a>
+        <div className="job-metadata__truncated">
+          <a href={`/commit/${sha}`}>{rowData.commitMessage}</a>
+        </div>
       </td>
       <td className="job-metadata">
         {rowData.prNum !== null && (
@@ -248,13 +250,13 @@ function HudHeaderRow({ names }: { names: string[] }) {
   return (
     <thead>
       <tr>
-        <th className="header-time">Time</th>
-        <th className="header-sha">SHA</th>
-        <th className="header-commit">Commit</th>
-        <th className="header-pr">PR</th>
+        <th className="regular-header">Time</th>
+        <th className="regular-header">SHA</th>
+        <th className="regular-header">Commit</th>
+        <th className="regular-header">PR</th>
         {names.map((name) => (
-          <th className="header-job" key={name}>
-            <div className="header-job__name">{name}</div>
+          <th className="job-header" key={name}>
+            <div className="job-header__name">{name}</div>
           </th>
         ))}
       </tr>
@@ -302,13 +304,15 @@ function HudTable({
 
   return (
     <table>
-      {/* <col className="col-time" />
-      <col className="col-sha" />
-      <col className="col-commit" />
-      <col className="col-pr" /> */}
-      {/* {jobNames.map((name: string) => (
-        <col className="col-job" key={name} />
-      ))} */}
+      <colgroup>
+        <col className="col-time" />
+        <col className="col-sha" />
+        <col className="col-commit" />
+        <col className="col-pr" />
+        {jobNames.map((name: string) => (
+          <col className="col-job" key={name} />
+        ))}
+      </colgroup>
       <HudHeaderRow names={jobNames} />
       <TooltipPinnedContext.Provider value={tooltipPinned}>
         <tbody>
@@ -367,10 +371,10 @@ export const getStaticProps: GetStaticProps = async () => {
       ],
     }
   );
-  const commitsQuery = await rocksetClient.queryLambdas.executeQueryLambdaByTag(
+  const commitsQuery = await rocksetClient.queryLambdas.executeQueryLambda(
     "commons",
     "master_commits",
-    "latest",
+    "c6a23106e970612a",
     {
       parameters: [
         {
@@ -426,8 +430,8 @@ export const getStaticProps: GetStaticProps = async () => {
       sha: sha,
       time: commit.timestamp,
       commitUrl: commit.url,
-      commitMessage: `${commit.truncated_message}...`,
-      prNum: commit.pr_num,
+      commitMessage: commit.message,
+      prNum: commit.prNum,
       jobs: jobs,
     };
     shaGrid.push(row);
