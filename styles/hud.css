@@ -56,8 +56,33 @@ a {
   padding: 10px;
   margin-bottom: 10px;
 }
+
+ /* Set table-layout fixed and manually set the width of each column.
+  * This is necessary to avoid excessive reflows on page load, where we keep
+  * recomputing the layout as we load more rows from the huge static html.
+  */
 table {
+  table-layout: fixed;
   border-collapse: collapse;
+}
+.header-time {
+  width: 11em;
+  vertical-align: bottom;
+}
+.header-sha {
+  width: 7em;
+  vertical-align: bottom;
+}
+.header-commit {
+  width: 40em;
+  vertical-align: bottom;
+}
+.header-pr {
+  width: 7em;
+  vertical-align: bottom;
+}
+.header-job {
+  width: 1em;
 }
 
 td {
@@ -94,14 +119,14 @@ th {
 }
 
 /* code to roatate the workflow name headers */
-.job-header {
+.header-job {
   font-family: sans-serif;
   height: 220px;
   white-space: nowrap;
   font-family: sans-serif;
 }
 
-.job-header__name {
+.header-job__name {
   transform: translate(10px, 100px) rotate(315deg);
   width: 10px;
   font-weight: 400;
@@ -109,13 +134,11 @@ th {
 }
 
 .regular-header {
-  font-family: sans-serif;
   vertical-align: bottom;
 }
 
 .job-metadata {
   white-space: nowrap;
-  font-family: sans-serif;
 }
 
 #hud-header {

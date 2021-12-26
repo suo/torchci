@@ -248,13 +248,13 @@ function HudHeaderRow({ names }: { names: string[] }) {
   return (
     <thead>
       <tr>
-        <th className="regular-header">Time</th>
-        <th className="regular-header">SHA</th>
-        <th className="regular-header">Commit</th>
-        <th className="regular-header">PR</th>
+        <th className="header-time">Time</th>
+        <th className="header-sha">SHA</th>
+        <th className="header-commit">Commit</th>
+        <th className="header-pr">PR</th>
         {names.map((name) => (
-          <th className="job-header" key={name}>
-            <div className="job-header__name">{name}</div>
+          <th className="header-job" key={name}>
+            <div className="header-job__name">{name}</div>
           </th>
         ))}
       </tr>
@@ -302,6 +302,13 @@ function HudTable({
 
   return (
     <table>
+      {/* <col className="col-time" />
+      <col className="col-sha" />
+      <col className="col-commit" />
+      <col className="col-pr" /> */}
+      {/* {jobNames.map((name: string) => (
+        <col className="col-job" key={name} />
+      ))} */}
       <HudHeaderRow names={jobNames} />
       <TooltipPinnedContext.Provider value={tooltipPinned}>
         <tbody>
