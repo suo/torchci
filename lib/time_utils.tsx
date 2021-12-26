@@ -1,25 +1,16 @@
+import dayjs from "dayjs";
+import utc from "dayjs/plugin/utc";
+
+dayjs.extend(utc);
+
 export function LocalTimeHuman({ timestamp }: { timestamp: string }) {
-  const time = new Date(timestamp);
-  const today = new Date();
+  const time = dayjs(timestamp).local();
 
-  const isToday =
-    time.getFullYear() === today.getFullYear() &&
-    time.getMonth() === today.getMonth() &&
-    time.getDate() === today.getDate();
-
-  const humanFormattedTime = isToday
-    ? // "6:55 PM"
-      new Intl.DateTimeFormat("en-US", {
-        hour: "numeric",
-        minute: "numeric",
-      }).format(time)
-    : // "Wed, Dec 8"
-      new Intl.DateTimeFormat("en-US", {
-        weekday: "short",
-        month: "short",
-        day: "numeric",
-      }).format(time);
-  return <span>{humanFormattedTime}</span>;
+  if (dayjs().isSame(time, "day")) {
+    return <span>{time.format("h:mm A")}</span>;
+  } else {
+    return <span>{time.format("ddd, MMM D")}</span>;
+  }
 }
 
 // from: https://gist.github.com/g1eb/62d9a48164fe7336fdf4845e22ae3d2c
