@@ -67,7 +67,7 @@ table {
   width: 10ch;
 }
 .col-sha {
-  width: 7ch;
+  width: 8ch;
 }
 .col-commit {
   width: 38ch;
@@ -134,10 +134,11 @@ th {
 .job-metadata__truncated {
   vertical-align: top;
   width: auto;
+  height: 20px;
   min-width: 0;
-  max-width: 38ch;
+  max-width: 37ch;
   display: inline-block;
-  overflow: hidden;
+  overflow: clip;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
