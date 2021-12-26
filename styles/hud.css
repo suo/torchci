@@ -64,7 +64,7 @@ table {
 }
 
 .col-time {
-  width: 11ch;
+  width: 10ch;
 }
 .col-sha {
   width: 7ch;
@@ -132,6 +132,7 @@ th {
 }
 
 .job-metadata__truncated {
+  vertical-align: top;
   width: auto;
   min-width: 0;
   max-width: 38ch;
