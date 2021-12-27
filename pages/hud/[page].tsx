@@ -260,7 +260,7 @@ export default function Hud({ fallback }: any) {
             <h1 id="hud-header">
               PyTorch HUD: <code>master</code>
             </h1>
-            <div>This page reloads every minute.</div>
+            <div>This page automatically updates.</div>
             <div>
               Page {pageIndex}:{" "}
               {pageIndex !== 0 ? (
