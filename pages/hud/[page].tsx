@@ -11,7 +11,7 @@ import React, {
   useContext,
   createContext,
 } from "react";
-import { GetStaticPaths, GetStaticProps, InferGetStaticPropsType } from "next";
+import { GetStaticPaths, GetStaticProps } from "next";
 import { JobData, RowData } from "../../lib/types";
 import fetchHud from "../../lib/fetch_hud";
 import Link from "next/link";
