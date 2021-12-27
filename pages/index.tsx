@@ -118,6 +118,9 @@ function JobTooltip({ job }: { job: JobData }) {
   return (
     <div className="tooltip-content">
       {`[${job.conclusion}] ${job.name}`}
+      <div>
+        <em>click to pin this tooltip, double-click for job page</em>
+      </div>
       <div id="options-row">
         <a target="_blank" rel="noreferrer" href={job.htmlUrl}>
           Job page
@@ -207,6 +210,7 @@ function JobCell({ job }: { job: JobData }) {
       onMouseOver={handleMouseOver}
       onMouseLeave={handleMouseLeave}
       onClick={handleClick}
+      onDoubleClick={() => window.open(job.htmlUrl)}
       className="tooltip-target"
     >
       <div className="tooltip-container" ref={ref}>
