@@ -12,7 +12,7 @@ import React, {
   createContext,
 } from "react";
 import { GetStaticPaths, GetStaticProps, InferGetStaticPropsType } from "next";
-import { HudData, JobData, RowData } from "../../lib/types";
+import { JobData, RowData } from "../../lib/types";
 import fetchHud from "../../lib/fetch_hud";
 import Link from "next/link";
 
@@ -228,6 +228,19 @@ function HudRow({ rowData }: { rowData: RowData }) {
   );
 }
 
+function HudColumns({ names }: { names: string[] }) {
+  return (
+    <colgroup>
+      <col className="col-time" />
+      <col className="col-sha" />
+      <col className="col-commit" />
+      <col className="col-pr" />
+      {names.map((name: string) => (
+        <col className="col-job" key={name} />
+      ))}
+    </colgroup>
+  );
+}
 function HudHeaderRow({ names }: { names: string[] }) {
   return (
     <thead>
@@ -247,14 +260,14 @@ function HudHeaderRow({ names }: { names: string[] }) {
 }
 
 const TooltipPinnedContext = createContext(true);
+const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
-function HudTable({ shaGrid, jobNames }: HudData) {
+function HudTable({ page }: { page: number }) {
   // Global state for whether any tooltip is pinned. This is used along with the
   // TooltipPinnedContext to coordinate mouseover behavior for all tooltip
   // targets, so that we don't show any tooltips if the user currently pinned
   // one.
   const [tooltipPinned, setTooltipPinned] = useState(false);
-
   useEffect(() => {
     // Set a global event listener so that we capture all clicks in the document.
     function handleClick(e: MouseEvent) {
@@ -282,49 +295,30 @@ function HudTable({ shaGrid, jobNames }: HudData) {
     };
   });
 
-  return (
-    <table>
-      <colgroup>
-        <col className="col-time" />
-        <col className="col-sha" />
-        <col className="col-commit" />
-        <col className="col-pr" />
-        {jobNames.map((name: string) => (
-          <col className="col-job" key={name} />
-        ))}
-      </colgroup>
-      <HudHeaderRow names={jobNames} />
-      <TooltipPinnedContext.Provider value={tooltipPinned}>
-        <tbody>
-          {shaGrid.map((row: RowData) => (
-            <HudRow key={row.sha} rowData={row} />
-          ))}
-        </tbody>
-      </TooltipPinnedContext.Provider>
-    </table>
-  );
-}
-
-const fetcher = (url: string) => fetch(url).then((res) => res.json());
-
-function Hud({ page }: { page: number }) {
   const { data } = useSWR(`/api/hud?page=${page}`, fetcher, {
     refreshInterval: 60 * 1000, // refresh every minute
   });
-  return <HudTable shaGrid={data.shaGrid} jobNames={data.jobNames} />;
+
+  return (
+    <TooltipPinnedContext.Provider value={tooltipPinned}>
+      <table>
+        <HudColumns names={data.jobNames} />
+        <HudHeaderRow names={data.jobNames} />
+        <tbody>
+          {data.shaGrid.map((row: RowData) => (
+            <HudRow key={row.sha} rowData={row} />
+          ))}
+        </tbody>
+      </table>
+    </TooltipPinnedContext.Provider>
+  );
 }
 
-export default function Page({ fallback }: any) {
+export default function Hud({ fallback }: any) {
   const router = useRouter();
   const pageIndex = router.query.page
     ? parseInt(router.query.page as string)
     : 0;
-
-  const hud = router.isFallback ? (
-    <div>Loading...</div>
-  ) : (
-    <Hud page={pageIndex} />
-  );
 
   return (
     <SWRConfig value={{ fallback }}>
@@ -344,14 +338,18 @@ export default function Page({ fallback }: any) {
         </div>
         <div>job fiter TODO</div>
         <div>disableissues</div>
-        {hud}
+        {router.isFallback ? (
+          <div>Loading...</div>
+        ) : (
+          <HudTable page={pageIndex} />
+        )}
       </div>
     </SWRConfig>
   );
 }
+
 export const getStaticPaths: GetStaticPaths = async () => {
-  const paths = [{ params: { page: "0" } }];
-  return { paths, fallback: true };
+  return { paths: [{ params: { page: "0" } }], fallback: true };
 };
 
 export const getStaticProps: GetStaticProps = async ({ params }) => {
