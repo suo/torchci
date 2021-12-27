@@ -1,21 +1,15 @@
-import { getCharForConclusion } from "../../lib/job-utils";
 import { LocalTimeHuman, durationHuman } from "../../components/time-utils";
 import { useRouter } from "next/router";
 import _ from "lodash";
 import useSWR, { SWRConfig } from "swr";
 
-import React, {
-  useState,
-  useContext,
-  createContext,
-  KeyboardEventHandler,
-  useEffect,
-} from "react";
+import React, { useState, useContext, createContext, useEffect } from "react";
 import { GetStaticPaths, GetStaticProps } from "next";
 import { JobData, RowData } from "../../lib/types";
 import fetchHud from "../../lib/fetch-hud";
 import Link from "next/link";
 import { TooltipTarget } from "../../components/tooltip-target";
+import JobConclusion from "../../components/job-conclusion";
 
 function JobTooltip({ job }: { job: JobData }) {
   // For nonexistent jobs, just show something basic:
@@ -121,16 +115,6 @@ function JobTooltip({ job }: { job: JobData }) {
 function JobCell({ job }: { job: JobData }) {
   const pinnedId = useContext(PinnedTooltipContext);
   const setPinnedId = useContext(SetPinnedTooltipContext);
-  const jobExists = job.hasOwnProperty("id");
-
-  let conclusionGlyph = jobExists ? (
-    <span className={`conclusion-${job.conclusion}`}>
-      {getCharForConclusion(job.conclusion)}
-    </span>
-  ) : (
-    <span className="conclusion-none">O</span>
-  );
-
   return (
     <td onDoubleClick={() => window.open(job.htmlUrl)}>
       <TooltipTarget
@@ -139,7 +123,7 @@ function JobCell({ job }: { job: JobData }) {
         setPinnedId={setPinnedId}
         tooltipContent={<JobTooltip job={job} />}
       >
-        <div className="conclusion">{conclusionGlyph}</div>
+        <JobConclusion conclusion={job.conclusion} />
       </TooltipTarget>
     </td>
   );
