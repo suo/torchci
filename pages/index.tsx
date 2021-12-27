@@ -2,6 +2,7 @@ import { getCharForConclusion } from "../lib/job_utils";
 import { LocalTimeHuman, durationHuman } from "../lib/time_utils";
 import rockset from "@rockset/client";
 import _ from "lodash";
+import useSWR, { SWRConfig } from "swr";
 
 import React, {
   useState,
@@ -11,32 +12,8 @@ import React, {
   createContext,
 } from "react";
 import { GetStaticProps, InferGetStaticPropsType } from "next";
-
-/**
- * Represents the individual job information returned by Rockset.
- */
-interface JobData {
-  name: string;
-  sha?: string;
-  id?: string;
-  conclusion?: string;
-  htmlUrl?: string;
-  logUrl?: string;
-  durationS?: number;
-  failureLine?: string;
-  failureRule?: string;
-  failureContext?: string;
-  failureCaptures?: string;
-}
-
-interface RowData {
-  sha: string;
-  time: string;
-  commitUrl: string;
-  commitMessage: string;
-  prNum: number;
-  jobs: JobData[];
-}
+import { HudData, JobData, RowData } from "../lib/types";
+import fetchHud from "../lib/fetch_hud";
 
 function JobTooltip({ job }: { job: JobData }) {
   // For nonexistent jobs, just show something basic:
@@ -269,10 +246,8 @@ function HudHeaderRow({ names }: { names: string[] }) {
 }
 
 const TooltipPinnedContext = createContext(true);
-function HudTable({
-  shaGrid,
-  jobNames,
-}: InferGetStaticPropsType<typeof getStaticProps>) {
+
+function HudTable({ shaGrid, jobNames }: HudData) {
   // Global state for whether any tooltip is pinned. This is used along with the
   // TooltipPinnedContext to coordinate mouseover behavior for all tooltip
   // targets, so that we don't show any tooltips if the user currently pinned
@@ -329,119 +304,39 @@ function HudTable({
   );
 }
 
-export default function Hud({
-  shaGrid,
-  jobNames,
-}: {
-  shaGrid: RowData[];
-  jobNames: string[];
-}) {
+const fetcher = (url: string) => fetch(url).then((res) => res.json());
+
+function Hud() {
+  const { data } = useSWR("/api/hud", fetcher, { refreshInterval: 60 * 1000 });
   return (
     <div id="hud-container">
       <h1 id="hud-header">
         PyTorch HUD: <code>master</code>
       </h1>
-      <div>This page reloads every minute. TODO</div>
+      <div>This page reloads every minute.</div>
       <div>Page through commits: TODO</div>
       <div>job fiter TODO</div>
       <div>disableissues</div>
 
-      <HudTable shaGrid={shaGrid} jobNames={jobNames} />
+      <HudTable shaGrid={data.shaGrid} jobNames={data.jobNames} />
     </div>
   );
 }
 
+export default function Page({ fallback }: any) {
+  return (
+    <SWRConfig value={{ fallback }}>
+      <Hud />
+    </SWRConfig>
+  );
+}
+
 export const getStaticProps: GetStaticProps = async () => {
-  if (typeof process.env.ROCKSET_API_KEY === "undefined") {
-    throw "ROCKSET_API_KEY is not defined, add it to your .env.local file";
-  }
-  const rocksetClient = rockset(process.env.ROCKSET_API_KEY);
-  const hudQuery = await rocksetClient.queryLambdas.executeQueryLambda(
-    "commons",
-    "hud_query",
-    "6f2cec5f159dda28",
-    {
-      parameters: [
-        {
-          name: "branch",
-          type: "string",
-          value: "refs/heads/master",
-        },
-        {
-          name: "page",
-          type: "int",
-          value: "0",
-        },
-      ],
-    }
-  );
-  const commitsQuery = await rocksetClient.queryLambdas.executeQueryLambda(
-    "commons",
-    "master_commits",
-    "c6a23106e970612a",
-    {
-      parameters: [
-        {
-          name: "branch",
-          type: "string",
-          value: "refs/heads/master",
-        },
-        {
-          name: "page",
-          type: "int",
-          value: "0",
-        },
-      ],
-    }
-  );
-
-  const commitsBySha = _.keyBy(commitsQuery.results, "sha");
-  const namesSet: Set<string> = new Set();
-
-  const results = hudQuery.results;
-
-  // Built a list of all the distinct job names.
-  results?.forEach((job) => {
-    namesSet.add(job.name);
-  });
-  const names = Array.from(namesSet).sort();
-
-  // Construct mapping of sha => job name => job data
-  const jobsBySha: {
-    [sha: string]: { [name: string]: JobData };
-  } = {};
-  _.forEach(_.groupBy(results, "sha"), (jobs, sha) => {
-    jobsBySha[sha] = _.keyBy(jobs, "name");
-  });
-
-  const shaGrid: RowData[] = [];
-
-  _.forEach(commitsBySha, (commit, sha) => {
-    const nameToJobs = jobsBySha[sha];
-    const jobs: JobData[] = [];
-    for (const name of names) {
-      if (nameToJobs[name] === undefined) {
-        // Insert default name
-        jobs.push({
-          name: name,
-        });
-      } else {
-        jobs.push(nameToJobs[name]);
-      }
-    }
-
-    const row: RowData = {
-      sha: sha,
-      time: commit.timestamp,
-      commitUrl: commit.url,
-      commitMessage: commit.message,
-      prNum: commit.prNum,
-      jobs: jobs,
-    };
-    shaGrid.push(row);
-  });
-
   return {
-    props: { shaGrid: shaGrid, jobNames: names },
+    props: {
+      fallback: {
+        "/api/hud": await fetchHud(),
+      },
+    },
   };
 };
