@@ -338,5 +338,6 @@ export const getStaticProps: GetStaticProps = async () => {
         "/api/hud": await fetchHud(),
       },
     },
+    revalidate: 600, // Every 10 minutes.
   };
 };
