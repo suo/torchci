@@ -1,5 +1,5 @@
-import { getCharForConclusion } from "../../lib/job_utils";
-import { LocalTimeHuman, durationHuman } from "../../lib/time_utils";
+import { getCharForConclusion } from "../../lib/job-utils";
+import { LocalTimeHuman, durationHuman } from "../../components/time-utils";
 import { useRouter } from "next/router";
 import _ from "lodash";
 import useSWR, { SWRConfig } from "swr";
@@ -13,7 +13,7 @@ import React, {
 } from "react";
 import { GetStaticPaths, GetStaticProps } from "next";
 import { JobData, RowData } from "../../lib/types";
-import fetchHud from "../../lib/fetch_hud";
+import fetchHud from "../../lib/fetch-hud";
 import Link from "next/link";
 
 function JobTooltip({ job }: { job: JobData }) {
@@ -126,6 +126,8 @@ function JobCell({ job }: { job: JobData }) {
   const [toolTipContent, setToolTipContent] = useState<any | null>(null);
   const timeoutId = useRef<NodeJS.Timeout | null>(null);
 
+  const jobExists = job.hasOwnProperty("id");
+
   function handleMouseOver() {
     if (anyTooltipPinned) {
       return;
@@ -175,7 +177,7 @@ function JobCell({ job }: { job: JobData }) {
     };
   }, [ref, pinned]);
 
-  let conclusionGlyph = job.hasOwnProperty("id") ? (
+  let conclusionGlyph = jobExists ? (
     <span className={`conclusion-${job.conclusion}`}>
       {getCharForConclusion(job.conclusion)}
     </span>
@@ -301,7 +303,7 @@ function HudTable({ page }: { page: number }) {
 
   return (
     <TooltipPinnedContext.Provider value={tooltipPinned}>
-      <table>
+      <table className="hud-table">
         <HudColumns names={data.jobNames} />
         <HudHeaderRow names={data.jobNames} />
         <tbody>

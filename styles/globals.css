@@ -14,3 +14,16 @@ a {
 * {
   box-sizing: border-box;
 }
+
+pre {
+  background-color: aliceblue;
+}
+
+code {
+  background-color: aliceblue;
+}
+
+a {
+  text-decoration: none;
+  color: #0064cf;
+}

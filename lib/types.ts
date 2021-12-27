@@ -15,6 +15,15 @@ export interface JobData {
   failureCaptures?: string;
 }
 
+export interface CommitData {
+  sha: string;
+  prUrl: string;
+  diffNum: string;
+  commitTitle: string;
+  commitMessageBody: string;
+  jobs: JobData[];
+}
+
 export interface RowData {
   sha: string;
   time: string;

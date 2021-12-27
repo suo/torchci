@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from "next";
-import fetchHud from "../../lib/fetch_hud";
+import fetchHud from "../../lib/fetch-hud";
 import { HudData } from "../../lib/types";
 
 export default async function handler(
