@@ -80,32 +80,11 @@ table {
 }
 
 td {
-  padding-right: 0.15em;
-}
-
-.tooltip-target {
-  cursor: pointer;
+  padding:0;
 }
 
 .tooltip-target-no-click {
   cursor: default;
-}
-
-.tooltip-container {
-  position: relative;
-}
-
-.tooltip-content {
-  background-color: lightgray;
-  padding: 5px 0;
-  border-radius: 6px;
-  cursor: default;
-
-  position: absolute;
-  z-index: 1;
-  top: calc(100% + 5px);
-  left: calc(100% + 5px);
-  white-space: nowrap;
 }
 
 th {

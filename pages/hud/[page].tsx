@@ -6,22 +6,21 @@ import useSWR, { SWRConfig } from "swr";
 
 import React, {
   useState,
-  useEffect,
-  useRef,
   useContext,
   createContext,
+  KeyboardEventHandler,
+  useEffect,
 } from "react";
 import { GetStaticPaths, GetStaticProps } from "next";
 import { JobData, RowData } from "../../lib/types";
 import fetchHud from "../../lib/fetch-hud";
 import Link from "next/link";
+import { TooltipTarget } from "../../components/tooltip-target";
 
 function JobTooltip({ job }: { job: JobData }) {
   // For nonexistent jobs, just show something basic:
   if (!job.hasOwnProperty("id")) {
-    return (
-      <div className="tooltip-content">{`[does not exist] ${job.name}`}</div>
-    );
+    return <div>{`[does not exist] ${job.name}`}</div>;
   }
 
   const rawLogs =
@@ -94,7 +93,7 @@ function JobTooltip({ job }: { job: JobData }) {
     ) : null;
 
   return (
-    <div className="tooltip-content">
+    <div>
       {`[${job.conclusion}] ${job.name}`}
       <div>
         <em>click to pin this tooltip, double-click for job page</em>
@@ -120,62 +119,9 @@ function JobTooltip({ job }: { job: JobData }) {
 }
 
 function JobCell({ job }: { job: JobData }) {
-  const anyTooltipPinned = useContext(TooltipPinnedContext);
-  const [pinned, setPinned] = useState(false);
-
-  const [toolTipContent, setToolTipContent] = useState<any | null>(null);
-  const timeoutId = useRef<NodeJS.Timeout | null>(null);
-
+  const pinnedId = useContext(PinnedTooltipContext);
+  const setPinnedId = useContext(SetPinnedTooltipContext);
   const jobExists = job.hasOwnProperty("id");
-
-  function handleMouseOver() {
-    if (anyTooltipPinned) {
-      return;
-    }
-    clearTimeout(timeoutId.current!);
-    timeoutId.current = setTimeout(() => {
-      setToolTipContent(<JobTooltip job={job} />);
-    }, 10);
-  }
-  function handleMouseLeave() {
-    if (anyTooltipPinned) {
-      return;
-    }
-    clearTimeout(timeoutId.current!);
-    if (!pinned) {
-      setToolTipContent(null);
-    }
-  }
-  function handleClick() {
-    if (anyTooltipPinned) {
-      return;
-    }
-    setPinned(true);
-  }
-
-  const ref = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (
-        pinned &&
-        ref.current &&
-        !ref.current.contains(event.target as Node)
-      ) {
-        setToolTipContent(null);
-        setPinned(false);
-      }
-    }
-    if (!pinned) {
-      return;
-    }
-
-    // Bind the event listener
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      // Unbind the event listener on clean up
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, [ref, pinned]);
 
   let conclusionGlyph = jobExists ? (
     <span className={`conclusion-${job.conclusion}`}>
@@ -186,17 +132,15 @@ function JobCell({ job }: { job: JobData }) {
   );
 
   return (
-    <td
-      onMouseOver={handleMouseOver}
-      onMouseLeave={handleMouseLeave}
-      onClick={handleClick}
-      onDoubleClick={() => window.open(job.htmlUrl)}
-      className="tooltip-target"
-    >
-      <div className="tooltip-container" ref={ref}>
-        {toolTipContent}
-      </div>
-      <div className="conclusion">{conclusionGlyph}</div>
+    <td onDoubleClick={() => window.open(job.htmlUrl)}>
+      <TooltipTarget
+        id={`${job.name}-${job.id}`}
+        pinnedId={pinnedId}
+        setPinnedId={setPinnedId}
+        tooltipContent={<JobTooltip job={job} />}
+      >
+        <div className="conclusion">{conclusionGlyph}</div>
+      </TooltipTarget>
     </td>
   );
 }
@@ -261,62 +205,48 @@ function HudHeaderRow({ names }: { names: string[] }) {
   );
 }
 
-const TooltipPinnedContext = createContext(true);
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 function HudTable({ page }: { page: number }) {
-  // Global state for whether any tooltip is pinned. This is used along with the
-  // TooltipPinnedContext to coordinate mouseover behavior for all tooltip
-  // targets, so that we don't show any tooltips if the user currently pinned
-  // one.
-  const [tooltipPinned, setTooltipPinned] = useState(false);
-  useEffect(() => {
-    // Set a global event listener so that we capture all clicks in the document.
-    function handleClick(e: MouseEvent) {
-      const target = e!.target as Element;
-
-      if (tooltipPinned) {
-        // If we currently have a tooltip pinned, clicking anywhere except the
-        // tooltip itself should dismiss it.
-        if (target.closest(".tooltip-content") !== null) {
-          return;
-        }
-        setTooltipPinned(false);
-      } else {
-        // If we don't have a tooltip pinned, clicking on any tooltip targets
-        // should pin it.
-        if (target.closest(".tooltip-target") !== null) {
-          setTooltipPinned(true);
-        }
-      }
-    }
-    document.addEventListener("click", handleClick);
-    return () => {
-      // Unbind the event listener on clean up
-      document.removeEventListener("click", handleClick);
-    };
-  });
-
   const { data } = useSWR(`/api/hud?page=${page}`, fetcher, {
     refreshInterval: 60 * 1000, // refresh every minute
   });
 
   return (
-    <TooltipPinnedContext.Provider value={tooltipPinned}>
-      <table className="hud-table">
-        <HudColumns names={data.jobNames} />
-        <HudHeaderRow names={data.jobNames} />
-        <tbody>
-          {data.shaGrid.map((row: RowData) => (
-            <HudRow key={row.sha} rowData={row} />
-          ))}
-        </tbody>
-      </table>
-    </TooltipPinnedContext.Provider>
+    <table className="hud-table">
+      <HudColumns names={data.jobNames} />
+      <HudHeaderRow names={data.jobNames} />
+      <tbody>
+        {data.shaGrid.map((row: RowData) => (
+          <HudRow key={row.sha} rowData={row} />
+        ))}
+      </tbody>
+    </table>
   );
 }
 
+const PinnedTooltipContext = createContext<null | string>(null);
+const SetPinnedTooltipContext = createContext<any>(null);
+
 export default function Hud({ fallback }: any) {
+  // Logic to handle tooltip pinning. The behavior we want is:
+  // - If the user clicks on a tooltip, it should be pinned.
+  // - While a tooltip is pinned, we don't show any other tooltips.
+  // - Clicking outside the tooltip or pressing esc should unpin it.
+  // This state needs to be set up at this level because we want to capture all
+  // clicks.
+  const [pinnedTooltip, setPinnedTooltip] = useState<null | string>(null);
+  function handleClick() {
+    setPinnedTooltip(null);
+  }
+  useEffect(() => {
+    document.addEventListener("keydown", (e) => {
+      if (e.code === "Escape") {
+        setPinnedTooltip(null);
+      }
+    });
+  }, []);
+
   const router = useRouter();
   const pageIndex = router.query.page
     ? parseInt(router.query.page as string)
@@ -324,28 +254,32 @@ export default function Hud({ fallback }: any) {
 
   return (
     <SWRConfig value={{ fallback }}>
-      <div id="hud-container">
-        <h1 id="hud-header">
-          PyTorch HUD: <code>master</code>
-        </h1>
-        <div>This page reloads every minute.</div>
-        <div>
-          Page {pageIndex}:{" "}
-          {pageIndex !== 0 ? (
-            <span>
-              <Link href={`/hud/${pageIndex - 1}`}>Prev</Link> |{" "}
-            </span>
-          ) : null}
-          <Link href={`/hud/${pageIndex + 1}`}>Next</Link>
-        </div>
-        <div>job fiter TODO</div>
-        <div>disableissues</div>
-        {router.isFallback ? (
-          <div>Loading...</div>
-        ) : (
-          <HudTable page={pageIndex} />
-        )}
-      </div>
+      <PinnedTooltipContext.Provider value={pinnedTooltip}>
+        <SetPinnedTooltipContext.Provider value={setPinnedTooltip}>
+          <div id="hud-container" onClick={handleClick}>
+            <h1 id="hud-header">
+              PyTorch HUD: <code>master</code>
+            </h1>
+            <div>This page reloads every minute.</div>
+            <div>
+              Page {pageIndex}:{" "}
+              {pageIndex !== 0 ? (
+                <span>
+                  <Link href={`/hud/${pageIndex - 1}`}>Prev</Link> |{" "}
+                </span>
+              ) : null}
+              <Link href={`/hud/${pageIndex + 1}`}>Next</Link>
+            </div>
+            <div>job fiter TODO</div>
+            <div>disableissues</div>
+            {router.isFallback ? (
+              <div>Loading...</div>
+            ) : (
+              <HudTable page={pageIndex} />
+            )}
+          </div>
+        </SetPinnedTooltipContext.Provider>
+      </PinnedTooltipContext.Provider>
     </SWRConfig>
   );
 }
