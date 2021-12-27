@@ -1,8 +1,8 @@
 import rockset from "@rockset/client";
 import _ from "lodash";
-import { CommitData, JobData, RowData } from "./types";
+import { JobData, RowData } from "./types";
 
-export default async function fetchHud(): Promise<{
+export default async function fetchHud(page: number): Promise<{
   shaGrid: RowData[];
   jobNames: string[];
 }> {
@@ -24,7 +24,7 @@ export default async function fetchHud(): Promise<{
         {
           name: "page",
           type: "int",
-          value: "0",
+          value: page.toString(),
         },
       ],
     }
@@ -43,7 +43,7 @@ export default async function fetchHud(): Promise<{
         {
           name: "page",
           type: "int",
-          value: "0",
+          value: page.toString(),
         },
       ],
     }

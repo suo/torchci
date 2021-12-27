@@ -1,6 +1,6 @@
-import { getCharForConclusion } from "../lib/job_utils";
-import { LocalTimeHuman, durationHuman } from "../lib/time_utils";
-import rockset from "@rockset/client";
+import { getCharForConclusion } from "../../lib/job_utils";
+import { LocalTimeHuman, durationHuman } from "../../lib/time_utils";
+import { useRouter } from "next/router";
 import _ from "lodash";
 import useSWR, { SWRConfig } from "swr";
 
@@ -11,9 +11,10 @@ import React, {
   useContext,
   createContext,
 } from "react";
-import { GetStaticProps, InferGetStaticPropsType } from "next";
-import { HudData, JobData, RowData } from "../lib/types";
-import fetchHud from "../lib/fetch_hud";
+import { GetStaticPaths, GetStaticProps, InferGetStaticPropsType } from "next";
+import { HudData, JobData, RowData } from "../../lib/types";
+import fetchHud from "../../lib/fetch_hud";
+import Link from "next/link";
 
 function JobTooltip({ job }: { job: JobData }) {
   // For nonexistent jobs, just show something basic:
@@ -306,37 +307,60 @@ function HudTable({ shaGrid, jobNames }: HudData) {
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
-function Hud() {
-  const { data } = useSWR("/api/hud", fetcher, { refreshInterval: 60 * 1000 });
-  return (
-    <div id="hud-container">
-      <h1 id="hud-header">
-        PyTorch HUD: <code>master</code>
-      </h1>
-      <div>This page reloads every minute.</div>
-      <div>Page through commits: TODO</div>
-      <div>job fiter TODO</div>
-      <div>disableissues</div>
-
-      <HudTable shaGrid={data.shaGrid} jobNames={data.jobNames} />
-    </div>
-  );
+function Hud({ page }: { page: number }) {
+  const { data } = useSWR(`/api/hud?page=${page}`, fetcher, {
+    refreshInterval: 60 * 1000, // refresh every minute
+  });
+  return <HudTable shaGrid={data.shaGrid} jobNames={data.jobNames} />;
 }
 
 export default function Page({ fallback }: any) {
+  const router = useRouter();
+  const pageIndex = router.query.page
+    ? parseInt(router.query.page as string)
+    : 0;
+
+  const hud = router.isFallback ? (
+    <div>Loading...</div>
+  ) : (
+    <Hud page={pageIndex} />
+  );
+
   return (
     <SWRConfig value={{ fallback }}>
-      <Hud />
+      <div id="hud-container">
+        <h1 id="hud-header">
+          PyTorch HUD: <code>master</code>
+        </h1>
+        <div>This page reloads every minute.</div>
+        <div>
+          Page {pageIndex}:{" "}
+          {pageIndex !== 0 ? (
+            <span>
+              <Link href={`/hud/${pageIndex - 1}`}>Prev</Link> |{" "}
+            </span>
+          ) : null}
+          <Link href={`/hud/${pageIndex + 1}`}>Next</Link>
+        </div>
+        <div>job fiter TODO</div>
+        <div>disableissues</div>
+        {hud}
+      </div>
     </SWRConfig>
   );
 }
+export const getStaticPaths: GetStaticPaths = async () => {
+  const paths = [{ params: { page: "0" } }];
+  return { paths, fallback: true };
+};
 
-export const getStaticProps: GetStaticProps = async () => {
+export const getStaticProps: GetStaticProps = async ({ params }) => {
+  const pageIndex = params!.page ? parseInt(params!.page as string) : 0;
+  const fallback: any = {};
+  fallback[`/api/hud?page=${pageIndex}`] = await fetchHud(pageIndex);
   return {
     props: {
-      fallback: {
-        "/api/hud": await fetchHud(),
-      },
+      fallback,
     },
     revalidate: 600, // Every 10 minutes.
   };

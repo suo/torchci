@@ -6,5 +6,9 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<HudData>
 ) {
-  res.status(200).json(await fetchHud());
+  let page: number = 0;
+  if (req.query.page !== undefined) {
+    page = parseInt(req.query.page as string)
+  }
+  res.status(200).json(await fetchHud(page));
 }

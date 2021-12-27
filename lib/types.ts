@@ -15,10 +15,6 @@ export interface JobData {
   failureCaptures?: string;
 }
 
-export interface CommitData {
-
-}
-
 export interface RowData {
   sha: string;
   time: string;
