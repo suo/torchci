@@ -79,6 +79,7 @@ rules = [
     Rule("Python ModuleNotFoundError", r"^ModuleNotFoundError: .*", 98),
     Rule("Python ImportError", r"^ImportError: .*", 97),
     Rule("Docker login failure", r"Docker login for '.*' failed.*", 96),
+    Rule("conda failure", r"An unexpected error has occurred. Conda has prepared the above report.", 95),
 ]
 
 dict_rules = [asdict(rule) for rule in rules]

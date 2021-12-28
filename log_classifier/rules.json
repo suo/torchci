@@ -143,5 +143,10 @@
         "name": "Docker login failure",
         "pattern": "Docker login for '.*' failed.*",
         "priority": 96
+    },
+    {
+        "name": "conda failure",
+        "pattern": "An unexpected error has occurred. Conda has prepared the above report.",
+        "priority": 95
     }
 ]
