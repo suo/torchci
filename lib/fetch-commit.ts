@@ -63,6 +63,8 @@ export default async function fetchCommit(sha: string): Promise<CommitData> {
   // to avoid noising up the display with many duplicate jobs.
   jobs = _.sortBy(jobs, "id").reverse();
   jobs = _.uniqBy(jobs, "name");
+  // Now reverse again, because we want to display earlier jobs first in the the UI.
+  jobs.reverse();
 
   const diffNum = match ? match[1] : null;
   return {
