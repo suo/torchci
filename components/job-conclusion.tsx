@@ -41,8 +41,8 @@ export default function JobConclusion({ conclusion }: { conclusion?: string }) {
       conclusionChar = "U";
   }
   return (
-    <div className={styles.conclusion}>
+    <span className={styles.conclusion}>
       <span className={style}>{conclusionChar}</span>
-    </div>
+    </span>
   );
 }

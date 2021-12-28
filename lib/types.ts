@@ -3,6 +3,8 @@
  */
 export interface JobData {
   name: string;
+  workflowName?: string;
+  jobName?: string;
   sha?: string;
   id?: string;
   conclusion?: string;
@@ -17,8 +19,8 @@ export interface JobData {
 
 export interface CommitData {
   sha: string;
-  prUrl: string;
-  diffNum: string;
+  prUrl: string | null;
+  diffNum: string | null;
   commitTitle: string;
   commitMessageBody: string;
   jobs: JobData[];

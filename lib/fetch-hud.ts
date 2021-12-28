@@ -10,10 +10,10 @@ export default async function fetchHud(page: number): Promise<{
     throw "ROCKSET_API_KEY is not defined, add it to your .env.local file";
   }
   const rocksetClient = rockset(process.env.ROCKSET_API_KEY);
-  const hudQuery = await rocksetClient.queryLambdas.executeQueryLambda(
+  const hudQuery = await rocksetClient.queryLambdas.executeQueryLambdaByTag(
     "commons",
     "hud_query",
-    "6f2cec5f159dda28",
+    "latest",
     {
       parameters: [
         {
@@ -29,10 +29,10 @@ export default async function fetchHud(page: number): Promise<{
       ],
     }
   );
-  const commitQuery = await rocksetClient.queryLambdas.executeQueryLambda(
+  const commitQuery = await rocksetClient.queryLambdas.executeQueryLambdaByTag(
     "commons",
     "master_commits",
-    "c6a23106e970612a",
+    "latest",
     {
       parameters: [
         {
@@ -50,7 +50,7 @@ export default async function fetchHud(page: number): Promise<{
   );
 
   const commitsBySha = _.keyBy(commitQuery.results, "sha");
-  const results = hudQuery.results;
+  let results = hudQuery.results;
 
   const namesSet: Set<string> = new Set();
   // Built a list of all the distinct job names.
@@ -60,6 +60,15 @@ export default async function fetchHud(page: number): Promise<{
   const names = Array.from(namesSet).sort();
 
   // Construct mapping of sha => job name => job data
+  //
+  // Subtle: here, we sort the jobs by "id" first. This ensures that if there
+  // are multiple jobs with the same name, the most recent one will come last,
+  // and thus be the one selected by the `keyBy` call below.
+  //
+  // Q: How can there be more than one job with the same name for a given sha?
+  // A: Periodic builds can be scheduled multiple times for one sha. In those
+  // cases, we want the most recent job to be shown.
+  results = _.sortBy(results, "id");
   const jobsBySha: {
     [sha: string]: { [name: string]: JobData };
   } = {};
@@ -76,7 +85,7 @@ export default async function fetchHud(page: number): Promise<{
       if (nameToJobs[name] === undefined) {
         // Insert default name
         jobs.push({
-          name: name,
+          name,
         });
       } else {
         jobs.push(nameToJobs[name]);
