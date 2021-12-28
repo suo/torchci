@@ -5,6 +5,7 @@ import styles from "../../components/commit.module.css";
 import JobConclusion from "../../components/job-conclusion";
 import _ from "lodash";
 import { useRouter } from "next/router";
+import useSWR from "swr";
 
 function isFailedJob(job: JobData) {
   return (
@@ -121,7 +122,18 @@ function VersionControlLinks({
   );
 }
 
-function CommitInfo({ commit }: { commit: CommitData }) {
+const fetcher = (url: string) => fetch(url).then((res) => res.json());
+
+function CommitInfo({ sha, fallback }: { sha: string; fallback: any }) {
+  const { data } = useSWR(`/api/commit/${sha}`, fetcher, {
+    fallback,
+    refreshInterval: 60 * 1000, // refresh every minute
+    // Refresh even when the user isn't looking, so that switching to the tab
+    // will always have fresh info.
+    refreshWhenHidden: true,
+  });
+  const commit = data;
+
   return (
     <div>
       <h2>{commit.commitTitle}</h2>
@@ -149,7 +161,7 @@ function CommitInfo({ commit }: { commit: CommitData }) {
   );
 }
 
-export default function Page({ commit }: { commit: CommitData }) {
+export default function Page({ fallback }: any) {
   const router = useRouter();
   const sha = router.query.sha as string;
 
@@ -161,7 +173,7 @@ export default function Page({ commit }: { commit: CommitData }) {
       {router.isFallback ? (
         <div>Loading...</div>
       ) : (
-        <CommitInfo commit={commit} />
+        <CommitInfo sha={sha} fallback={fallback} />
       )}
     </div>
   );
@@ -172,10 +184,12 @@ export const getStaticPaths: GetStaticPaths = async () => {
 };
 
 export const getStaticProps: GetStaticProps = async ({ params }) => {
-  const sha = params!.sha;
+  const sha = params!.sha as string;
+  const fallback: any = {};
+  fallback[`/api/commit/${sha}`] = await fetchCommit(sha as string);
   return {
     props: {
-      commit: await fetchCommit(sha as string),
+      fallback,
     },
     revalidate: 60, // Every minute.
   };
