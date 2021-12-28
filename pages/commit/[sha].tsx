@@ -4,6 +4,7 @@ import { CommitData, JobData } from "../../lib/types";
 import styles from "../../components/commit.module.css";
 import JobConclusion from "../../components/job-conclusion";
 import _ from "lodash";
+import { useRouter } from "next/router";
 
 function isFailedJob(job: JobData) {
   return (
@@ -120,13 +121,9 @@ function VersionControlLinks({
   );
 }
 
-export default function Page({ commit }: { commit: CommitData }) {
+function CommitInfo({ commit }: { commit: CommitData }) {
   return (
     <div>
-      <h1 id="hud-header">
-        PyTorch Commit: <code>{commit.sha}</code>
-      </h1>
-
       <h2>{commit.commitTitle}</h2>
 
       <VersionControlLinks sha={commit.sha} diffNum={commit.diffNum} />
@@ -152,8 +149,26 @@ export default function Page({ commit }: { commit: CommitData }) {
   );
 }
 
+export default function Page({ commit }: { commit: CommitData }) {
+  const router = useRouter();
+  const sha = router.query.sha as string;
+
+  return (
+    <div>
+      <h1 id="hud-header">
+        PyTorch Commit: <code>{sha}</code>
+      </h1>
+      {router.isFallback ? (
+        <div>Loading...</div>
+      ) : (
+        <CommitInfo commit={commit} />
+      )}
+    </div>
+  );
+}
+
 export const getStaticPaths: GetStaticPaths = async () => {
-  return { paths: [], fallback: "blocking" };
+  return { paths: [], fallback: true };
 };
 
 export const getStaticProps: GetStaticProps = async ({ params }) => {
