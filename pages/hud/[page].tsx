@@ -194,7 +194,7 @@ function HudHeaderRow({ names }: { names: string[] }) {
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 function HudTable({ page }: { page: number }) {
-  const { data } = useSWR(`/api/hud?page=${page}`, fetcher, {
+  const { data } = useSWR(`/api/hud/${page}`, fetcher, {
     refreshInterval: 60 * 1000, // refresh every minute
     // Refresh even when the user isn't looking, so that switching to the tab
     // will always have fresh info.
@@ -280,7 +280,7 @@ export const getStaticPaths: GetStaticPaths = async () => {
 export const getStaticProps: GetStaticProps = async ({ params }) => {
   const pageIndex = params!.page ? parseInt(params!.page as string) : 0;
   const fallback: any = {};
-  fallback[`/api/hud?page=${pageIndex}`] = await fetchHud(pageIndex);
+  fallback[`/api/hud/${pageIndex}`] = await fetchHud(pageIndex);
   return {
     props: {
       fallback,
