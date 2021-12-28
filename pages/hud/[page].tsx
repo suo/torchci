@@ -196,6 +196,9 @@ const fetcher = (url: string) => fetch(url).then((res) => res.json());
 function HudTable({ page }: { page: number }) {
   const { data } = useSWR(`/api/hud?page=${page}`, fetcher, {
     refreshInterval: 60 * 1000, // refresh every minute
+    // Refresh even when the user isn't looking, so that switching to the tab
+    // will always have fresh info.
+    refreshWhenHidden: true,
   });
 
   return (
@@ -282,6 +285,6 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
     props: {
       fallback,
     },
-    revalidate: 300, // Every 5 minutes.
+    revalidate: 60,
   };
 };
