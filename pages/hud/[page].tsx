@@ -141,7 +141,8 @@ function HudRow({ rowData }: { rowData: RowData }) {
       </td>
       <td className="job-metadata">
         <div className="job-metadata__truncated">
-          <Link href={`/commit/${sha}`}>
+          {/* turn prefetch off, to avoid spamming the backend */}
+          <Link prefetch={false} href={`/commit/${sha}`}>
             <a>{rowData.commitMessage}</a>
           </Link>
         </div>
