@@ -141,7 +141,9 @@ function HudRow({ rowData }: { rowData: RowData }) {
       </td>
       <td className="job-metadata">
         <div className="job-metadata__truncated">
-          <a href={`/commit/${sha}`}>{rowData.commitMessage}</a>
+          <Link href={`/commit/${sha}`}>
+            <a>{rowData.commitMessage}</a>
+          </Link>
         </div>
       </td>
       <td className="job-metadata">
@@ -280,6 +282,6 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
     props: {
       fallback,
     },
-    revalidate: 600, // Every 10 minutes.
+    revalidate: 300, // Every 5 minutes.
   };
 };

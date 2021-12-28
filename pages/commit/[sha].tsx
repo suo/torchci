@@ -177,6 +177,6 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
     props: {
       commit: await fetchCommit(sha as string),
     },
-    revalidate: 60, // Every 10 minutes.
+    revalidate: 60, // Every minute.
   };
 };
