@@ -246,12 +246,8 @@ function FilterableHudTable({
 }) {
   const router = useRouter();
 
-  // Job filter-related state. We have to use an effect hook here because query
-  // params are undefined at static generation time; they only become available
-  // after hydration.
   const [jobFilter, setJobFilter] = useState<string | null>(null);
-
-  // null and empty string both corrspond to no filter; otherwise lowercase it
+  // null and empty string both correspond to no filter; otherwise lowercase it
   // to make the filter case-insensitive.
   const normalizedJobFilter =
     jobFilter === null || jobFilter === "" ? null : jobFilter.toLowerCase();
@@ -307,6 +303,8 @@ function JobFilterInput({
 }) {
   const router = useRouter();
   const [currentFilter, setCurrentFilter] = useState("");
+  // We have to use an effect hook here because query params are undefined at
+  // static generation time; they only become available after hydration.
   useEffect(() => {
     const filterValue = (router.query.name_filter as string) || "";
     setCurrentFilter(filterValue);
