@@ -11,17 +11,10 @@ by AWS Lambda (called `ossci-log-analyzer` in PyTorch's AWS account).
 
 ## How to add a new rule
 
-1. Edit and `rules.py` to add a rule.
-2. This generates `rules.json`.
-3. You can run `classify_log.py <id>` to test the new rule on your local changes.
-4. Commit both changes and push the result to `origin/main`.
-
-`rules.json` is hosted on GitHub pages and the lambda code will automatically
-fetch it and use it as its ruleset, so you don't need to change the lambda code.
-
-Note that you may need to wait a few minutes for GH pages to rebuild the site.
-Once your changes are visibile on
-[GitHub pages](https://suo.github.io/torchci/log_classifier/rules.json),
+Edit `pages/api/classifier/rules.ts` to add a rule. This rule will be deployed
+along with the main app, so once your changes are pushed in `main` and the
+corresponding Vercel deployment completes, the lambda will automatically pick up
+the rule.
 
 ## How to backfill a new rule
 

@@ -139,7 +139,7 @@ class RuleEngine:
 
 
 def get_rules_from_gh():
-    with urlopen("https://suo.github.io/torchci/log_classifier/rules.json") as data:
+    with urlopen("https://www.torch-ci.com/api/classifier/rules") as data:
         rules = json.load(data)
         rules = [Rule(**r) for r in rules]
     return rules
