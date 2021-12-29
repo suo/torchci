@@ -8,7 +8,7 @@ import React, {
   useContext,
   createContext,
   useEffect,
-  FormEventHandler,
+  useCallback,
 } from "react";
 import { GetStaticPaths, GetStaticProps } from "next";
 import { JobData, RowData } from "../../lib/types";
@@ -252,20 +252,23 @@ function FilterableHudTable({
   const normalizedJobFilter =
     jobFilter === null || jobFilter === "" ? null : jobFilter.toLowerCase();
 
+  const handleInput = useCallback((f) => setJobFilter(f), []);
+  const handleSubmit = useCallback(
+    (f) => {
+      if (f === "") {
+        router.push(`/hud/${page}`, undefined, { shallow: true });
+      } else {
+        router.push(`/hud/${page}?name_filter=${f}`, undefined, {
+          shallow: true,
+        });
+      }
+    },
+    [page, router]
+  );
+
   return (
     <div>
-      <JobFilterInput
-        handleSubmit={(f) => {
-          if (f === "") {
-            router.push(`/hud/${page}`, undefined, { shallow: true });
-          } else {
-            router.push(`/hud/${page}?name_filter=${f}`, undefined, {
-              shallow: true,
-            });
-          }
-        }}
-        handleInput={(f) => setJobFilter(f)}
-      />
+      <JobFilterInput handleSubmit={handleSubmit} handleInput={handleInput} />
 
       <table className="hud-table">
         <HudTableColumns filter={normalizedJobFilter} names={jobNames} />
