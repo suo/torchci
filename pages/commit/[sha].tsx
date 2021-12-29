@@ -1,41 +1,17 @@
 import { GetStaticPaths, GetStaticProps } from "next";
 import fetchCommit from "../../lib/fetch-commit";
-import { CommitData, JobData } from "../../lib/types";
+import { JobData } from "../../lib/types";
 import styles from "../../components/commit.module.css";
-import JobConclusion from "../../components/job-conclusion";
 import _ from "lodash";
 import { useRouter } from "next/router";
 import useSWR from "swr";
+import JobSummary from "../../components/job-summary";
 
 function isFailedJob(job: JobData) {
   return (
     job.conclusion === "failure" ||
     job.conclusion === "cancelled" ||
     job.conclusion === "timed_out"
-  );
-}
-
-function JobFailureContext({ job }: { job: JobData }) {
-  if (job.failureContext == null) {
-    return null;
-  }
-  return (
-    <details>
-      <summary>
-        <code>{job.failureLine}</code>
-      </summary>
-      <pre>{job.failureContext}</pre>
-    </details>
-  );
-}
-
-function JobSummary({ job }: { job: JobData }) {
-  return (
-    <div>
-      <JobConclusion conclusion={job.conclusion} />
-      <a href={job.htmlUrl}> {job.name} </a>
-      <JobFailureContext job={job} />
-    </div>
   );
 }
 
