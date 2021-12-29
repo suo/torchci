@@ -19,4 +19,5 @@ the rule.
 ## How to backfill a new rule
 
 Run `backfill.py`. Note that this uses the Lambda to run the rules, so you need
-to make sure [GitHub pages](https://suo.github.io/torchci/log_classifier/rules.json) reflects your changes before you run!
+to make sure [the live site](https://www.torch-ci.com/api/classifier/rules)
+reflects your changes before you run!
