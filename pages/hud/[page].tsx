@@ -140,11 +140,6 @@ function JobCell({ job }: { job: JobData }) {
 }
 
 function HudRow({ rowData }: { rowData: RowData }) {
-  const filter = useContext(JobFilterContext);
-  const filteredJobs =
-    filter === null
-      ? rowData.jobs
-      : rowData.jobs.filter((job) => includesCaseInsensitive(job.name, filter));
   const sha = rowData.sha;
   return (
     <tr>
@@ -168,38 +163,44 @@ function HudRow({ rowData }: { rowData: RowData }) {
           </a>
         )}
       </td>
-      {filteredJobs.map((job: JobData) => (
+      {rowData.jobs.map((job: JobData) => (
         <JobCell key={job.name} job={job} />
       ))}
     </tr>
   );
 }
 
-function HudColumns({ names }: { names: string[] }) {
-  const filter = useContext(JobFilterContext);
-  const filteredNames =
-    filter === null
-      ? names
-      : names.filter((name) => includesCaseInsensitive(name, filter));
+function HudTableColumns({
+  names,
+  filter,
+}: {
+  names: string[];
+  filter: string | null;
+}) {
   return (
     <colgroup>
       <col className="col-time" />
       <col className="col-sha" />
       <col className="col-commit" />
       <col className="col-pr" />
-      {filteredNames.map((name: string) => (
-        <col className="col-job" key={name} />
-      ))}
+      {names.map((name: string) => {
+        const passesFilter =
+          filter === null || includesCaseInsensitive(name, filter);
+        const style = passesFilter ? {} : { visibility: "collapse" as any };
+
+        return <col className="col-job" key={name} style={style} />;
+      })}
     </colgroup>
   );
 }
 
-function HudHeaderRow({ names }: { names: string[] }) {
-  const filter = useContext(JobFilterContext);
-  const filteredNames =
-    filter === null
-      ? names
-      : names.filter((name) => includesCaseInsensitive(name, filter));
+function HudTableHeader({
+  names,
+  filter,
+}: {
+  names: string[];
+  filter: string | null;
+}) {
   return (
     <thead>
       <tr>
@@ -207,11 +208,16 @@ function HudHeaderRow({ names }: { names: string[] }) {
         <th className="regular-header">SHA</th>
         <th className="regular-header">Commit</th>
         <th className="regular-header">PR</th>
-        {filteredNames.map((name) => (
-          <th className="job-header" key={name}>
-            <div className="job-header__name">{name}</div>
-          </th>
-        ))}
+        {names.map((name) => {
+          const passesFilter =
+            filter === null || includesCaseInsensitive(name, filter);
+          const style = passesFilter ? {} : { visibility: "collapse" as any };
+          return (
+            <th className="job-header" key={name} style={style}>
+              <div className="job-header__name">{name}</div>
+            </th>
+          );
+        })}
       </tr>
     </thead>
   );
@@ -219,20 +225,31 @@ function HudHeaderRow({ names }: { names: string[] }) {
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
-const JobFilterContext = createContext<string | null>(null);
-function HudTable({
+function HudTableBody({ shaGrid }: { shaGrid: RowData[] }) {
+  return (
+    <tbody>
+      {shaGrid.map((row: RowData) => (
+        <HudRow key={row.sha} rowData={row} />
+      ))}
+    </tbody>
+  );
+}
+
+function FilterableHudTable({
   page,
-  jobFilter,
+  jobNames,
+  children,
 }: {
   page: number;
-  jobFilter: string | null;
+  jobNames: string[];
+  children: React.ReactNode;
 }) {
-  const { data } = useSWR(`/api/hud/${page}`, fetcher, {
-    refreshInterval: 60 * 1000, // refresh every minute
-    // Refresh even when the user isn't looking, so that switching to the tab
-    // will always have fresh info.
-    refreshWhenHidden: true,
-  });
+  const router = useRouter();
+
+  // Job filter-related state. We have to use an effect hook here because query
+  // params are undefined at static generation time; they only become available
+  // after hydration.
+  const [jobFilter, setJobFilter] = useState<string | null>(null);
 
   // null and empty string both corrspond to no filter; otherwise lowercase it
   // to make the filter case-insensitive.
@@ -240,53 +257,98 @@ function HudTable({
     jobFilter === null || jobFilter === "" ? null : jobFilter.toLowerCase();
 
   return (
-    <table className="hud-table">
-      <JobFilterContext.Provider value={normalizedJobFilter}>
-        <HudColumns names={data.jobNames} />
-        <HudHeaderRow names={data.jobNames} />
-        <tbody>
-          {data.shaGrid.map((row: RowData) => (
-            <HudRow key={row.sha} rowData={row} />
-          ))}
-        </tbody>
-      </JobFilterContext.Provider>
-    </table>
+    <div>
+      <JobFilterInput
+        handleSubmit={(f) => {
+          if (f === "") {
+            router.push(`/hud/${page}`, undefined, { shallow: true });
+          } else {
+            router.push(`/hud/${page}?name_filter=${f}`, undefined, {
+              shallow: true,
+            });
+          }
+        }}
+        handleInput={(f) => setJobFilter(f)}
+      />
+
+      <table className="hud-table">
+        <HudTableColumns filter={normalizedJobFilter} names={jobNames} />
+        <HudTableHeader filter={normalizedJobFilter} names={jobNames} />
+        {children}
+      </table>
+    </div>
+  );
+}
+
+function HudTable({ page }: { page: number }) {
+  const { data } = useSWR(`/api/hud/${page}`, fetcher, {
+    refreshInterval: 60 * 1000, // refresh every minute
+    // Refresh even when the user isn't looking, so that switching to the tab
+    // will always have fresh info.
+    refreshWhenHidden: true,
+  });
+
+  // Here, we are intentionally injecting HudTableBody into the
+  // FilterableHudTable component. This is for rendering performance; we don't
+  // want React to re-render the whole table every time the filter changes.
+  return (
+    <FilterableHudTable page={page} jobNames={data.jobNames}>
+      <HudTableBody shaGrid={data.shaGrid} />
+    </FilterableHudTable>
   );
 }
 
 function JobFilterInput({
-  currentFilter,
+  handleSubmit,
   handleInput,
 }: {
-  currentFilter: string | null;
-  handleInput: FormEventHandler<HTMLFormElement>;
+  handleSubmit: (value: string) => void;
+  handleInput: (value: string) => void;
 }) {
+  const router = useRouter();
+  const [currentFilter, setCurrentFilter] = useState("");
+  useEffect(() => {
+    const filterValue = (router.query.name_filter as string) || "";
+    setCurrentFilter(filterValue);
+    handleInput(filterValue);
+  }, [router.query.name_filter, handleInput]);
+
   return (
     <div>
-      <form onSubmit={handleInput}>
-        <label htmlFor="name_filter">Job filter: </label>
-        <input type="search" name="name_filter" />
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          handleSubmit(currentFilter);
+        }}
+      >
+        <label htmlFor="name_filter">
+          Job filter: (press enter to change url, esc to clear):{" "}
+        </label>
+        <input
+          onChange={(e) => {
+            setCurrentFilter(e.currentTarget.value);
+            handleInput(e.currentTarget.value);
+          }}
+          type="search"
+          name="name_filter"
+          value={currentFilter}
+        />
         <input type="submit" value="Go" />
-        {currentFilter !== null && currentFilter !== "" ? (
-          <span>
-            <em>(Current filter: {currentFilter})</em>
-          </span>
-        ) : null}
       </form>
     </div>
   );
 }
 
-function PageSelector({ pageIndex }: { pageIndex: number }) {
+function PageSelector({ curPage }: { curPage: number }) {
   return (
     <div>
-      Page {pageIndex}:{" "}
-      {pageIndex !== 0 ? (
+      Page {curPage}:{" "}
+      {curPage !== 0 ? (
         <span>
-          <Link href={`/hud/${pageIndex - 1}`}>Prev</Link> |{" "}
+          <Link href={`/hud/${curPage - 1}`}>Prev</Link> |{" "}
         </span>
       ) : null}
-      <Link href={`/hud/${pageIndex + 1}`}>Next</Link>
+      <Link href={`/hud/${curPage + 1}`}>Next</Link>
     </div>
   );
 }
@@ -316,18 +378,7 @@ export default function Hud({ fallback }: any) {
   }, []);
 
   // Page handling
-  const pageIndex = router.query.page
-    ? parseInt(router.query.page as string)
-    : 0;
-
-  // Job filter-related state. We have to use an effect hook here because query
-  // params are undefined at static generation time; they only become available
-  // after hydration.
-  const [jobFilter, setJobFilter] = useState<string | null>(null);
-  useEffect(() => {
-    const filterValue = (router.query.name_filter as string) || null;
-    setJobFilter(filterValue);
-  }, [router.query.name_filter]);
+  const page = router.query.page ? parseInt(router.query.page as string) : 0;
 
   return (
     <SWRConfig value={{ fallback }}>
@@ -339,28 +390,13 @@ export default function Hud({ fallback }: any) {
             </h1>
             <div>This page automatically updates.</div>
 
-            <PageSelector pageIndex={pageIndex} />
-
-            <JobFilterInput
-              currentFilter={jobFilter}
-              handleInput={(e) => {
-                e.preventDefault();
-                // @ts-ignore
-                const filterValue = e.target[0].value;
-                if (filterValue === "") {
-                  router.push(`/hud/${pageIndex}`);
-                } else {
-                  router.push(`/hud/${pageIndex}?name_filter=${filterValue}`);
-                }
-                setJobFilter(filterValue);
-              }}
-            />
+            <PageSelector curPage={page} />
 
             <div>disableissues</div>
             {router.isFallback ? (
               <div>Loading...</div>
             ) : (
-              <HudTable jobFilter={jobFilter} page={pageIndex} />
+              <HudTable page={page} />
             )}
           </div>
         </SetPinnedTooltipContext.Provider>
