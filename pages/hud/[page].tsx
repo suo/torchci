@@ -277,10 +277,26 @@ function JobFilterInput({
   );
 }
 
+function PageSelector({ pageIndex }: { pageIndex: number }) {
+  return (
+    <div>
+      Page {pageIndex}:{" "}
+      {pageIndex !== 0 ? (
+        <span>
+          <Link href={`/hud/${pageIndex - 1}`}>Prev</Link> |{" "}
+        </span>
+      ) : null}
+      <Link href={`/hud/${pageIndex + 1}`}>Next</Link>
+    </div>
+  );
+}
+
 const PinnedTooltipContext = createContext<null | string>(null);
 const SetPinnedTooltipContext = createContext<any>(null);
 
 export default function Hud({ fallback }: any) {
+  const router = useRouter();
+
   // Logic to handle tooltip pinning. The behavior we want is:
   // - If the user clicks on a tooltip, it should be pinned.
   // - While a tooltip is pinned, we don't show any other tooltips.
@@ -299,11 +315,14 @@ export default function Hud({ fallback }: any) {
     });
   }, []);
 
-  const router = useRouter();
+  // Page handling
   const pageIndex = router.query.page
     ? parseInt(router.query.page as string)
     : 0;
 
+  // Job filter-related state. We have to use an effect hook here because query
+  // params are undefined at static generation time; they only become available
+  // after hydration.
   const [jobFilter, setJobFilter] = useState<string | null>(null);
   useEffect(() => {
     const filterValue = (router.query.name_filter as string) || null;
@@ -319,15 +338,9 @@ export default function Hud({ fallback }: any) {
               PyTorch HUD: <code>master</code>
             </h1>
             <div>This page automatically updates.</div>
-            <div>
-              Page {pageIndex}:{" "}
-              {pageIndex !== 0 ? (
-                <span>
-                  <Link href={`/hud/${pageIndex - 1}`}>Prev</Link> |{" "}
-                </span>
-              ) : null}
-              <Link href={`/hud/${pageIndex + 1}`}>Next</Link>
-            </div>
+
+            <PageSelector pageIndex={pageIndex} />
+
             <JobFilterInput
               currentFilter={jobFilter}
               handleInput={(e) => {
@@ -342,6 +355,7 @@ export default function Hud({ fallback }: any) {
                 setJobFilter(filterValue);
               }}
             />
+
             <div>disableissues</div>
             {router.isFallback ? (
               <div>Loading...</div>
