@@ -69,7 +69,7 @@ function FailureInfo({
           </tbody>
         </table>
       </div>
-      <h3>Failure samples ({totalCount} most recent)</h3>
+      <h3>Failures ({totalCount} total)</h3>
       <ul>
         {samples.map((sample) => (
           <li key={sample.id}>
