@@ -51,7 +51,9 @@ export function TooltipTarget({
         // Don't propagate any clicks to the tooltip itself.
         onClick={(e) => e.stopPropagation()}
       >
-        <div className={styles.content}>{tooltipContent}</div>
+        <div className={isPinned ? styles.contentPinned : styles.content}>
+          {tooltipContent}
+        </div>
       </div>
     ) : null;
 
