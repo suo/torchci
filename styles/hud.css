@@ -11,14 +11,6 @@ a {
   color: #0064cf;
 }
 
-.sev-box {
-  border: 1px solid red;
-  border-radius: 5px;
-  background-color: #ffe1e1;
-  padding: 10px;
-  margin-bottom: 10px;
-}
-
 .hud-table {
   table-layout: fixed;
   border-collapse: collapse;
