@@ -49,7 +49,7 @@ function JobTooltip({ job }: { job: JobData }) {
         <a
           target="_blank"
           rel="noreferrer"
-          href={`failure?capture=${job.failureCaptures}`}
+          href={`/failure/${job.failureCaptures}`}
         >
           more like this
         </a>

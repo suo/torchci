@@ -19,7 +19,7 @@ a {
   margin-bottom: 10px;
 }
 
-table {
+.hud-table {
   table-layout: fixed;
   border-collapse: collapse;
   width: max-content;

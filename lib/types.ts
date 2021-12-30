@@ -7,6 +7,7 @@ export interface JobData {
   jobName?: string;
   sha?: string;
   id?: string;
+  time?: string;
   conclusion?: string;
   htmlUrl?: string;
   logUrl?: string;
