@@ -11,7 +11,7 @@ import React, {
   useCallback,
 } from "react";
 import { GetStaticPaths, GetStaticProps } from "next";
-import { JobData, RowData } from "../../lib/types";
+import { IssueData, JobData, RowData } from "../../lib/types";
 import fetchHud from "../../lib/fetch-hud";
 import Link from "next/link";
 import { TooltipTarget } from "../../components/tooltip-target";
@@ -19,6 +19,56 @@ import JobConclusion from "../../components/job-conclusion";
 
 function includesCaseInsensitive(value: string, pattern: string): boolean {
   return value.toLowerCase().includes(pattern.toLowerCase());
+}
+
+function DisableIssue({
+  issueTitle,
+  failureCaptures,
+}: {
+  issueTitle: string;
+  failureCaptures: string;
+}) {
+  const { data } = useSWR("/api/issue?label=skipped", fetcher);
+
+  const [disableIssue, setDisableIssue] = useState<string | null>(null);
+  if (data === undefined) {
+    return <span>checking for disable issues.</span>;
+  }
+
+  const issues: IssueData[] = data.issues;
+  function handleDisableIssue(e: React.MouseEvent) {
+    e.preventDefault();
+
+    const matchingIssues = issues.filter((issue) => issue.title === issueTitle);
+    if (matchingIssues.length !== 0) {
+      // There is a matching issue, show that in the tooltip box.
+      setDisableIssue(matchingIssues[0].html_url);
+    } else {
+      // No matching issue, open a window to create one.
+      const examplesURL = `http://torch-ci.com/failure/${encodeURIComponent(
+        failureCaptures
+      )}`;
+      const issueBody =
+        encodeURIComponent(`Platforms: <fill this in or delete. Valid labels are: asan, linux, mac, macos, rocm, win, windows.>
+
+This test was disabled because it is failing on master ([recent examples](${examplesURL})).`);
+      const issueCreateURL = `https://github.com/pytorch/pytorch/issues/new?title=${issueTitle}&body=${issueBody}`;
+      window.open(issueCreateURL);
+    }
+  }
+
+  return (
+    <span>
+      {" | "}
+      {disableIssue === null ? (
+        <a onClick={handleDisableIssue}>disable test</a>
+      ) : (
+        <a target="_blank" rel="noreferrer" href={disableIssue}>
+          test already disabled
+        </a>
+      )}
+    </span>
+  );
 }
 
 function JobTooltip({ job }: { job: JobData }) {
@@ -57,33 +107,19 @@ function JobTooltip({ job }: { job: JobData }) {
     ) : null;
 
   let disableIssue = null;
-  //   if (tooltipInfo.existing_disable_issue !== null) {
-  //     disableIssue = (
-  //       <span>
-  //         {" | "}
-  //         <a target="_blank" href={tooltipInfo.existing_disable_issue}>
-  //           test curently disabled
-  //         </a>
-  //       </span>
-  //     );
-  //   } else if (tooltipInfo.disable_issue_title !== null) {
-  //     const examplesURL = `http://hud2.pytorch.org/failure?capture=${tooltipInfo.failure_captures}`;
-  //     const issueBody =
-  //       encodeURIComponent(`Platforms: <fill this in or delete. Valid labels are: asan, linux, mac, macos, rocm, win, windows.>
-
-  // This job was disabled because it is failing on master ([recent examples](${examplesURL})).`);
-  //     const issueCreateURL = `https://github.com/pytorch/pytorch/issues/new?title=${tooltipInfo.disable_issue_title}&body=${issueBody}`;
-  //     disableIssue = (
-  //       <span>
-  //         {" | "}
-  //         <a target="_blank" href={issueCreateURL}>
-  //           disable this test
-  //         </a>
-  //       </span>
-  //     );
-  //   } else {
-  //     disableIssue = null;
-  //   }
+  if (job.failureLine !== null) {
+    const testFailureRe = /^(?:FAIL|ERROR) \[.*\]: (test_.* \(.*Test.*\))/;
+    const match = job.failureLine!.match(testFailureRe);
+    if (match !== null) {
+      const issueTitle = `DISABLED ${match[1]}`;
+      disableIssue = (
+        <DisableIssue
+          issueTitle={issueTitle}
+          failureCaptures={job.failureCaptures as string}
+        />
+      );
+    }
+  }
 
   const failureContext =
     job.failureLine !== null ? (
@@ -393,7 +429,6 @@ export default function Hud({ fallback }: any) {
 
             <PageSelector curPage={page} />
 
-            <div>disableissues</div>
             {router.isFallback ? (
               <div>Loading...</div>
             ) : (
