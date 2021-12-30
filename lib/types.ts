@@ -40,3 +40,9 @@ export interface HudData {
   shaGrid: RowData[];
   jobNames: string[];
 }
+
+export interface IssueData {
+  number: number;
+  title: string;
+  html_url: string;
+}
