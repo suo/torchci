@@ -29,44 +29,37 @@ function DisableIssue({
   failureCaptures: string;
 }) {
   const { data } = useSWR("/api/issue?label=skipped", fetcher);
-
-  const [disableIssue, setDisableIssue] = useState<string | null>(null);
   if (data === undefined) {
     return <span>checking for disable issues.</span>;
   }
-
   const issues: IssueData[] = data.issues;
-  function handleDisableIssue(e: React.MouseEvent) {
-    e.preventDefault();
 
-    const matchingIssues = issues.filter((issue) => issue.title === issueTitle);
-    if (matchingIssues.length !== 0) {
-      // There is a matching issue, show that in the tooltip box.
-      setDisableIssue(matchingIssues[0].html_url);
-    } else {
-      // No matching issue, open a window to create one.
-      const examplesURL = `http://torch-ci.com/failure/${encodeURIComponent(
-        failureCaptures
-      )}`;
-      const issueBody =
-        encodeURIComponent(`Platforms: <fill this in or delete. Valid labels are: asan, linux, mac, macos, rocm, win, windows.>
+  let issueLink;
+  let linkText;
+  const matchingIssues = issues.filter((issue) => issue.title === issueTitle);
+  if (matchingIssues.length !== 0) {
+    // There is a matching issue, show that in the tooltip box.
+    linkText = "Test is disabled";
+    issueLink = matchingIssues[0].html_url;
+  } else {
+    // No matching issue, open a window to create one.
+    const examplesURL = `http://torch-ci.com/failure/${encodeURIComponent(
+      failureCaptures
+    )}`;
+    const issueBody =
+      encodeURIComponent(`Platforms: <fill this in or delete. Valid labels are: asan, linux, mac, macos, rocm, win, windows.>
 
 This test was disabled because it is failing on master ([recent examples](${examplesURL})).`);
-      const issueCreateURL = `https://github.com/pytorch/pytorch/issues/new?title=${issueTitle}&body=${issueBody}`;
-      window.open(issueCreateURL);
-    }
+    linkText = "Disable test";
+    issueLink = `https://github.com/pytorch/pytorch/issues/new?title=${issueTitle}&body=${issueBody}`;
   }
 
   return (
     <span>
       {" | "}
-      {disableIssue === null ? (
-        <a onClick={handleDisableIssue}>disable test</a>
-      ) : (
-        <a target="_blank" rel="noreferrer" href={disableIssue}>
-          test already disabled
-        </a>
-      )}
+      <a target="_blank" rel="noreferrer" href={issueLink}>
+        {linkText}
+      </a>
     </span>
   );
 }
