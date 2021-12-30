@@ -122,13 +122,13 @@ function JobTooltip({ job }: { job: JobData }) {
   );
 }
 
-function JobCell({ job }: { job: JobData }) {
+function JobCell({ sha, job }: { sha: string; job: JobData }) {
   const pinnedId = useContext(PinnedTooltipContext);
   const setPinnedId = useContext(SetPinnedTooltipContext);
   return (
     <td onDoubleClick={() => window.open(job.htmlUrl)}>
       <TooltipTarget
-        id={`${job.name}-${job.id}`}
+        id={`${sha}-${job.name}`}
         pinnedId={pinnedId}
         setPinnedId={setPinnedId}
         tooltipContent={<JobTooltip job={job} />}
@@ -164,7 +164,7 @@ function HudRow({ rowData }: { rowData: RowData }) {
         )}
       </td>
       {rowData.jobs.map((job: JobData) => (
-        <JobCell key={job.name} job={job} />
+        <JobCell sha={sha} key={job.name} job={job} />
       ))}
     </tr>
   );
