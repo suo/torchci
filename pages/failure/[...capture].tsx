@@ -83,7 +83,13 @@ function FailureInfo({
 
 export default function Page() {
   const router = useRouter();
-  const capture = router.query.capture;
+  // Captures may contain `/` characters, which mess up regular dynamic routes.
+  // So we use a catch-all route to capture the whole path, then join it back
+  // together with `/`.
+  let capture =
+    router.query.capture !== undefined
+      ? (router.query.capture as string[]).join("/")
+      : undefined;
 
   // `capture` is undefined pre-hydration, so we need to conditionally fetch in
   // `useSWR` to avoid sending a garbage request to the server.
