@@ -28,9 +28,14 @@ function DisableIssue({
   issueTitle: string;
   failureCaptures: string;
 }) {
-  const { data } = useSWR("/api/issue?label=skipped", fetcher);
+  const { data } = useSWR("/api/issue?label=skipped", fetcher, {
+    // Set a 10s cache for the request, so that lots of tooltip hovers don't
+    // spam the backend. Since actually mutating the state (through filing a
+    // disable issue) is a pretty heavy operation, 10s of staleness is fine.
+    dedupingInterval: 10000,
+  });
   if (data === undefined) {
-    return <span>checking for disable issues.</span>;
+    return <span>{" | "} checking for disable issues.</span>;
   }
   const issues: IssueData[] = data.issues;
 
