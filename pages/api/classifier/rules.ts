@@ -81,6 +81,11 @@ export default async function handler(
       priority: 997,
     },
     {
+      name: "failed to download github artifacts",
+      pattern: r`List Artifacts failed:.*`,
+      priority: 997,
+    },
+    {
       name: "MSVC out of memory",
       pattern: r`Catastrophic error: .*`,
       priority: 996,
