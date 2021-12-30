@@ -4,8 +4,8 @@ dayjs.extend(utc);
 
 import { useRouter } from "next/router";
 import useSWR from "swr";
-import JobSummary from "../components/job-summary";
-import { JobData } from "../lib/types";
+import JobSummary from "../../components/job-summary";
+import { JobData } from "../../lib/types";
 import { BarChart, Bar, CartesianGrid, Tooltip, XAxis, YAxis } from "recharts";
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
@@ -89,7 +89,7 @@ export default function Page() {
   // `useSWR` to avoid sending a garbage request to the server.
   const swrKey =
     capture !== undefined
-      ? `/api/failure?capture=${encodeURIComponent(capture as string)}`
+      ? `/api/failure/${encodeURIComponent(capture as string)}`
       : null;
   const { data } = useSWR(swrKey, fetcher);
   return (
