@@ -11,7 +11,6 @@ export default async function handler(
     throw "ROCKSET_API_KEY is not defined, add it to your .env.local file";
   }
   const capture = req.query.capture;
-  console.log(capture);
   const rocksetClient = rockset(process.env.ROCKSET_API_KEY);
 
   const samples = await rocksetClient.queryLambdas.executeQueryLambda(
