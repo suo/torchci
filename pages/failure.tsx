@@ -4,8 +4,8 @@ dayjs.extend(utc);
 
 import { useRouter } from "next/router";
 import useSWR from "swr";
-import JobSummary from "../../components/job-summary";
-import { JobData } from "../../lib/types";
+import JobSummary from "../components/job-summary";
+import { JobData } from "../lib/types";
 import { BarChart, Bar, CartesianGrid, Tooltip, XAxis, YAxis } from "recharts";
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
@@ -83,17 +83,14 @@ function FailureInfo({
 
 export default function Page() {
   const router = useRouter();
-  // Captures may contain `/` characters, which mess up regular dynamic routes.
-  // So we use a catch-all route to capture the whole path, then join it back
-  // together with `/`.
-  let capture =
-    router.query.capture !== undefined
-      ? (router.query.capture as string[]).join("/")
-      : undefined;
+  const capture = router.query.capture;
 
   // `capture` is undefined pre-hydration, so we need to conditionally fetch in
   // `useSWR` to avoid sending a garbage request to the server.
-  const swrKey = capture !== undefined ? `/api/failure/${capture}` : null;
+  const swrKey =
+    capture !== undefined
+      ? `/api/failure?capture=${encodeURIComponent(capture as string)}`
+      : null;
   const { data } = useSWR(swrKey, fetcher);
   return (
     <div>
