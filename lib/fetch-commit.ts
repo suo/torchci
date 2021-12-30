@@ -1,13 +1,10 @@
-import rockset from "@rockset/client";
 import _ from "lodash";
+import getRocksetClient from "./rockset";
 
 import { CommitData } from "./types";
 
 export default async function fetchCommit(sha: string): Promise<CommitData> {
-  if (typeof process.env.ROCKSET_API_KEY === "undefined") {
-    throw "ROCKSET_API_KEY is not defined, add it to your .env.local file";
-  }
-  const rocksetClient = rockset(process.env.ROCKSET_API_KEY);
+  const rocksetClient = getRocksetClient();
   const commitQuery = await rocksetClient.queryLambdas.executeQueryLambdaByTag(
     "commons",
     "commit_query",

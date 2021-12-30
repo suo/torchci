@@ -1,15 +1,12 @@
-import rockset from "@rockset/client";
 import _ from "lodash";
+import getRocksetClient from "./rockset";
 import { JobData, RowData } from "./types";
 
 export default async function fetchHud(page: number): Promise<{
   shaGrid: RowData[];
   jobNames: string[];
 }> {
-  if (typeof process.env.ROCKSET_API_KEY === "undefined") {
-    throw "ROCKSET_API_KEY is not defined, add it to your .env.local file";
-  }
-  const rocksetClient = rockset(process.env.ROCKSET_API_KEY);
+  const rocksetClient = getRocksetClient();
   const hudQuery = await rocksetClient.queryLambdas.executeQueryLambdaByTag(
     "commons",
     "hud_query",

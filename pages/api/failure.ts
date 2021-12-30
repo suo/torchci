@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from "next";
-import rockset from "@rockset/client";
+import getRocksetClient from "../../lib/rockset";
 
 interface Data {}
 
@@ -7,11 +7,8 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<Data>
 ) {
-  if (typeof process.env.ROCKSET_API_KEY === "undefined") {
-    throw "ROCKSET_API_KEY is not defined, add it to your .env.local file";
-  }
   const capture = req.query.capture;
-  const rocksetClient = rockset(process.env.ROCKSET_API_KEY);
+  const rocksetClient = getRocksetClient();
 
   const samples = await rocksetClient.queryLambdas.executeQueryLambda(
     "commons",
