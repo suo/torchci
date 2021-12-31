@@ -23,8 +23,7 @@ function includesCaseInsensitive(value: string, pattern: string): boolean {
 }
 
 function JobCell({ sha, job }: { sha: string; job: JobData }) {
-  const pinnedId = useContext(PinnedTooltipContext);
-  const setPinnedId = useContext(SetPinnedTooltipContext);
+  const [pinnedId, setPinnedId] = useContext(PinnedTooltipContext);
   return (
     <td onDoubleClick={() => window.open(job.htmlUrl)}>
       <TooltipTarget
@@ -254,8 +253,7 @@ function PageSelector({ curPage }: { curPage: number }) {
   );
 }
 
-const PinnedTooltipContext = createContext<null | string>(null);
-const SetPinnedTooltipContext = createContext<any>(null);
+const PinnedTooltipContext = createContext<[null | string, any]>([null, null]);
 
 export default function Hud({ fallback }: any) {
   const router = useRouter();
@@ -283,23 +281,17 @@ export default function Hud({ fallback }: any) {
 
   return (
     <SWRConfig value={{ fallback }}>
-      <PinnedTooltipContext.Provider value={pinnedTooltip}>
-        <SetPinnedTooltipContext.Provider value={setPinnedTooltip}>
-          <div id="hud-container" onClick={handleClick}>
-            <h1 id="hud-header">
-              PyTorch HUD: <code>master</code>
-            </h1>
-            <div>This page automatically updates.</div>
+      <PinnedTooltipContext.Provider value={[pinnedTooltip, setPinnedTooltip]}>
+        <div id="hud-container" onClick={handleClick}>
+          <h1 id="hud-header">
+            PyTorch HUD: <code>master</code>
+          </h1>
+          <div>This page automatically updates.</div>
 
-            <PageSelector curPage={page} />
+          <PageSelector curPage={page} />
 
-            {router.isFallback ? (
-              <div>Loading...</div>
-            ) : (
-              <HudTable page={page} />
-            )}
-          </div>
-        </SetPinnedTooltipContext.Provider>
+          {router.isFallback ? <div>Loading...</div> : <HudTable page={page} />}
+        </div>
       </PinnedTooltipContext.Provider>
     </SWRConfig>
   );
