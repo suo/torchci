@@ -1,4 +1,4 @@
-import { LocalTimeHuman, durationHuman } from "../../components/time-utils";
+import { LocalTimeHuman } from "../../components/time-utils";
 import { useRouter } from "next/router";
 import _ from "lodash";
 import useSWR, { SWRConfig } from "swr";
@@ -11,149 +11,15 @@ import React, {
   useCallback,
 } from "react";
 import { GetStaticPaths, GetStaticProps } from "next";
-import { IssueData, JobData, RowData } from "../../lib/types";
+import { JobData, RowData } from "../../lib/types";
 import fetchHud from "../../lib/fetch-hud";
 import Link from "next/link";
 import { TooltipTarget } from "../../components/tooltip-target";
 import JobConclusion from "../../components/job-conclusion";
+import JobTooltip from "../../components/job-tooltip";
 
 function includesCaseInsensitive(value: string, pattern: string): boolean {
   return value.toLowerCase().includes(pattern.toLowerCase());
-}
-
-function DisableIssue({
-  issueTitle,
-  failureCaptures,
-}: {
-  issueTitle: string;
-  failureCaptures: string;
-}) {
-  const { data } = useSWR("/api/issue?label=skipped", fetcher, {
-    // Set a 10s cache for the request, so that lots of tooltip hovers don't
-    // spam the backend. Since actually mutating the state (through filing a
-    // disable issue) is a pretty heavy operation, 10s of staleness is fine.
-    dedupingInterval: 10000,
-  });
-  if (data === undefined) {
-    return <span>{" | "} checking for disable issues.</span>;
-  }
-  const issues: IssueData[] = data.issues;
-
-  let issueLink;
-  let linkText;
-  const matchingIssues = issues.filter((issue) => issue.title === issueTitle);
-  if (matchingIssues.length !== 0) {
-    // There is a matching issue, show that in the tooltip box.
-    linkText = "Test is disabled";
-    issueLink = matchingIssues[0].html_url;
-  } else {
-    // No matching issue, open a window to create one.
-    const examplesURL = `http://torch-ci.com/failure/${encodeURIComponent(
-      failureCaptures
-    )}`;
-    const issueBody =
-      encodeURIComponent(`Platforms: <fill this in or delete. Valid labels are: asan, linux, mac, macos, rocm, win, windows.>
-
-This test was disabled because it is failing on master ([recent examples](${examplesURL})).`);
-    linkText = "Disable test";
-    issueLink = `https://github.com/pytorch/pytorch/issues/new?title=${issueTitle}&body=${issueBody}`;
-  }
-
-  return (
-    <span>
-      {" | "}
-      <a target="_blank" rel="noreferrer" href={issueLink}>
-        {linkText}
-      </a>
-    </span>
-  );
-}
-
-function JobTooltip({ job }: { job: JobData }) {
-  // For nonexistent jobs, just show something basic:
-  if (!job.hasOwnProperty("id")) {
-    return <div>{`[does not exist] ${job.name}`}</div>;
-  }
-
-  const rawLogs =
-    job.conclusion !== "pending" ? (
-      <span>
-        {" | "}
-        <a target="_blank" rel="noreferrer" href={job.logUrl}>
-          Raw logs
-        </a>
-      </span>
-    ) : null;
-
-  const durationS =
-    job.durationS !== null ? (
-      <span>{` | Duration: ${durationHuman(job.durationS!)}`}</span>
-    ) : null;
-
-  const failureCaptures =
-    job.failureCaptures !== null ? (
-      <span>
-        {" | "}
-        <a
-          target="_blank"
-          rel="noreferrer"
-          href={`/failure/${encodeURIComponent(job.failureCaptures as string)}`}
-        >
-          more like this
-        </a>
-      </span>
-    ) : null;
-
-  let disableIssue = null;
-  if (job.failureLine !== null) {
-    const testFailureRe = /^(?:FAIL|ERROR) \[.*\]: (test_.* \(.*Test.*\))/;
-    const match = job.failureLine!.match(testFailureRe);
-    if (match !== null) {
-      const issueTitle = `DISABLED ${match[1]}`;
-      disableIssue = (
-        <DisableIssue
-          issueTitle={issueTitle}
-          failureCaptures={job.failureCaptures as string}
-        />
-      );
-    }
-  }
-
-  const failureContext =
-    job.failureLine !== null ? (
-      <details>
-        <summary>
-          <strong>Click for context </strong>
-          <code>{job.failureLine}</code>
-        </summary>
-        <pre>{job.failureContext}</pre>
-      </details>
-    ) : null;
-
-  return (
-    <div>
-      {`[${job.conclusion}] ${job.name}`}
-      <div>
-        <em>click to pin this tooltip, double-click for job page</em>
-      </div>
-      <div id="options-row">
-        <a target="_blank" rel="noreferrer" href={job.htmlUrl}>
-          Job page
-        </a>
-        <span>
-          {" | "}
-          <a target="_blank" rel="noreferrer" href={`commit/${job.sha}`}>
-            Commit HUD
-          </a>
-        </span>
-        {rawLogs}
-        {failureCaptures}
-        {durationS}
-        {disableIssue}
-        {failureContext}
-      </div>
-    </div>
-  );
 }
 
 function JobCell({ sha, job }: { sha: string; job: JobData }) {
