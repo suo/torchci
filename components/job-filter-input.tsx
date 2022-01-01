@@ -1,6 +1,3 @@
-import { useRouter } from "next/router";
-import React, { useState, useEffect } from "react";
-
 export function JobFilterInput({
   currentFilter,
   handleSubmit,

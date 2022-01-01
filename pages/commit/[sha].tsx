@@ -55,8 +55,8 @@ function WorkflowBox({
     <div className={workflowClass}>
       <h3>{workflowName}</h3>
       {jobs.map((job) => (
-        <div>
-          <JobSummary key={job.id} job={job} />
+        <div key={job.id}>
+          <JobSummary job={job} />
           <JobFailureContext job={job} />
         </div>
       ))}

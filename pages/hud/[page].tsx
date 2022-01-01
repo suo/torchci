@@ -152,6 +152,13 @@ function FilterableHudTable({
   const normalizedJobFilter =
     jobFilter === null || jobFilter === "" ? null : jobFilter.toLowerCase();
 
+  useEffect(() => {
+    document.addEventListener("keydown", (e) => {
+      if (e.code === "Escape") {
+        setJobFilter(null);
+      }
+    });
+  }, []);
   const handleInput = useCallback((f) => setJobFilter(f), []);
   const handleSubmit = useCallback(() => {
     if (jobFilter === "") {

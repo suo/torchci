@@ -1,0 +1,42 @@
+.workflowBoxFail {
+  border: 1px solid gray;
+  padding: 10px;
+  border-radius: 5px;
+  background-color: mistyrose;
+}
+
+.workflowBoxPending {
+  border: 1px solid gray;
+  padding: 10px;
+  border-radius: 5px;
+  background-color: azure;
+}
+
+.workflowBoxSuccess {
+  border: 1px solid gray;
+  padding: 10px;
+  border-radius: 5px;
+  background-color: lightgreen;
+}
+
+.shaTitleElement {
+  padding-right: 0.5em;
+  padding-left: 0.5em;
+  border-left: 1px solid black;
+}
+
+.minihudGrid {
+  display: grid;
+  grid-template-columns: 1fr 30px;
+}
+
+.sha {
+  font-family: monospace;
+}
+.extraShaInfo {
+  font-size: smaller;
+}
+
+.commitTitle {
+  font-weight: 600;
+}
