@@ -1,4 +1,3 @@
-import { LocalTimeHuman } from "../../components/time-utils";
 import { useRouter } from "next/router";
 import _ from "lodash";
 import useSWR, { SWRConfig } from "swr";
@@ -11,13 +10,15 @@ import React, {
   useCallback,
 } from "react";
 import { GetStaticPaths, GetStaticProps } from "next";
-import { JobData, RowData } from "../../lib/types";
-import fetchHud from "../../lib/fetch-hud";
 import Link from "next/link";
-import { TooltipTarget } from "../../components/tooltip-target";
-import JobConclusion from "../../components/job-conclusion";
-import JobTooltip from "../../components/job-tooltip";
-import { JobFilterInput } from "../../components/job-filter-input";
+
+import { JobData, RowData } from "lib/types";
+import fetchHud from "lib/fetch-hud";
+import { LocalTimeHuman } from "components/time-utils";
+import { TooltipTarget } from "components/tooltip-target";
+import JobConclusion from "components/job-conclusion";
+import JobTooltip from "components/job-tooltip";
+import { JobFilterInput } from "components/job-filter-input";
 
 function includesCaseInsensitive(value: string, pattern: string): boolean {
   return value.toLowerCase().includes(pattern.toLowerCase());

@@ -4,9 +4,10 @@ dayjs.extend(utc);
 
 import { useRouter } from "next/router";
 import useSWR from "swr";
-import JobSummary, { JobFailureContext } from "../../components/job-summary";
-import { JobData } from "../../lib/types";
 import { BarChart, Bar, CartesianGrid, Tooltip, XAxis, YAxis } from "recharts";
+
+import JobSummary, { JobFailureContext } from "components/job-summary";
+import { JobData } from "lib/types";
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 

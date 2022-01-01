@@ -1,13 +1,5 @@
 import { GetStaticProps } from "next";
 import useSWR, { SWRConfig } from "swr";
-import fetchHud from "../lib/fetch-hud";
-import { JobData, RowData } from "../lib/types";
-
-import styles from "../components/minihud.module.css";
-import { JobFailureContext } from "../components/job-summary";
-import { JobLinks } from "../components/job-tooltip";
-import { LocalTimeHuman } from "../components/time-utils";
-import JobConclusion from "../components/job-conclusion";
 import {
   createContext,
   CSSProperties,
@@ -16,7 +8,15 @@ import {
   useState,
 } from "react";
 import { useRouter } from "next/router";
-import { JobFilterInput } from "../components/job-filter-input";
+
+import fetchHud from "lib/fetch-hud";
+import { JobData, RowData } from "lib/types";
+import styles from "components/minihud.module.css";
+import { JobFailureContext } from "components/job-summary";
+import { JobLinks } from "components/job-tooltip";
+import { LocalTimeHuman } from "components/time-utils";
+import JobConclusion from "components/job-conclusion";
+import { JobFilterInput } from "components/job-filter-input";
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 

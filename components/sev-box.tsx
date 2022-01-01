@@ -1,5 +1,5 @@
 import useSWR from "swr";
-import { IssueData } from "../lib/types";
+import { IssueData } from "lib/types";
 import styles from "./sev-box.module.css";
 
 function SevBox({ issue }: { issue: IssueData }) {

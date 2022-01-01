@@ -1,7 +1,7 @@
 import { NextApiRequest, NextApiResponse } from "next";
 
-import getRocksetClient from "../../lib/rockset";
-import { IssueData } from "../../lib/types";
+import getRocksetClient from "lib/rockset";
+import { IssueData } from "lib/types";
 interface Data {
   issues: IssueData[];
 }

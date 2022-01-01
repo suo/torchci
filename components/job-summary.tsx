@@ -1,4 +1,4 @@
-import { JobData } from "../lib/types";
+import { JobData } from "lib/types";
 import JobConclusion from "./job-conclusion";
 
 export function JobFailureContext({ job }: { job: JobData }) {

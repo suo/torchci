@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from "next";
-import getRocksetClient from "../../../lib/rockset";
+import getRocksetClient from "lib/rockset";
 
 interface Data {}
 

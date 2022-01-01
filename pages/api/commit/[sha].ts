@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from "next";
-import fetchCommit from "../../../lib/fetch-commit";
-import { CommitData } from "../../../lib/types";
+import fetchCommit from "lib/fetch-commit";
+import { CommitData } from "lib/types";
 
 export default async function handler(
   req: NextApiRequest,

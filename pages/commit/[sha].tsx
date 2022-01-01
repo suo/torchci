@@ -1,11 +1,12 @@
 import { GetStaticPaths, GetStaticProps } from "next";
-import fetchCommit from "../../lib/fetch-commit";
-import { JobData } from "../../lib/types";
-import styles from "../../components/commit.module.css";
 import _ from "lodash";
 import { useRouter } from "next/router";
 import useSWR from "swr";
-import JobSummary, { JobFailureContext } from "../../components/job-summary";
+
+import fetchCommit from "lib/fetch-commit";
+import { JobData } from "lib/types";
+import styles from "components/commit.module.css";
+import JobSummary, { JobFailureContext } from "components/job-summary";
 
 function isFailedJob(job: JobData) {
   return (
