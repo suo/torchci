@@ -57,20 +57,26 @@ export default async function fetchHud(page: number): Promise<{
   const names = Array.from(namesSet).sort();
 
   // Construct mapping of sha => job name => job data
-  //
-  // Subtle: here, we sort the jobs by "id" first. This ensures that if there
-  // are multiple jobs with the same name, the most recent one will come last,
-  // and thus be the one selected by the `keyBy` call below.
-  //
-  // Q: How can there be more than one job with the same name for a given sha?
-  // A: Periodic builds can be scheduled multiple times for one sha. In those
-  // cases, we want the most recent job to be shown.
-  results = _.sortBy(results, "id");
   const jobsBySha: {
     [sha: string]: { [name: string]: JobData };
   } = {};
-  _.forEach(_.groupBy(results, "sha"), (jobs, sha) => {
-    jobsBySha[sha] = _.keyBy(jobs, "name");
+  results!.forEach((job: JobData) => {
+    if (jobsBySha[job.sha!] === undefined) {
+      jobsBySha[job.sha!] = {};
+    }
+
+    const existingJob = jobsBySha[job.sha!][job.name];
+    if (existingJob !== undefined) {
+      // If there are multiple jobs with the same name, we want the most recent.
+      // Q: How can there be more than one job with the same name for a given sha?
+      // A: Periodic builds can be scheduled multiple times for one sha. In those
+      // cases, we want the most recent job to be shown.
+      if (job.id! > existingJob.id!) {
+        jobsBySha[job.sha!][job.name] = job;
+      }
+    } else {
+      jobsBySha[job.sha!][job.name] = job;
+    }
   });
 
   const shaGrid: RowData[] = [];
