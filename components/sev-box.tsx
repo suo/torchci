@@ -29,6 +29,9 @@ export default function SevReport() {
     return null;
   }
   const issues: IssueData[] = data.issues;
+  if (issues.length === 0) {
+    return null;
+  }
 
   return (
     <div>

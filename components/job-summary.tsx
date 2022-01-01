@@ -1,7 +1,7 @@
 import { JobData } from "../lib/types";
 import JobConclusion from "./job-conclusion";
 
-function JobFailureContext({ job }: { job: JobData }) {
+export function JobFailureContext({ job }: { job: JobData }) {
   if (job.failureContext == null) {
     return null;
   }
@@ -20,7 +20,6 @@ export default function JobSummary({ job }: { job: JobData }) {
     <div>
       <JobConclusion conclusion={job.conclusion} />
       <a href={job.htmlUrl}> {job.name} </a>
-      <JobFailureContext job={job} />
     </div>
   );
 }

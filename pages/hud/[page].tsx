@@ -17,6 +17,7 @@ import Link from "next/link";
 import { TooltipTarget } from "../../components/tooltip-target";
 import JobConclusion from "../../components/job-conclusion";
 import JobTooltip from "../../components/job-tooltip";
+import { JobFilterInput } from "../../components/job-filter-input";
 
 function includesCaseInsensitive(value: string, pattern: string): boolean {
   return value.toLowerCase().includes(pattern.toLowerCase());
@@ -152,22 +153,31 @@ function FilterableHudTable({
     jobFilter === null || jobFilter === "" ? null : jobFilter.toLowerCase();
 
   const handleInput = useCallback((f) => setJobFilter(f), []);
-  const handleSubmit = useCallback(
-    (f) => {
-      if (f === "") {
-        router.push(`/hud/${page}`, undefined, { shallow: true });
-      } else {
-        router.push(`/hud/${page}?name_filter=${f}`, undefined, {
-          shallow: true,
-        });
-      }
-    },
-    [page, router]
-  );
+  const handleSubmit = useCallback(() => {
+    if (jobFilter === "") {
+      router.push(`/hud/${page}`, undefined, { shallow: true });
+    } else {
+      router.push(`/hud/${page}?name_filter=${jobFilter}`, undefined, {
+        shallow: true,
+      });
+    }
+  }, [page, router, jobFilter]);
+
+  // We have to use an effect hook here because query params are undefined at
+  // static generation time; they only become available after hydration.
+  useEffect(() => {
+    const filterValue = (router.query.name_filter as string) || "";
+    setJobFilter(filterValue);
+    handleInput(filterValue);
+  }, [router.query.name_filter, handleInput]);
 
   return (
     <div>
-      <JobFilterInput handleSubmit={handleSubmit} handleInput={handleInput} />
+      <JobFilterInput
+        currentFilter={jobFilter}
+        handleSubmit={handleSubmit}
+        handleInput={handleInput}
+      />
 
       <table className="hud-table">
         <HudTableColumns filter={normalizedJobFilter} names={jobNames} />
@@ -193,49 +203,6 @@ function HudTable({ page }: { page: number }) {
     <FilterableHudTable page={page} jobNames={data.jobNames}>
       <HudTableBody shaGrid={data.shaGrid} />
     </FilterableHudTable>
-  );
-}
-
-function JobFilterInput({
-  handleSubmit,
-  handleInput,
-}: {
-  handleSubmit: (value: string) => void;
-  handleInput: (value: string) => void;
-}) {
-  const router = useRouter();
-  const [currentFilter, setCurrentFilter] = useState("");
-  // We have to use an effect hook here because query params are undefined at
-  // static generation time; they only become available after hydration.
-  useEffect(() => {
-    const filterValue = (router.query.name_filter as string) || "";
-    setCurrentFilter(filterValue);
-    handleInput(filterValue);
-  }, [router.query.name_filter, handleInput]);
-
-  return (
-    <div>
-      <form
-        onSubmit={(e) => {
-          e.preventDefault();
-          handleSubmit(currentFilter);
-        }}
-      >
-        <label htmlFor="name_filter">
-          Job filter: (press enter to change url, esc to clear):{" "}
-        </label>
-        <input
-          onChange={(e) => {
-            setCurrentFilter(e.currentTarget.value);
-            handleInput(e.currentTarget.value);
-          }}
-          type="search"
-          name="name_filter"
-          value={currentFilter}
-        />
-        <input type="submit" value="Go" />
-      </form>
-    </div>
   );
 }
 

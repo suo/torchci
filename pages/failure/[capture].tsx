@@ -4,7 +4,7 @@ dayjs.extend(utc);
 
 import { useRouter } from "next/router";
 import useSWR from "swr";
-import JobSummary from "../../components/job-summary";
+import JobSummary, { JobFailureContext } from "../../components/job-summary";
 import { JobData } from "../../lib/types";
 import { BarChart, Bar, CartesianGrid, Tooltip, XAxis, YAxis } from "recharts";
 
@@ -74,6 +74,7 @@ function FailureInfo({
         {samples.map((sample) => (
           <li key={sample.id}>
             <JobSummary job={sample} />
+            <JobFailureContext job={sample} />
           </li>
         ))}
       </ul>

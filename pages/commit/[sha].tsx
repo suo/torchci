@@ -5,7 +5,7 @@ import styles from "../../components/commit.module.css";
 import _ from "lodash";
 import { useRouter } from "next/router";
 import useSWR from "swr";
-import JobSummary from "../../components/job-summary";
+import JobSummary, { JobFailureContext } from "../../components/job-summary";
 
 function isFailedJob(job: JobData) {
   return (
@@ -32,6 +32,7 @@ function FilteredJobList({
         {filteredJobs.map((job) => (
           <li key={job.id}>
             <JobSummary job={job} />
+            <JobFailureContext job={job} />
           </li>
         ))}
       </ul>
@@ -54,7 +55,10 @@ function WorkflowBox({
     <div className={workflowClass}>
       <h3>{workflowName}</h3>
       {jobs.map((job) => (
-        <JobSummary key={job.id} job={job} />
+        <div>
+          <JobSummary key={job.id} job={job} />
+          <JobFailureContext job={job} />
+        </div>
       ))}
     </div>
   );
