@@ -12,7 +12,13 @@ import React, {
 import { GetStaticPaths, GetStaticProps } from "next";
 import Link from "next/link";
 
-import { JobData, RowData } from "lib/types";
+import {
+  formatHudURL,
+  HudParams,
+  JobData,
+  packHudParams,
+  RowData,
+} from "lib/types";
 import fetchHud from "lib/fetch-hud";
 import { LocalTimeHuman } from "components/time-utils";
 import { TooltipTarget } from "components/tooltip-target";
@@ -196,8 +202,8 @@ function FilterableHudTable({
   );
 }
 
-function HudTable({ page }: { page: number }) {
-  const { data } = useSWR(`/api/hud/${page}`, fetcher, {
+function HudTable({ params }: { params: HudParams }) {
+  const { data } = useSWR(formatHudURL(params), fetcher, {
     refreshInterval: 60 * 1000, // refresh every minute
     // Refresh even when the user isn't looking, so that switching to the tab
     // will always have fresh info.
@@ -208,22 +214,27 @@ function HudTable({ page }: { page: number }) {
   // FilterableHudTable component. This is for rendering performance; we don't
   // want React to re-render the whole table every time the filter changes.
   return (
-    <FilterableHudTable page={page} jobNames={data.jobNames}>
+    <FilterableHudTable page={params.page} jobNames={data.jobNames}>
       <HudTableBody shaGrid={data.shaGrid} />
     </FilterableHudTable>
   );
 }
 
-function PageSelector({ curPage }: { curPage: number }) {
+function PageSelector({ params }: { params: HudParams }) {
   return (
     <div>
-      Page {curPage}:{" "}
-      {curPage !== 0 ? (
+      Page {params.page}:{" "}
+      {params.page !== 0 ? (
         <span>
-          <Link href={`/hud/${curPage - 1}`}>Prev</Link> |{" "}
+          <Link href={formatHudURL({ ...params, page: params.page - 1 })}>
+            Prev
+          </Link>{" "}
+          |{" "}
         </span>
       ) : null}
-      <Link href={`/hud/${curPage + 1}`}>Next</Link>
+      <Link href={formatHudURL({ ...params, page: params.page + 1 })}>
+        Next
+      </Link>
     </div>
   );
 }
@@ -251,21 +262,24 @@ export default function Hud({ fallback }: any) {
     });
   }, []);
 
-  // Page handling
-  const page = router.query.page ? parseInt(router.query.page as string) : 0;
+  const params = packHudParams(router.query);
 
   return (
     <SWRConfig value={{ fallback }}>
       <PinnedTooltipContext.Provider value={[pinnedTooltip, setPinnedTooltip]}>
         <div id="hud-container" onClick={handleClick}>
           <h1 id="hud-header">
-            PyTorch HUD: <code>master</code>
+            PyTorch HUD: <code>{params.branch}</code>
           </h1>
           <div>This page automatically updates.</div>
 
-          <PageSelector curPage={page} />
+          <PageSelector params={params} />
 
-          {router.isFallback ? <div>Loading...</div> : <HudTable page={page} />}
+          {router.isFallback ? (
+            <div>Loading...</div>
+          ) : (
+            <HudTable params={params} />
+          )}
         </div>
       </PinnedTooltipContext.Provider>
     </SWRConfig>
@@ -273,16 +287,28 @@ export default function Hud({ fallback }: any) {
 }
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  return { paths: [{ params: { page: "0" } }], fallback: true };
+  return {
+    paths: [
+      {
+        params: {
+          repoOwner: "pytorch",
+          repoName: "pytorch",
+          branch: "master",
+          page: "0",
+        },
+      },
+    ],
+    fallback: true,
+  };
 };
 
 export const getStaticProps: GetStaticProps = async ({ params }) => {
-  const pageIndex = params!.page ? parseInt(params!.page as string) : 0;
-  const fallback: any = {};
-  fallback[`/api/hud/${pageIndex}`] = await fetchHud(pageIndex);
+  const packedParams = packHudParams(params);
   return {
     props: {
-      fallback,
+      fallback: {
+        [formatHudURL(packedParams)]: await fetchHud(packedParams),
+      },
     },
     revalidate: 60,
   };

@@ -1,8 +1,8 @@
 import _ from "lodash";
 import getRocksetClient from "./rockset";
-import { JobData, RowData } from "./types";
+import { HudParams, JobData, RowData } from "./types";
 
-export default async function fetchHud(page: number): Promise<{
+export default async function fetchHud(params: HudParams): Promise<{
   shaGrid: RowData[];
   jobNames: string[];
 }> {
@@ -16,12 +16,12 @@ export default async function fetchHud(page: number): Promise<{
         {
           name: "branch",
           type: "string",
-          value: "refs/heads/master",
+          value: `refs/heads/${params.branch}`,
         },
         {
           name: "page",
           type: "int",
-          value: page.toString(),
+          value: params.page.toString(),
         },
       ],
     }
@@ -35,12 +35,12 @@ export default async function fetchHud(page: number): Promise<{
         {
           name: "branch",
           type: "string",
-          value: "refs/heads/master",
+          value: `refs/heads/${params.branch}`,
         },
         {
           name: "page",
           type: "int",
-          value: page.toString(),
+          value: params.page.toString(),
         },
       ],
     }
@@ -82,10 +82,10 @@ export default async function fetchHud(page: number): Promise<{
   const shaGrid: RowData[] = [];
 
   _.forEach(commitsBySha, (commit, sha) => {
-    const nameToJobs = jobsBySha[sha];
     const jobs: JobData[] = [];
+    const nameToJobs = jobsBySha[sha];
     for (const name of names) {
-      if (nameToJobs[name] === undefined) {
+      if (nameToJobs === undefined || nameToJobs[name] === undefined) {
         // Insert default name
         jobs.push({
           name,

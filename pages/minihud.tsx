@@ -10,7 +10,7 @@ import {
 import { useRouter } from "next/router";
 
 import fetchHud from "lib/fetch-hud";
-import { JobData, RowData } from "lib/types";
+import { formatHudURL, HudParams, JobData, RowData } from "lib/types";
 import styles from "components/minihud.module.css";
 import { JobFailureContext } from "components/job-summary";
 import { JobLinks } from "components/job-tooltip";
@@ -131,7 +131,13 @@ function ShaSummary({ row }: { row: RowData }) {
 }
 
 function MiniHud() {
-  const { data } = useSWR(`/api/hud/0`, fetcher, {
+  const params: HudParams = {
+    branch: "master",
+    repoOwner: "pytorch",
+    repoName: "pytorch",
+    page: 0,
+  };
+  const { data } = useSWR(formatHudURL(params), fetcher, {
     refreshInterval: 60 * 1000, // refresh every minute
     // Refresh even when the user isn't looking, so that switching to the tab
     // will always have fresh info.
@@ -192,11 +198,17 @@ export default function Page({ fallback }: any) {
 }
 
 export const getStaticProps: GetStaticProps = async () => {
-  const fallback: any = {};
-  fallback[`/api/hud/0`] = await fetchHud(0);
+  const params: HudParams = {
+    branch: "master",
+    repoOwner: "pytorch",
+    repoName: "pytorch",
+    page: 0,
+  };
   return {
     props: {
-      fallback,
+      fallback: {
+        [formatHudURL(params)]: await fetchHud(params),
+      },
     },
     revalidate: 60,
   };

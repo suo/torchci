@@ -5,7 +5,7 @@ module.exports = {
     return [
       {
         source: "/",
-        destination: "/hud/0",
+        destination: "/hud/pytorch/pytorch/master/0",
       },
     ];
   },
