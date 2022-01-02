@@ -303,13 +303,13 @@ export default function Hud({ fallback }: any) {
         <div id="hud-container" onClick={handleClick}>
           <HudHeader params={params} />
           <div>This page automatically updates.</div>
-
-          <PageSelector params={params} />
-
           {router.isFallback ? (
             <div>Loading...</div>
           ) : (
-            <HudTable params={params} />
+            <div>
+              <PageSelector params={params} />
+              <HudTable params={params} />
+            </div>
           )}
         </div>
       </PinnedTooltipContext.Provider>
