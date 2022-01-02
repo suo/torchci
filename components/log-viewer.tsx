@@ -1,7 +1,6 @@
 import { JobData } from "lib/types";
 import { useEffect, useState } from "react";
-// import { LazyLog } from "react-lazylog";
-import useSWR from "swr";
+import useSWRImmutable from "swr";
 import Editor, { useMonaco } from "@monaco-editor/react";
 import { registerLogLanguage } from "lib/log-utils";
 
@@ -12,12 +11,7 @@ function Log({ url, line }: { url: string; line: number }) {
   useEffect(() => {
     monaco?.languages.typescript.javascriptDefaults.setEagerModelSync(true);
   }, [monaco]);
-  const { data, isValidating } = useSWR(url, fetcher, {
-    dedupingInterval: 999999,
-    // don't refetch data ever, since log data is immutable.
-    revalidateOnFocus: false,
-    revalidateOnReconnect: false,
-  });
+  const { data, isValidating } = useSWRImmutable(url, fetcher);
 
   if (isValidating) {
     return (
