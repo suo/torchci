@@ -41,8 +41,16 @@ function isFailedJob(job: JobData) {
 }
 
 function FailedJob({ job }: { job: JobData }) {
-  const [_jobFilter, setJobFilter] = useContext(JobFilterContext);
+  const [jobFilter, setJobFilter] = useContext(JobFilterContext);
   const [jobHover, setJobHover] = useContext(JobHoverContext);
+
+  function toggleJobFilter() {
+    if (jobFilter === job.name) {
+      setJobFilter(null);
+    } else {
+      setJobFilter(job.name);
+    }
+  }
 
   const linkStyle: CSSProperties = { cursor: "pointer" };
   if (job.name === jobHover) {
@@ -54,19 +62,25 @@ function FailedJob({ job }: { job: JobData }) {
         <JobConclusion conclusion={job.conclusion} />
         <a
           style={linkStyle}
-          onClick={() => setJobFilter(job.name)}
           onMouseEnter={() => setJobHover(job.name)}
           onMouseLeave={() => setJobHover(null)}
+          href={job.htmlUrl}
         >
           {" "}
           {job.name}
         </a>
       </div>
-      <span>
-        <a href={job.htmlUrl}>Job page</a> |{" "}
-      </span>
-      <JobLinks job={job} />
-      <LogViewer job={job} />
+      <div className={styles.jobLinkLine}>
+        <input
+          type="checkbox"
+          id="scales"
+          checked={jobFilter === job.name}
+          onChange={() => toggleJobFilter()}
+        />
+        <label htmlFor="scales">Set filter | </label>
+        <JobLinks job={job} />
+        <LogViewer job={job} />
+      </div>
     </div>
   );
 }
@@ -76,7 +90,7 @@ function FailedJobs({ failedJobs }: { failedJobs: JobData[] }) {
     return null;
   }
   return (
-    <ul>
+    <ul className={styles.failedJobList}>
       {failedJobs.map((job) => (
         <li key={job.id}>
           <FailedJob job={job} />

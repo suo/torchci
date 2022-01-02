@@ -40,3 +40,11 @@
 .commitTitle {
   font-weight: 600;
 }
+
+.jobLinkLine {
+  margin-bottom: 1em;
+}
+
+.failedJobList {
+  margin-bottom: 0;
+}
