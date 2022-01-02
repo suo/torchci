@@ -34,7 +34,7 @@ a {
 }
 
 td {
-  padding:0;
+  padding: 0;
 }
 
 .tooltip-target-no-click {
@@ -78,8 +78,22 @@ th {
 
 #hud-header {
   margin-top: 0px;
+  padding-bottom: 2px;
 }
 
 .highlight-log-line {
   background-color: indigo;
+}
+
+.branch-form {
+  display: inline;
+}
+.branch-form__input {
+  font-weight: bold;
+  font-family: monospace;
+  background-color: aliceblue;
+  font-size: 1em;
+  border: 0px;
+  padding: 0px;
+  padding-left: 5px;
 }

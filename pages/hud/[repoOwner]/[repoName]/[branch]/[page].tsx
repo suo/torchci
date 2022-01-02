@@ -239,6 +239,39 @@ function PageSelector({ params }: { params: HudParams }) {
   );
 }
 
+function HudHeader({ params }: { params: HudParams }) {
+  const [isInput, setIsInput] = useState(false);
+  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    // @ts-ignore
+    const branch = e.target[0].value;
+    window.location.href = formatHudURL({ ...params, branch });
+  }
+
+  return (
+    <h1 id="hud-header">
+      PyTorch HUD:{" "}
+      {isInput ? (
+        <form
+          className="branch-form"
+          onSubmit={handleSubmit}
+          onKeyDown={(e) => {
+            if (e.key === "Escape") {
+              setIsInput(false);
+            }
+          }}
+        >
+          <input autoFocus className="branch-form__input" type="text"></input>
+        </form>
+      ) : (
+        <code style={{ cursor: "pointer" }} onClick={() => setIsInput(true)}>
+          {params.branch}
+        </code>
+      )}
+    </h1>
+  );
+}
+
 const PinnedTooltipContext = createContext<[null | string, any]>([null, null]);
 
 export default function Hud({ fallback }: any) {
@@ -268,9 +301,7 @@ export default function Hud({ fallback }: any) {
     <SWRConfig value={{ fallback }}>
       <PinnedTooltipContext.Provider value={[pinnedTooltip, setPinnedTooltip]}>
         <div id="hud-container" onClick={handleClick}>
-          <h1 id="hud-header">
-            PyTorch HUD: <code>{params.branch}</code>
-          </h1>
+          <HudHeader params={params} />
           <div>This page automatically updates.</div>
 
           <PageSelector params={params} />
