@@ -79,3 +79,7 @@ th {
 #hud-header {
   margin-top: 0px;
 }
+
+.highlight-log-line {
+  background-color: indigo;
+}

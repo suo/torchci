@@ -20,21 +20,20 @@ export default async function fetchCommit(sha: string): Promise<CommitData> {
     }
   );
 
-  const commitJobsQuery =
-    await rocksetClient.queryLambdas.executeQueryLambdaByTag(
-      "commons",
-      "commit_jobs_query",
-      "latest",
-      {
-        parameters: [
-          {
-            name: "sha",
-            type: "string",
-            value: sha,
-          },
-        ],
-      }
-    );
+  const commitJobsQuery = await rocksetClient.queryLambdas.executeQueryLambda(
+    "commons",
+    "commit_jobs_query",
+    "4ba333d37b875c58",
+    {
+      parameters: [
+        {
+          name: "sha",
+          type: "string",
+          value: sha,
+        },
+      ],
+    }
+  );
 
   const commit = commitQuery.results?.[0].commit;
   const firstLine = commit.message.indexOf("\n");

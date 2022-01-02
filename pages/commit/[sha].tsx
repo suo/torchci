@@ -6,7 +6,8 @@ import useSWR from "swr";
 import fetchCommit from "lib/fetch-commit";
 import { JobData } from "lib/types";
 import styles from "components/commit.module.css";
-import JobSummary, { JobFailureContext } from "components/job-summary";
+import JobSummary from "components/job-summary";
+import dynamic from "next/dynamic";
 
 function isFailedJob(job: JobData) {
   return (
@@ -15,6 +16,11 @@ function isFailedJob(job: JobData) {
     job.conclusion === "timed_out"
   );
 }
+
+// react-lazylog doesn't work with SSR, so we have to import it dynamically like this.
+const LogViewer = dynamic(() => import("components/log-viewer"), {
+  ssr: false,
+});
 
 function FilteredJobList({
   filterName,
@@ -33,7 +39,7 @@ function FilteredJobList({
         {filteredJobs.map((job) => (
           <li key={job.id}>
             <JobSummary job={job} />
-            <JobFailureContext job={job} />
+            <LogViewer job={job} />
           </li>
         ))}
       </ul>
@@ -58,7 +64,7 @@ function WorkflowBox({
       {jobs.map((job) => (
         <div key={job.id}>
           <JobSummary job={job} />
-          <JobFailureContext job={job} />
+          <LogViewer job={job} />
         </div>
       ))}
     </div>

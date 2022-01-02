@@ -13,7 +13,7 @@ export interface JobData {
   logUrl?: string;
   durationS?: number;
   failureLine?: string;
-  failureRule?: string;
+  failureLineNumber?: number;
   failureContext?: string;
   failureCaptures?: string;
 }

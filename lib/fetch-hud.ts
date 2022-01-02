@@ -7,10 +7,10 @@ export default async function fetchHud(params: HudParams): Promise<{
   jobNames: string[];
 }> {
   const rocksetClient = getRocksetClient();
-  const hudQuery = await rocksetClient.queryLambdas.executeQueryLambdaByTag(
+  const hudQuery = await rocksetClient.queryLambdas.executeQueryLambda(
     "commons",
     "hud_query",
-    "latest",
+    "05875f87e51aecd5",
     {
       parameters: [
         {
