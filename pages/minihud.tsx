@@ -62,7 +62,6 @@ function FailedJob({ job }: { job: JobData }) {
           {" "}
           {job.name}
         </a>
-        <OriginalPRInfo job={job} />
       </div>
       <div className={styles.jobLinkLine}>
         <input

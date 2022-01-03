@@ -4,33 +4,36 @@ import styles from "./original-pr-info.module.css";
 
 export default function OriginalPRInfo({ job }: { job: JobData }) {
   const originalPrJob = job.originalPrData;
-  if (!isFailedJob(job) || originalPrJob === undefined) {
+  if (originalPrJob === undefined) {
     return null;
   }
 
-  const sameConclusion = originalPrJob.conclusion === job.conclusion;
+  const sameFailureConclusion =
+    isFailedJob(job) && originalPrJob.conclusion === job.conclusion;
   const sameClassification =
     originalPrJob.failureCaptures !== null &&
     originalPrJob.failureCaptures === job.failureCaptures;
 
-  if (sameConclusion) {
-    return (
-      <span>
-        {" | "}
-        <a
-          className={styles.originalPRJobFailure}
-          target="_blank"
-          rel="noreferrer"
-        >
-          original PR job failed
-          <span style={{ backgroundColor: "darkred" }}>
-            {" "}
-            {sameClassification && " WITH SAME ERROR!"}
-          </span>
-        </a>
+  let sameFailureWarning = null;
+  if (sameFailureConclusion) {
+    sameFailureWarning = (
+      <span className={styles.originalPRJobFailure}>
+        {" "}
+        also failed
+        <span style={{ backgroundColor: "darkred" }}>
+          {sameClassification && " WITH SAME ERROR!"}
+        </span>
       </span>
     );
   }
 
-  return null;
+  return (
+    <span>
+      {" | "}
+      <a target="_blank" rel="noreferrer" href={originalPrJob.htmlUrl}>
+        original PR job
+      </a>
+      {sameFailureWarning}
+    </span>
+  );
 }
