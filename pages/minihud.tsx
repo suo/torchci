@@ -143,7 +143,7 @@ function ShaSummary({ row }: { row: RowData }) {
           <a
             href={`https://www.internalfb.com/intern/test/bouncycastle/?arcanist_name=fbsource&revision_or_diff_id=${row.diffNum}`}
           >
-            <button>Revert</button>
+            <button className={styles.revertButton}>Revert</button>
           </a>
         </span>
       ) : null}

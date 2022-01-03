@@ -88,6 +88,7 @@ function DisableIssue({ job }: { job: JobData }) {
   const issues: IssueData[] = data.issues;
   let issueLink;
   let linkText;
+  let buttonStyle;
   const matchingIssues = issues.filter((issue) => issue.title === issueTitle);
 
   if (matchingIssues.length !== 0) {
@@ -99,13 +100,14 @@ function DisableIssue({ job }: { job: JobData }) {
     const issueBody = formatIssueBody(job.failureCaptures!);
     linkText = "Disable test";
     issueLink = `https://github.com/pytorch/pytorch/issues/new?title=${issueTitle}&body=${issueBody}`;
+    buttonStyle = styles.disableTestButton;
   }
 
   return (
     <span>
       {" | "}
       <a target="_blank" rel="noreferrer" href={issueLink}>
-        {linkText}
+        <button className={buttonStyle}>{linkText}</button>
       </a>
     </span>
   );
@@ -129,7 +131,7 @@ export function OriginalPRInfo({ job }: { job: JobData }) {
       <span className={styles.originalPRJobFailure}>
         {" "}
         also failed
-        <span style={{ backgroundColor: "darkred" }}>
+        <span style={{ color: "darkred" }}>
           {sameClassification && " WITH SAME ERROR!"}
         </span>
       </span>

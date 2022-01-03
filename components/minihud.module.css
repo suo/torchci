@@ -43,3 +43,9 @@
 .failedJobList {
   margin-bottom: 0;
 }
+
+.revertButton{
+  background-color: #dc3545;
+  border-color: #dc3545;
+  color: white;
+}
