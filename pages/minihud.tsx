@@ -53,6 +53,8 @@ function FailedJob({ job }: { job: JobData }) {
       <div>
         <JobConclusion conclusion={job.conclusion} />
         <a
+          target="_blank"
+          rel="noreferrer"
           style={linkStyle}
           onMouseEnter={() => setJobHover(job.name)}
           onMouseLeave={() => setJobHover(null)}
@@ -120,23 +122,37 @@ function ShaSummary({ row }: { row: RowData }) {
       <span className={`${styles.shaTitleElement} ${styles.commitTitle}`}>
         {/* here, we purposefully do not use Link/. The prefetch behavior
           (even with prefetch disabled) spams our backend).*/}
-        <a href={`/commit/${row.sha}`}>{row.commitMessage}</a>
+        <a target="_blank" rel="noreferrer" href={`/commit/${row.sha}`}>
+          {row.commitMessage}
+        </a>
       </span>
 
       <span
         className={`${styles.shaTitleElement} ${styles.sha} ${styles.extraShaInfo}`}
       >
-        <a href={row.commitUrl}>{row.sha.substring(0, 7)}</a>
+        <a target="_blank" rel="noreferrer" href={row.commitUrl}>
+          {row.sha.substring(0, 7)}
+        </a>
       </span>
       {row.prNum !== null && (
         <span className={`${styles.shaTitleElement} ${styles.extraShaInfo}`}>
-          <a href={`https://github.com/pytorch/pytorch/pull/${row.prNum}`}>
+          <a
+            target="_blank"
+            rel="noreferrer"
+            href={`https://github.com/pytorch/pytorch/pull/${row.prNum}`}
+          >
             Pull
           </a>
         </span>
       )}
       <span className={`${styles.shaTitleElement} ${styles.extraShaInfo}`}>
-        <a href={`https://www.internalfb.com/diff/${row.diffNum}`}>Diff</a>
+        <a
+          target="_blank"
+          rel="noreferrer"
+          href={`https://www.internalfb.com/diff/${row.diffNum}`}
+        >
+          Diff
+        </a>
       </span>
       {failedJobs.length !== 0 ? (
         <span className={styles.shaTitleElement}>
