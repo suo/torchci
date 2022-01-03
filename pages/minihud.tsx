@@ -111,7 +111,7 @@ function ShaSummary({ row }: { row: RowData }) {
 
   return (
     <div className={style}>
-      <span className={styles.shaTitleElement}>
+      <span className={`${styles.shaTitleElement} ${styles.timestamp}`}>
         <LocalTimeHuman timestamp={row.time} />
       </span>
       <span className={`${styles.shaTitleElement} ${styles.commitTitle}`}>

@@ -20,9 +20,7 @@
 }
 
 .shaTitleElement {
-  padding-right: 0.5em;
-  padding-left: 0.5em;
-  border-left: 1px solid black;
+  margin-right: 0.5em;
 }
 
 .sha {
@@ -48,7 +46,7 @@
   height: 1.25em;
 }
 
-.revertButton{
+.revertButton {
   background-color: #dc3545;
   border-color: #dc3545;
   color: white;
