@@ -36,12 +36,16 @@
   font-weight: 600;
 }
 
-.jobLinkLine {
+.failedJob {
   margin-bottom: 1em;
 }
 
 .failedJobList {
   margin-bottom: 0;
+}
+
+.failedJobLinks {
+  height: 1.25em;
 }
 
 .revertButton{

@@ -44,7 +44,7 @@ function FailedJob({ job }: { job: JobData }) {
     linkStyle.backgroundColor = "khaki";
   }
   return (
-    <>
+    <div className={styles.failedJob}>
       <div>
         <JobConclusion conclusion={job.conclusion} />
         <a
@@ -59,7 +59,7 @@ function FailedJob({ job }: { job: JobData }) {
           {job.name}
         </a>
       </div>
-      <div className={styles.jobLinkLine}>
+      <div className={styles.failedJobLinks}>
         <input
           type="checkbox"
           id="scales"
@@ -68,9 +68,9 @@ function FailedJob({ job }: { job: JobData }) {
         />
         <label htmlFor="scales">Set filter | </label>
         <JobLinks job={job} />
-        <LogViewer job={job} />
       </div>
-    </>
+      <LogViewer job={job} />
+    </div>
   );
 }
 
