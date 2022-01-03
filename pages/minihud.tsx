@@ -17,8 +17,9 @@ import { JobLinks } from "components/job-tooltip";
 import { LocalTimeHuman } from "components/time-utils";
 import JobConclusion from "components/job-conclusion";
 import { JobFilterInput } from "components/job-filter-input";
-
-const fetcher = (url: string) => fetch(url).then((res) => res.json());
+import OriginalPRInfo from "components/original-pr-info";
+import useHudData from "lib/use-hud-data";
+import { isFailedJob } from "lib/job-utils";
 
 function includesCaseInsensitive(value: string, pattern: string): boolean {
   if (pattern === "") {
@@ -31,14 +32,6 @@ function includesCaseInsensitive(value: string, pattern: string): boolean {
 const LogViewer = dynamic(() => import("components/log-viewer"), {
   ssr: false,
 });
-
-function isFailedJob(job: JobData) {
-  return (
-    job.conclusion === "failure" ||
-    job.conclusion === "cancelled" ||
-    job.conclusion === "timed_out"
-  );
-}
 
 function FailedJob({ job }: { job: JobData }) {
   const [jobFilter, setJobFilter] = useContext(JobFilterContext);
@@ -69,6 +62,7 @@ function FailedJob({ job }: { job: JobData }) {
           {" "}
           {job.name}
         </a>
+        <OriginalPRInfo job={job} />
       </div>
       <div className={styles.jobLinkLine}>
         <input
@@ -156,13 +150,7 @@ function MiniHud() {
     repoName: "pytorch",
     page: 0,
   };
-  const { data } = useSWR(formatHudURL("api/hud", params), fetcher, {
-    refreshInterval: 60 * 1000, // refresh every minute
-    // Refresh even when the user isn't looking, so that switching to the tab
-    // will always have fresh info.
-    refreshWhenHidden: true,
-  });
-  const shaGrid: RowData[] = data.shaGrid;
+  const { shaGrid } = useHudData(params);
 
   return (
     <div>

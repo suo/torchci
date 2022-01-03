@@ -16,6 +16,7 @@ export interface JobData {
   failureLineNumber?: number;
   failureContext?: string;
   failureCaptures?: string;
+  originalPrData?: JobData;
 }
 
 export interface CommitData {

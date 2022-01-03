@@ -3,6 +3,7 @@ import React from "react";
 import { IssueData, JobData } from "../lib/types";
 import useSWR from "swr";
 import { JobFailureContext } from "./job-summary";
+import OriginalPRInfo from "./original-pr-info";
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 const testFailureRe = /^(?:FAIL|ERROR) \[.*\]: (test_.* \(.*Test.*\))/;
@@ -50,6 +51,7 @@ export function JobLinks({ job }: { job: JobData }) {
       {rawLogs}
       {failureCaptures}
       {durationS}
+      <OriginalPRInfo job={job} />
       <DisableIssue job={job} />
     </span>
   );

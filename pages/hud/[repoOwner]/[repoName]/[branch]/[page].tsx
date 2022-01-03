@@ -25,6 +25,8 @@ import { TooltipTarget } from "components/tooltip-target";
 import JobConclusion from "components/job-conclusion";
 import JobTooltip from "components/job-tooltip";
 import { JobFilterInput } from "components/job-filter-input";
+import { JobFailureContext } from "components/job-summary";
+import useHudData from "lib/use-hud-data";
 
 function includesCaseInsensitive(value: string, pattern: string): boolean {
   return value.toLowerCase().includes(pattern.toLowerCase());
@@ -130,8 +132,6 @@ function HudTableHeader({
   );
 }
 
-const fetcher = (url: string) => fetch(url).then((res) => res.json());
-
 function HudTableBody({ shaGrid }: { shaGrid: RowData[] }) {
   return (
     <tbody>
@@ -203,19 +203,14 @@ function FilterableHudTable({
 }
 
 function HudTable({ params }: { params: HudParams }) {
-  const { data } = useSWR(formatHudURL("api/hud", params), fetcher, {
-    refreshInterval: 60 * 1000, // refresh every minute
-    // Refresh even when the user isn't looking, so that switching to the tab
-    // will always have fresh info.
-    refreshWhenHidden: true,
-  });
+  const { shaGrid, jobNames } = useHudData(params);
 
   // Here, we are intentionally injecting HudTableBody into the
   // FilterableHudTable component. This is for rendering performance; we don't
   // want React to re-render the whole table every time the filter changes.
   return (
-    <FilterableHudTable page={params.page} jobNames={data.jobNames}>
-      <HudTableBody shaGrid={data.shaGrid} />
+    <FilterableHudTable page={params.page} jobNames={jobNames}>
+      <HudTableBody shaGrid={shaGrid} />
     </FilterableHudTable>
   );
 }

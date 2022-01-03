@@ -8,14 +8,7 @@ import { JobData } from "lib/types";
 import styles from "components/commit.module.css";
 import JobSummary from "components/job-summary";
 import dynamic from "next/dynamic";
-
-function isFailedJob(job: JobData) {
-  return (
-    job.conclusion === "failure" ||
-    job.conclusion === "cancelled" ||
-    job.conclusion === "timed_out"
-  );
-}
+import { isFailedJob } from "lib/job-utils";
 
 // react-lazylog doesn't work with SSR, so we have to import it dynamically like this.
 const LogViewer = dynamic(() => import("components/log-viewer"), {
@@ -112,14 +105,13 @@ function VersionControlLinks({
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 function CommitInfo({ sha, fallback }: { sha: string; fallback: any }) {
-  const { data } = useSWR(`/api/commit/${sha}`, fetcher, {
+  const { data: commit } = useSWR(`/api/commit/${sha}`, fetcher, {
     fallback,
     refreshInterval: 60 * 1000, // refresh every minute
     // Refresh even when the user isn't looking, so that switching to the tab
     // will always have fresh info.
     refreshWhenHidden: true,
   });
-  const commit = data;
 
   return (
     <div>
