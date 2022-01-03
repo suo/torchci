@@ -1,4 +1,4 @@
-import styles from "./job-conclusion.module.css";
+import styles from "./JobConclusion.module.css";
 
 export default function JobConclusion({ conclusion }: { conclusion?: string }) {
   let conclusionChar;

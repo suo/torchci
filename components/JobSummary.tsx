@@ -1,5 +1,5 @@
 import { JobData } from "lib/types";
-import JobConclusion from "./job-conclusion";
+import JobConclusion from "./JobConclusion";
 
 export default function JobSummary({ job }: { job: JobData }) {
   return (

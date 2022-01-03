@@ -10,15 +10,15 @@ import {
 import { useRouter } from "next/router";
 import dynamic from "next/dynamic";
 
-import fetchHud from "lib/fetch-hud";
+import fetchHud from "lib/fetchHud";
 import { formatHudURL, HudParams, JobData, RowData } from "lib/types";
 import styles from "components/minihud.module.css";
-import JobLinks from "components/job-links";
-import { LocalTimeHuman } from "components/time-utils";
-import JobConclusion from "components/job-conclusion";
-import { JobFilterInput } from "components/job-filter-input";
-import useHudData from "lib/use-hud-data";
-import { isFailedJob } from "lib/job-utils";
+import JobLinks from "components/JobLinks";
+import { LocalTimeHuman } from "components/TimeUtils";
+import JobConclusion from "components/JobConclusion";
+import JobFilterInput from "components/JobFilterInput";
+import useHudData from "lib/useHudData";
+import { isFailedJob } from "lib/jobUtils";
 
 function includesCaseInsensitive(value: string, pattern: string): boolean {
   if (pattern === "") {
@@ -28,7 +28,7 @@ function includesCaseInsensitive(value: string, pattern: string): boolean {
 }
 
 // react-lazylog doesn't work with SSR, so we have to import it dynamically like this.
-const LogViewer = dynamic(() => import("components/log-viewer"), {
+const LogViewer = dynamic(() => import("components/LogViewer"), {
   ssr: false,
 });
 

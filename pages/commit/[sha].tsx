@@ -3,15 +3,15 @@ import _ from "lodash";
 import { useRouter } from "next/router";
 import useSWR from "swr";
 
-import fetchCommit from "lib/fetch-commit";
+import fetchCommit from "lib/fetchCommit";
 import { JobData } from "lib/types";
 import styles from "components/commit.module.css";
-import JobSummary from "components/job-summary";
+import JobSummary from "components/JobSummary";
 import dynamic from "next/dynamic";
-import { isFailedJob } from "lib/job-utils";
+import { isFailedJob } from "lib/jobUtils";
 
 // react-lazylog doesn't work with SSR, so we have to import it dynamically like this.
-const LogViewer = dynamic(() => import("components/log-viewer"), {
+const LogViewer = dynamic(() => import("components/LogViewer"), {
   ssr: false,
 });
 

@@ -1,7 +1,7 @@
 import { useRef, useState } from "react";
-import styles from "./tooltip-target.module.css";
+import styles from "./TooltipTarget.module.css";
 
-export function TooltipTarget({
+export default function TooltipTarget({
   id,
   pinnedId,
   setPinnedId,

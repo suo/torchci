@@ -1,4 +1,4 @@
-export function JobFilterInput({
+export default function JobFilterInput({
   currentFilter,
   handleSubmit,
   handleInput,

@@ -19,13 +19,13 @@ import {
   packHudParams,
   RowData,
 } from "lib/types";
-import fetchHud from "lib/fetch-hud";
-import { LocalTimeHuman } from "components/time-utils";
-import { TooltipTarget } from "components/tooltip-target";
-import JobConclusion from "components/job-conclusion";
-import JobTooltip from "components/job-tooltip";
-import { JobFilterInput } from "components/job-filter-input";
-import useHudData from "lib/use-hud-data";
+import fetchHud from "lib/fetchHud";
+import { LocalTimeHuman } from "components/TimeUtils";
+import TooltipTarget from "components/TooltipTarget";
+import JobConclusion from "components/JobConclusion";
+import JobTooltip from "components/JobTooltip";
+import JobFilterInput from "components/JobFilterInput";
+import useHudData from "lib/useHudData";
 
 function includesCaseInsensitive(value: string, pattern: string): boolean {
   return value.toLowerCase().includes(pattern.toLowerCase());

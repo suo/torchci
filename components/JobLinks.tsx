@@ -1,7 +1,49 @@
+import { durationHuman } from "./TimeUtils";
+import useSWR from "swr";
 import React from "react";
 import { IssueData, JobData } from "../lib/types";
-import useSWR from "swr";
-import JobLinks from "./job-links";
+import { isFailedJob } from "lib/jobUtils";
+import styles from "./JobLinks.module.css";
+
+export default function JobLinks({ job }: { job: JobData }) {
+  const rawLogs =
+    job.conclusion !== "pending" ? (
+      <span>
+        <a target="_blank" rel="noreferrer" href={job.logUrl}>
+          Raw logs
+        </a>
+      </span>
+    ) : null;
+
+  const durationS =
+    job.durationS !== null ? (
+      <span>{` | Duration: ${durationHuman(job.durationS!)}`}</span>
+    ) : null;
+
+  const failureCaptures =
+    job.failureCaptures !== null ? (
+      <span>
+        {" | "}
+        <a
+          target="_blank"
+          rel="noreferrer"
+          href={`/failure/${encodeURIComponent(job.failureCaptures as string)}`}
+        >
+          more like this
+        </a>
+      </span>
+    ) : null;
+
+  return (
+    <span>
+      {rawLogs}
+      {failureCaptures}
+      {durationS}
+      <OriginalPRInfo job={job} />
+      <DisableIssue job={job} />
+    </span>
+  );
+}
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 const testFailureRe = /^(?:FAIL|ERROR) \[.*\]: (test_.* \(.*Test.*\))/;
@@ -15,21 +57,7 @@ function formatIssueBody(failureCaptures: string) {
 This test was disabled because it is failing on master ([recent examples](${examplesURL})).`);
 }
 
-export function JobFailureContext({ job }: { job: JobData }) {
-  if (job.failureContext == null) {
-    return null;
-  }
-  return (
-    <details>
-      <summary>
-        <code>{job.failureLine}</code>
-      </summary>
-      <pre>{job.failureContext}</pre>
-    </details>
-  );
-}
-
-export function DisableIssue({ job }: { job: JobData }) {
+function DisableIssue({ job }: { job: JobData }) {
   const hasFailureClassification = job.failureLine !== null;
   const swrKey = hasFailureClassification ? "/api/issue?label=skipped" : null;
   const { data } = useSWR(swrKey, fetcher, {
@@ -83,20 +111,38 @@ export function DisableIssue({ job }: { job: JobData }) {
   );
 }
 
-export default function JobTooltip({ job }: { job: JobData }) {
-  // For nonexistent jobs, just show something basic:
-  if (!job.hasOwnProperty("id")) {
-    return <div>{`[does not exist] ${job.name}`}</div>;
+export function OriginalPRInfo({ job }: { job: JobData }) {
+  const originalPrJob = job.originalPrData;
+  if (originalPrJob === undefined) {
+    return null;
+  }
+
+  const sameFailureConclusion =
+    isFailedJob(job) && originalPrJob.conclusion === job.conclusion;
+  const sameClassification =
+    originalPrJob.failureCaptures !== null &&
+    originalPrJob.failureCaptures === job.failureCaptures;
+
+  let sameFailureWarning = null;
+  if (sameFailureConclusion) {
+    sameFailureWarning = (
+      <span className={styles.originalPRJobFailure}>
+        {" "}
+        also failed
+        <span style={{ backgroundColor: "darkred" }}>
+          {sameClassification && " WITH SAME ERROR!"}
+        </span>
+      </span>
+    );
   }
 
   return (
-    <div>
-      {`[${job.conclusion}] ${job.name}`}
-      <div>
-        <em>click to pin this tooltip, double-click for job page</em>
-      </div>
-      <JobLinks job={job} />
-      <JobFailureContext job={job} />
-    </div>
+    <span>
+      {" | "}
+      <a target="_blank" rel="noreferrer" href={originalPrJob.htmlUrl}>
+        original PR job
+      </a>
+      {sameFailureWarning}
+    </span>
   );
 }
