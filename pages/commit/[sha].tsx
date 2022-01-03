@@ -7,13 +7,8 @@ import fetchCommit from "lib/fetchCommit";
 import { JobData } from "lib/types";
 import styles from "components/commit.module.css";
 import JobSummary from "components/JobSummary";
-import dynamic from "next/dynamic";
 import { isFailedJob } from "lib/jobUtils";
-
-// react-lazylog doesn't work with SSR, so we have to import it dynamically like this.
-const LogViewer = dynamic(() => import("components/LogViewer"), {
-  ssr: false,
-});
+import LogViewer from "components/LogViewer";
 
 function FilteredJobList({
   filterName,

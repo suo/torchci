@@ -2,18 +2,13 @@ import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 dayjs.extend(utc);
 
-import dynamic from "next/dynamic";
 import { useRouter } from "next/router";
 import useSWR from "swr";
 import { BarChart, Bar, CartesianGrid, Tooltip, XAxis, YAxis } from "recharts";
 
-import JobSummary from "components/JobSummary";
 import { JobData } from "lib/types";
-
-// react-lazylog doesn't work with SSR, so we have to import it dynamically like this.
-const LogViewer = dynamic(() => import("components/LogViewer"), {
-  ssr: false,
-});
+import JobSummary from "components/JobSummary";
+import LogViewer from "components/LogViewer";
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 

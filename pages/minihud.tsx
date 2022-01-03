@@ -8,7 +8,6 @@ import {
   useState,
 } from "react";
 import { useRouter } from "next/router";
-import dynamic from "next/dynamic";
 
 import fetchHud from "lib/fetchHud";
 import { formatHudURL, HudParams, JobData, RowData } from "lib/types";
@@ -19,6 +18,7 @@ import JobConclusion from "components/JobConclusion";
 import JobFilterInput from "components/JobFilterInput";
 import useHudData from "lib/useHudData";
 import { isFailedJob } from "lib/jobUtils";
+import LogViewer from "components/LogViewer";
 
 function includesCaseInsensitive(value: string, pattern: string): boolean {
   if (pattern === "") {
@@ -26,11 +26,6 @@ function includesCaseInsensitive(value: string, pattern: string): boolean {
   }
   return value.toLowerCase().includes(pattern.toLowerCase());
 }
-
-// react-lazylog doesn't work with SSR, so we have to import it dynamically like this.
-const LogViewer = dynamic(() => import("components/LogViewer"), {
-  ssr: false,
-});
 
 function FailedJob({ job }: { job: JobData }) {
   const [jobFilter, setJobFilter] = useContext(JobFilterContext);
