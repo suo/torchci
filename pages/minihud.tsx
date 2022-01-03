@@ -49,7 +49,7 @@ function FailedJob({ job }: { job: JobData }) {
     linkStyle.backgroundColor = "khaki";
   }
   return (
-    <div>
+    <>
       <div>
         <JobConclusion conclusion={job.conclusion} />
         <a
@@ -75,7 +75,7 @@ function FailedJob({ job }: { job: JobData }) {
         <JobLinks job={job} />
         <LogViewer job={job} />
       </div>
-    </div>
+    </>
   );
 }
 
@@ -181,11 +181,11 @@ function MiniHud() {
   const { shaGrid } = useHudData(params);
 
   return (
-    <div>
+    <>
       {shaGrid.map((row: RowData) => (
         <ShaSummary row={row} key={row.sha} />
       ))}
-    </div>
+    </>
   );
 }
 

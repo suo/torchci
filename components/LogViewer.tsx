@@ -201,7 +201,7 @@ function Log({ url, line }: { url: string; line: number }) {
 
 export default function LogViewer({ job }: { job: JobData }) {
   const [showLogViewer, setShowLogViewer] = useState(false);
-  if (job.failureContext === null) {
+  if (job.failureLine === null) {
     return null;
   }
 

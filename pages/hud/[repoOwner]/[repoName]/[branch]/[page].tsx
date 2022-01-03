@@ -186,7 +186,7 @@ function FilterableHudTable({
   }, [router.query.name_filter, handleInput]);
 
   return (
-    <div>
+    <>
       <JobFilterInput
         currentFilter={jobFilter}
         handleSubmit={handleSubmit}
@@ -198,7 +198,7 @@ function FilterableHudTable({
         <HudTableHeader filter={normalizedJobFilter} names={jobNames} />
         {children}
       </table>
-    </div>
+    </>
   );
 }
 
