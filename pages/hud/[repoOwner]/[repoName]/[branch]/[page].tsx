@@ -203,7 +203,7 @@ function FilterableHudTable({
 }
 
 function HudTable({ params }: { params: HudParams }) {
-  const { data } = useSWR(formatHudURL(params), fetcher, {
+  const { data } = useSWR(formatHudURL("api/hud", params), fetcher, {
     refreshInterval: 60 * 1000, // refresh every minute
     // Refresh even when the user isn't looking, so that switching to the tab
     // will always have fresh info.
@@ -226,13 +226,15 @@ function PageSelector({ params }: { params: HudParams }) {
       Page {params.page}:{" "}
       {params.page !== 0 ? (
         <span>
-          <Link href={formatHudURL({ ...params, page: params.page - 1 })}>
+          <Link
+            href={formatHudURL("hud", { ...params, page: params.page - 1 })}
+          >
             Prev
           </Link>{" "}
           |{" "}
         </span>
       ) : null}
-      <Link href={formatHudURL({ ...params, page: params.page + 1 })}>
+      <Link href={formatHudURL("hud", { ...params, page: params.page + 1 })}>
         Next
       </Link>
     </div>
@@ -245,7 +247,7 @@ function HudHeader({ params }: { params: HudParams }) {
     e.preventDefault();
     // @ts-ignore
     const branch = e.target[0].value;
-    window.location.href = formatHudURL({ ...params, branch });
+    window.location.href = formatHudURL("hud", { ...params, branch });
   }
 
   return (
@@ -338,7 +340,7 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
   return {
     props: {
       fallback: {
-        [formatHudURL(packedParams)]: await fetchHud(packedParams),
+        [formatHudURL("api/hud", packedParams)]: await fetchHud(packedParams),
       },
     },
     revalidate: 60,

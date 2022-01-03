@@ -156,7 +156,7 @@ function MiniHud() {
     repoName: "pytorch",
     page: 0,
   };
-  const { data } = useSWR(formatHudURL(params), fetcher, {
+  const { data } = useSWR(formatHudURL("api/hud", params), fetcher, {
     refreshInterval: 60 * 1000, // refresh every minute
     // Refresh even when the user isn't looking, so that switching to the tab
     // will always have fresh info.
@@ -226,7 +226,7 @@ export const getStaticProps: GetStaticProps = async () => {
   return {
     props: {
       fallback: {
-        [formatHudURL(params)]: await fetchHud(params),
+        [formatHudURL("api/hud", params)]: await fetchHud(params),
       },
     },
     revalidate: 60,

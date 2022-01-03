@@ -63,8 +63,8 @@ export function packHudParams(input: any) {
   };
 }
 
-export function formatHudURL(params: HudParams): string {
-  return `/hud/${params.repoOwner}/${params.repoName}/${encodeURIComponent(
-    params.branch
-  )}/${params.page}`;
+export function formatHudURL(urlPrefix: string, params: HudParams): string {
+  return `/${urlPrefix}/${params.repoOwner}/${
+    params.repoName
+  }/${encodeURIComponent(params.branch)}/${params.page}`;
 }
