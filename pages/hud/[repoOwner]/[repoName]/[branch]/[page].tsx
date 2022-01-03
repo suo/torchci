@@ -12,6 +12,7 @@ import React, {
 import { GetStaticPaths, GetStaticProps } from "next";
 import Link from "next/link";
 
+import styles from "components/hud.module.css";
 import {
   formatHudURL,
   HudParams,
@@ -51,20 +52,20 @@ function HudRow({ rowData }: { rowData: RowData }) {
   const sha = rowData.sha;
   return (
     <tr>
-      <td className="job-metadata">
+      <td className={styles.jobMetadata}>
         <LocalTimeHuman timestamp={rowData.time} />
       </td>
-      <td className="job-metadata">
+      <td className={styles.jobMetadata}>
         <a href={rowData.commitUrl}>{sha.substring(0, 7)}</a>
       </td>
-      <td className="job-metadata">
-        <div className="job-metadata__truncated">
+      <td className={styles.jobMetadata}>
+        <div className={styles.jobMetadataTruncated}>
           {/* here, we purposefully do not use Link/. The prefetch behavior
           (even with prefetch disabled) spams our backend).*/}
           <a href={`/commit/${sha}`}>{rowData.commitMessage}</a>
         </div>
       </td>
-      <td className="job-metadata">
+      <td className={styles.jobMetadata}>
         {rowData.prNum !== null && (
           <a href={`https://github.com/pytorch/pytorch/pull/${rowData.prNum}`}>
             #{rowData.prNum}
@@ -87,16 +88,16 @@ function HudTableColumns({
 }) {
   return (
     <colgroup>
-      <col className="col-time" />
-      <col className="col-sha" />
-      <col className="col-commit" />
-      <col className="col-pr" />
+      <col className={styles.colTime} />
+      <col className={styles.colSha} />
+      <col className={styles.colCommit} />
+      <col className={styles.colPr} />
       {names.map((name: string) => {
         const passesFilter =
           filter === null || includesCaseInsensitive(name, filter);
         const style = passesFilter ? {} : { visibility: "collapse" as any };
 
-        return <col className="col-job" key={name} style={style} />;
+        return <col className={styles.colJob} key={name} style={style} />;
       })}
     </colgroup>
   );
@@ -112,17 +113,17 @@ function HudTableHeader({
   return (
     <thead>
       <tr>
-        <th className="regular-header">Time</th>
-        <th className="regular-header">SHA</th>
-        <th className="regular-header">Commit</th>
-        <th className="regular-header">PR</th>
+        <th className={styles.regularHeader}>Time</th>
+        <th className={styles.regularHeader}>SHA</th>
+        <th className={styles.regularHeader}>Commit</th>
+        <th className={styles.regularHeader}>PR</th>
         {names.map((name) => {
           const passesFilter =
             filter === null || includesCaseInsensitive(name, filter);
           const style = passesFilter ? {} : { visibility: "collapse" as any };
           return (
-            <th className="job-header" key={name} style={style}>
-              <div className="job-header__name">{name}</div>
+            <th className={styles.jobHeader} key={name} style={style}>
+              <div className={styles.jobHeaderName}>{name}</div>
             </th>
           );
         })}
@@ -192,7 +193,7 @@ function FilterableHudTable({
         handleInput={handleInput}
       />
 
-      <table className="hud-table">
+      <table className={styles.hudTable}>
         <HudTableColumns filter={normalizedJobFilter} names={jobNames} />
         <HudTableHeader filter={normalizedJobFilter} names={jobNames} />
         {children}
@@ -245,11 +246,11 @@ function HudHeader({ params }: { params: HudParams }) {
   }
 
   return (
-    <h1 id="hud-header">
+    <h1>
       PyTorch HUD:{" "}
       {isInput ? (
         <form
-          className="branch-form"
+          className={styles.branchForm}
           onSubmit={handleSubmit}
           onKeyDown={(e) => {
             if (e.key === "Escape") {
@@ -257,7 +258,11 @@ function HudHeader({ params }: { params: HudParams }) {
             }
           }}
         >
-          <input autoFocus className="branch-form__input" type="text"></input>
+          <input
+            autoFocus
+            className={styles.branchFormInput}
+            type="text"
+          ></input>
         </form>
       ) : (
         <code style={{ cursor: "pointer" }} onClick={() => setIsInput(true)}>
@@ -296,7 +301,7 @@ export default function Hud({ fallback }: any) {
   return (
     <SWRConfig value={{ fallback }}>
       <PinnedTooltipContext.Provider value={[pinnedTooltip, setPinnedTooltip]}>
-        <div id="hud-container" onClick={handleClick}>
+        <div onClick={handleClick}>
           <HudHeader params={params} />
           <div>This page automatically updates.</div>
           {router.isFallback ? (

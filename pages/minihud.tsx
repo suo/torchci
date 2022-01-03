@@ -141,6 +141,8 @@ function ShaSummary({ row }: { row: RowData }) {
       {failedJobs.length !== 0 ? (
         <span className={styles.shaTitleElement}>
           <a
+            target="_blank"
+            rel="noreferrer"
             href={`https://www.internalfb.com/intern/test/bouncycastle/?arcanist_name=fbsource&revision_or_diff_id=${row.diffNum}`}
           >
             <button className={styles.revertButton}>Revert</button>
@@ -197,7 +199,7 @@ export default function Page({ fallback }: any) {
   return (
     <SWRConfig value={{ fallback }}>
       <JobFilterInput
-        width="500px"
+        width="50%"
         currentFilter={jobFilter}
         handleSubmit={handleSubmit}
         handleInput={setJobFilter}

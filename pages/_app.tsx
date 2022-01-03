@@ -1,5 +1,4 @@
 import "styles/globals.css";
-import "styles/hud.css";
 import type { AppProps } from "next/app";
 import Head from "next/head";
 import SevReport from "components/SevReport";

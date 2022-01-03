@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import useSWRImmutable from "swr";
 import Editor, { useMonaco } from "@monaco-editor/react";
 import { Monaco } from "@monaco-editor/react";
+import styles from "./LogViewer.module.css";
 
 function filterLog(log: string): string {
   let negativeRegexes = [
@@ -182,7 +183,10 @@ function Log({ url, line }: { url: string; line: number }) {
                 startColumn: 1,
                 endColumn: 1,
               },
-              options: { isWholeLine: true, className: "highlight-log-line" },
+              options: {
+                isWholeLine: true,
+                className: styles.highlightLogLine,
+              },
             },
           ]
         );
