@@ -9,6 +9,7 @@ import { BarChart, Bar, CartesianGrid, Tooltip, XAxis, YAxis } from "recharts";
 import { JobData } from "lib/types";
 import JobSummary from "components/JobSummary";
 import LogViewer from "components/LogViewer";
+import JobLinks from "components/JobLinks";
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
@@ -76,6 +77,9 @@ function FailureInfo({
         {samples.map((sample) => (
           <li key={sample.id}>
             <JobSummary job={sample} />
+            <div>
+              <JobLinks job={sample} />
+            </div>
             <LogViewer job={sample} />
           </li>
         ))}
