@@ -89,28 +89,17 @@ function FailedJobs({ failedJobs }: { failedJobs: JobData[] }) {
   );
 }
 
-function ShaSummary({ row }: { row: RowData }) {
-  const [jobFilter, _setJobFilter] = useContext(JobFilterContext);
-
-  const jobs =
-    jobFilter === null
-      ? row.jobs
-      : row.jobs.filter((job) => includesCaseInsensitive(job.name, jobFilter));
-
-  const failedJobs = jobs.filter(isFailedJob);
-  const pendingJobs = jobs.filter((job) => job.conclusion === "pending");
-
-  let style;
-  if (failedJobs.length !== 0) {
-    style = styles.workflowBoxFail;
-  } else if (pendingJobs.length === 0) {
-    style = styles.workflowBoxSuccess;
-  } else {
-    style = styles.workflowBoxPending;
-  }
-
+function CommitSummaryLine({
+  row,
+  numPending,
+  showRevert,
+}: {
+  row: RowData;
+  numPending: number;
+  showRevert: boolean;
+}) {
   return (
-    <div className={style}>
+    <div>
       <span className={`${styles.shaTitleElement} ${styles.timestamp}`}>
         <LocalTimeHuman timestamp={row.time} />
       </span>
@@ -149,7 +138,12 @@ function ShaSummary({ row }: { row: RowData }) {
           Diff
         </a>
       </span>
-      {failedJobs.length !== 0 ? (
+      {numPending > 0 && (
+        <span className={styles.shaTitleElement}>
+          <em>{numPending} pending</em>
+        </span>
+      )}
+      {showRevert ? (
         <span className={styles.shaTitleElement}>
           <a
             target="_blank"
@@ -160,7 +154,37 @@ function ShaSummary({ row }: { row: RowData }) {
           </a>
         </span>
       ) : null}
-      <div>{pendingJobs.length ? `${pendingJobs.length} pending` : null}</div>
+    </div>
+  );
+}
+
+function CommitSummary({ row }: { row: RowData }) {
+  const [jobFilter, _setJobFilter] = useContext(JobFilterContext);
+
+  const jobs =
+    jobFilter === null
+      ? row.jobs
+      : row.jobs.filter((job) => includesCaseInsensitive(job.name, jobFilter));
+
+  const failedJobs = jobs.filter(isFailedJob);
+  const pendingJobs = jobs.filter((job) => job.conclusion === "pending");
+
+  let className;
+  if (failedJobs.length !== 0) {
+    className = styles.workflowBoxFail;
+  } else if (pendingJobs.length === 0) {
+    className = styles.workflowBoxSuccess;
+  } else {
+    className = styles.workflowBoxPending;
+  }
+
+  return (
+    <div className={className}>
+      <CommitSummaryLine
+        row={row}
+        numPending={pendingJobs.length}
+        showRevert={failedJobs.length !== 0}
+      />
       <FailedJobs failedJobs={failedJobs} />
     </div>
   );
@@ -178,7 +202,7 @@ function MiniHud() {
   return (
     <>
       {shaGrid.map((row: RowData) => (
-        <ShaSummary row={row} key={row.sha} />
+        <CommitSummary row={row} key={row.sha} />
       ))}
     </>
   );
