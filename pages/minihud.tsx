@@ -135,6 +135,18 @@ function ShaSummary({ row }: { row: RowData }) {
           </a>
         </span>
       )}
+      <span className={`${styles.shaTitleElement} ${styles.extraShaInfo}`}>
+        <a href={`https://www.internalfb.com/diff/${row.diffNum}`}>Diff</a>
+      </span>
+      {failedJobs.length !== 0 ? (
+        <span className={styles.shaTitleElement}>
+          <a
+            href={`https://www.internalfb.com/intern/test/bouncycastle/?arcanist_name=fbsource&revision_or_diff_id=${row.diffNum}`}
+          >
+            <button>Revert</button>
+          </a>
+        </span>
+      ) : null}
       <div>{pendingJobs.length ? `${pendingJobs.length} pending` : null}</div>
       <FailedJobs failedJobs={failedJobs} />
     </div>
@@ -193,9 +205,7 @@ export default function Page({ fallback }: any) {
 
       <JobFilterContext.Provider value={[jobFilter, setJobFilter]}>
         <JobHoverContext.Provider value={[jobHover, setJobHover]}>
-          <div className={styles.minihudGrid}>
-            <MiniHud />
-          </div>
+          <MiniHud />
         </JobHoverContext.Provider>
       </JobFilterContext.Provider>
     </SWRConfig>

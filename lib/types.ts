@@ -33,7 +33,8 @@ export interface RowData {
   time: string;
   commitUrl: string;
   commitMessage: string;
-  prNum: number;
+  diffNum: string;  // like: `D123456`
+  prNum: number | null;
   jobs: JobData[];
 }
 

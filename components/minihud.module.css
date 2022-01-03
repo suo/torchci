@@ -25,11 +25,6 @@
   border-left: 1px solid black;
 }
 
-.minihudGrid {
-  display: grid;
-  grid-template-columns: 1fr 30px;
-}
-
 .sha {
   font-family: monospace;
 }

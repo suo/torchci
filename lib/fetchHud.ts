@@ -26,10 +26,10 @@ export default async function fetchHud(params: HudParams): Promise<{
       ],
     }
   );
-  const commitQuery = await rocksetClient.queryLambdas.executeQueryLambdaByTag(
+  const commitQuery = await rocksetClient.queryLambdas.executeQueryLambda(
     "commons",
     "master_commits",
-    "latest",
+    "22dfa1db426dc0f1",
     {
       parameters: [
         {
@@ -99,6 +99,7 @@ export default async function fetchHud(params: HudParams): Promise<{
       sha: sha,
       time: commit.timestamp,
       commitUrl: commit.url,
+      diffNum: commit.diffNum,
       commitMessage: commit.message,
       prNum: commit.prNum,
       jobs: jobs,
