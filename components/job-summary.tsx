@@ -1,20 +1,6 @@
 import { JobData } from "lib/types";
 import JobConclusion from "./job-conclusion";
 
-export function JobFailureContext({ job }: { job: JobData }) {
-  if (job.failureContext == null) {
-    return null;
-  }
-  return (
-    <details>
-      <summary>
-        <code>{job.failureLine}</code>
-      </summary>
-      <pre>{job.failureContext}</pre>
-    </details>
-  );
-}
-
 export default function JobSummary({ job }: { job: JobData }) {
   return (
     <div>

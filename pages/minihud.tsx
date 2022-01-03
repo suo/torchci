@@ -1,5 +1,5 @@
 import { GetStaticProps } from "next";
-import useSWR, { SWRConfig } from "swr";
+import { SWRConfig } from "swr";
 import {
   createContext,
   CSSProperties,
@@ -13,11 +13,10 @@ import dynamic from "next/dynamic";
 import fetchHud from "lib/fetch-hud";
 import { formatHudURL, HudParams, JobData, RowData } from "lib/types";
 import styles from "components/minihud.module.css";
-import { JobLinks } from "components/job-tooltip";
+import JobLinks from "components/job-links";
 import { LocalTimeHuman } from "components/time-utils";
 import JobConclusion from "components/job-conclusion";
 import { JobFilterInput } from "components/job-filter-input";
-import OriginalPRInfo from "components/original-pr-info";
 import useHudData from "lib/use-hud-data";
 import { isFailedJob } from "lib/job-utils";
 

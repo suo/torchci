@@ -1,9 +1,7 @@
-import { durationHuman } from "./time-utils";
 import React from "react";
 import { IssueData, JobData } from "../lib/types";
 import useSWR from "swr";
-import { JobFailureContext } from "./job-summary";
-import OriginalPRInfo from "./original-pr-info";
+import JobLinks from "./job-links";
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 const testFailureRe = /^(?:FAIL|ERROR) \[.*\]: (test_.* \(.*Test.*\))/;
@@ -17,47 +15,21 @@ function formatIssueBody(failureCaptures: string) {
 This test was disabled because it is failing on master ([recent examples](${examplesURL})).`);
 }
 
-export function JobLinks({ job }: { job: JobData }) {
-  const rawLogs =
-    job.conclusion !== "pending" ? (
-      <span>
-        <a target="_blank" rel="noreferrer" href={job.logUrl}>
-          Raw logs
-        </a>
-      </span>
-    ) : null;
-
-  const durationS =
-    job.durationS !== null ? (
-      <span>{` | Duration: ${durationHuman(job.durationS!)}`}</span>
-    ) : null;
-
-  const failureCaptures =
-    job.failureCaptures !== null ? (
-      <span>
-        {" | "}
-        <a
-          target="_blank"
-          rel="noreferrer"
-          href={`/failure/${encodeURIComponent(job.failureCaptures as string)}`}
-        >
-          more like this
-        </a>
-      </span>
-    ) : null;
-
+export function JobFailureContext({ job }: { job: JobData }) {
+  if (job.failureContext == null) {
+    return null;
+  }
   return (
-    <span>
-      {rawLogs}
-      {failureCaptures}
-      {durationS}
-      <OriginalPRInfo job={job} />
-      <DisableIssue job={job} />
-    </span>
+    <details>
+      <summary>
+        <code>{job.failureLine}</code>
+      </summary>
+      <pre>{job.failureContext}</pre>
+    </details>
   );
 }
 
-function DisableIssue({ job }: { job: JobData }) {
+export function DisableIssue({ job }: { job: JobData }) {
   const hasFailureClassification = job.failureLine !== null;
   const swrKey = hasFailureClassification ? "/api/issue?label=skipped" : null;
   const { data } = useSWR(swrKey, fetcher, {

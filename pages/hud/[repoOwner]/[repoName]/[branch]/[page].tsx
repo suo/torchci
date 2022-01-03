@@ -1,6 +1,6 @@
 import { useRouter } from "next/router";
 import _ from "lodash";
-import useSWR, { SWRConfig } from "swr";
+import { SWRConfig } from "swr";
 
 import React, {
   useState,
@@ -25,7 +25,6 @@ import { TooltipTarget } from "components/tooltip-target";
 import JobConclusion from "components/job-conclusion";
 import JobTooltip from "components/job-tooltip";
 import { JobFilterInput } from "components/job-filter-input";
-import { JobFailureContext } from "components/job-summary";
 import useHudData from "lib/use-hud-data";
 
 function includesCaseInsensitive(value: string, pattern: string): boolean {
