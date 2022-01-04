@@ -5,6 +5,7 @@ import {
   CSSProperties,
   useCallback,
   useContext,
+  useEffect,
   useState,
 } from "react";
 import { useRouter } from "next/router";
@@ -230,6 +231,13 @@ export default function Page({ fallback }: any) {
       });
     }
   }, [router, jobFilter]);
+
+  // We have to use an effect hook here because query params are undefined at
+  // static generation time; they only become available after hydration.
+  useEffect(() => {
+    const filterValue = (router.query.name_filter as string) || "";
+    setJobFilter(filterValue);
+  }, [router.query.name_filter]);
 
   return (
     <SWRConfig value={{ fallback }}>
