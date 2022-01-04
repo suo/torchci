@@ -5,13 +5,13 @@ import SevReport from "components/SevReport";
 
 function MyApp({ Component, pageProps }: AppProps) {
   return (
-    <div>
+    <>
       <Head>
         <title>PyTorch CI HUD</title>
       </Head>
       <SevReport />
       <Component {...pageProps} />
-    </div>
+    </>
   );
 }
 

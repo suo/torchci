@@ -242,7 +242,9 @@ export default function Page({ fallback }: any) {
 
       <JobFilterContext.Provider value={[jobFilter, setJobFilter]}>
         <JobHoverContext.Provider value={[jobHover, setJobHover]}>
-          <MiniHud />
+          <div style={{ display: "grid" }}>
+            <MiniHud />
+          </div>
         </JobHoverContext.Provider>
       </JobFilterContext.Provider>
     </SWRConfig>
