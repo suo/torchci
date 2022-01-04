@@ -235,7 +235,7 @@ export default function Page({ fallback }: any) {
   // We have to use an effect hook here because query params are undefined at
   // static generation time; they only become available after hydration.
   useEffect(() => {
-    const filterValue = (router.query.name_filter as string) || "";
+    const filterValue = (router.query.name_filter as string) || null;
     setJobFilter(filterValue);
   }, [router.query.name_filter]);
 
