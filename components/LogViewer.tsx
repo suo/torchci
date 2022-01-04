@@ -148,9 +148,9 @@ function Log({ url, line }: { url: string; line: number }) {
   useEffect(() => {
     monaco?.languages.typescript.javascriptDefaults.setEagerModelSync(true);
   }, [monaco]);
-  const { data, isValidating } = useSWRImmutable(url, fetcher);
+  const { data } = useSWRImmutable(url, fetcher);
 
-  if (isValidating) {
+  if (data === undefined) {
     return (
       <div>
         <em>loading...</em>
