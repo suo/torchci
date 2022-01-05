@@ -43,6 +43,13 @@
 
 .failedJob {
   margin-top: 1em;
+  scroll-margin-top: 10em;
+}
+
+.failedJobHighlighted {
+  border: 5px solid #5ECED4;
+  padding: 10px;
+  border-radius: 5px;
 }
 
 .failedJobList {

@@ -30,7 +30,25 @@ function includesCaseInsensitive(value: string, pattern: string): boolean {
 
 function FailedJob({ job }: { job: JobData }) {
   const [jobFilter, setJobFilter] = useContext(JobFilterContext);
-  const [jobHover, setJobHover] = useContext(JobHoverContext);
+  const [jobHoverContext, setJobHoverContext] = useContext(JobHoverContext);
+  const [highlighted, setHighlighted] = useState(false);
+  const [thisJobHovered, setThisJobHovered] = useState(false);
+
+  useEffect(() => {
+    const onHashChanged = () => {
+      if (window.location.hash === "") {
+        return;
+      }
+      const hash = window.location.hash.slice(1);
+      setHighlighted(hash === job.id?.toString());
+    };
+
+    window.addEventListener("hashchange", onHashChanged);
+
+    return () => {
+      window.removeEventListener("hashchange", onHashChanged);
+    };
+  }, [job.id]);
 
   function toggleJobFilter() {
     if (jobFilter === job.name) {
@@ -40,25 +58,43 @@ function FailedJob({ job }: { job: JobData }) {
     }
   }
 
-  const linkStyle: CSSProperties = { cursor: "pointer" };
-  if (job.name === jobHover) {
+  const linkStyle: CSSProperties = { cursor: "pointer", marginRight: "0.5em" };
+  if (job.name === jobHoverContext) {
     linkStyle.backgroundColor = "khaki";
   }
+  let jobStyle = styles.failedJob;
+  if (highlighted) {
+    jobStyle = `${styles.failedJob} ${styles.failedJobHighlighted}`;
+  }
   return (
-    <div className={styles.failedJob}>
+    <div
+      className={jobStyle}
+      id={job.id}
+      onMouseEnter={() => {
+        setThisJobHovered(true);
+        setJobHoverContext(job.name!);
+      }}
+      onMouseLeave={() => {
+        setThisJobHovered(false);
+        setJobHoverContext(null);
+      }}
+    >
       <div>
         <JobConclusion conclusion={job.conclusion} />
         <a
           target="_blank"
           rel="noreferrer"
           style={linkStyle}
-          onMouseEnter={() => setJobHover(job.name!)}
-          onMouseLeave={() => setJobHover(null)}
           href={job.htmlUrl}
         >
           {" "}
           {job.name}
         </a>
+        {thisJobHovered && (
+          <a href={`#${job.id}`} className={styles.extraShaInfo}>
+            link to this job
+          </a>
+        )}
       </div>
       <div className={styles.failedJobLinks}>
         <input
