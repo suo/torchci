@@ -20,6 +20,9 @@ function FilteredJobList({
   pred: (job: JobData) => boolean;
 }) {
   const filteredJobs = jobs.filter(pred);
+  if (filteredJobs.length === 0) {
+    return null;
+  }
   return (
     <div>
       <h2>{filterName}</h2>
@@ -99,14 +102,16 @@ function VersionControlLinks({
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
-function CommitInfo({ sha, fallback }: { sha: string; fallback: any }) {
+function CommitInfo({ sha }: { sha: string }) {
   const { data: commit } = useSWR(`/api/commit/${sha}`, fetcher, {
-    fallback,
     refreshInterval: 60 * 1000, // refresh every minute
     // Refresh even when the user isn't looking, so that switching to the tab
     // will always have fresh info.
     refreshWhenHidden: true,
   });
+  if (commit === undefined) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <div>
@@ -135,7 +140,7 @@ function CommitInfo({ sha, fallback }: { sha: string; fallback: any }) {
   );
 }
 
-export default function Page({ fallback }: any) {
+export default function Page() {
   const router = useRouter();
   const sha = router.query.sha as string;
 
@@ -144,27 +149,7 @@ export default function Page({ fallback }: any) {
       <h1 id="hud-header">
         PyTorch Commit: <code>{sha}</code>
       </h1>
-      {router.isFallback ? (
-        <div>Loading...</div>
-      ) : (
-        <CommitInfo sha={sha} fallback={fallback} />
-      )}
+      {sha !== undefined && <CommitInfo sha={sha} />}
     </div>
   );
 }
-
-export const getStaticPaths: GetStaticPaths = async () => {
-  return { paths: [], fallback: true };
-};
-
-export const getStaticProps: GetStaticProps = async ({ params }) => {
-  const sha = params!.sha as string;
-  const fallback: any = {};
-  fallback[`/api/commit/${sha}`] = await fetchCommit(sha as string);
-  return {
-    props: {
-      fallback,
-    },
-    revalidate: 60, // Every minute.
-  };
-};
