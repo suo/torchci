@@ -16,7 +16,7 @@ export default function JobLinks({ job }: { job: JobData }) {
     ) : null;
 
   const durationS =
-    job.durationS !== null ? (
+    job.durationS != null ? (
       <span>{` | Duration: ${durationHuman(job.durationS!)}`}</span>
     ) : null;
 
@@ -58,7 +58,7 @@ This test was disabled because it is failing on master ([recent examples](${exam
 }
 
 function DisableIssue({ job }: { job: JobData }) {
-  const hasFailureClassification = job.failureLine !== null;
+  const hasFailureClassification = job.failureLine != null;
   const swrKey = hasFailureClassification ? "/api/issue?label=skipped" : null;
   const { data } = useSWR(swrKey, fetcher, {
     // Set a 60s cache for the request, so that lots of tooltip hovers don't

@@ -2,7 +2,7 @@
  * Represents the individual job information returned by Rockset.
  */
 export interface JobData {
-  name: string;
+  name?: string;
   workflowName?: string;
   jobName?: string;
   sha?: string;

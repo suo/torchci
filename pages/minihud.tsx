@@ -36,7 +36,7 @@ function FailedJob({ job }: { job: JobData }) {
     if (jobFilter === job.name) {
       setJobFilter(null);
     } else {
-      setJobFilter(job.name);
+      setJobFilter(job.name!);
     }
   }
 
@@ -52,7 +52,7 @@ function FailedJob({ job }: { job: JobData }) {
           target="_blank"
           rel="noreferrer"
           style={linkStyle}
-          onMouseEnter={() => setJobHover(job.name)}
+          onMouseEnter={() => setJobHover(job.name!)}
           onMouseLeave={() => setJobHover(null)}
           href={job.htmlUrl}
         >
@@ -165,7 +165,7 @@ function CommitSummary({ row }: { row: RowData }) {
   const jobs =
     jobFilter === null
       ? row.jobs
-      : row.jobs.filter((job) => includesCaseInsensitive(job.name, jobFilter));
+      : row.jobs.filter((job) => includesCaseInsensitive(job.name!, jobFilter));
 
   const failedJobs = jobs.filter(isFailedJob);
   const pendingJobs = jobs.filter((job) => job.conclusion === "pending");
