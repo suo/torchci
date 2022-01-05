@@ -16,7 +16,7 @@ function SevBox({ issue }: { issue: IssueData }) {
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 export default function SevReport() {
   const { data } = useSWR(
-    `/api/issue?label=${encodeURIComponent("ci: sev")}`,
+    `/api/issue/${encodeURIComponent("ci: sev")}`,
     fetcher,
     {
       refreshInterval: 60 * 1000, // refresh every minute
