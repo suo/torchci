@@ -127,10 +127,12 @@ function FailedJobs({ failedJobs }: { failedJobs: JobData[] }) {
 }
 
 function CommitSummaryLine({
+  showAnchorLink,
   row,
   numPending,
   showRevert,
 }: {
+  showAnchorLink: boolean;
   row: RowData;
   numPending: number;
   showRevert: boolean;
@@ -180,7 +182,7 @@ function CommitSummaryLine({
           <em>{numPending} pending</em>
         </span>
       )}
-      {showRevert ? (
+      {showRevert && (
         <span className={styles.shaTitleElement}>
           <a
             target="_blank"
@@ -190,13 +192,20 @@ function CommitSummaryLine({
             <button className={styles.revertButton}>Revert</button>
           </a>
         </span>
-      ) : null}
+      )}
+      {showAnchorLink && (
+        <span className={`${styles.shaTitleElement} ${styles.extraShaInfo}`}>
+          <a href={`#${row.sha}`}>link to this commit</a>
+        </span>
+      )}
     </div>
   );
 }
 
 function CommitSummary({ row }: { row: RowData }) {
   const [jobFilter, _setJobFilter] = useContext(JobFilterContext);
+  const [hover, setHover] = useState(false);
+  const [highlighted, setHighlighted] = useState(false);
 
   const jobs =
     jobFilter === null
@@ -217,12 +226,38 @@ function CommitSummary({ row }: { row: RowData }) {
     className = styles.workflowBoxPending;
   }
 
+  if (highlighted) {
+    className += " " + styles.workflowBoxHighlight;
+  }
+
+  useEffect(() => {
+    const onHashChanged = () => {
+      if (window.location.hash === "") {
+        return;
+      }
+      const hash = window.location.hash.slice(1);
+      setHighlighted(hash === row.sha);
+    };
+
+    window.addEventListener("hashchange", onHashChanged);
+
+    return () => {
+      window.removeEventListener("hashchange", onHashChanged);
+    };
+  }, [row.sha]);
+
   return (
-    <div className={className}>
+    <div
+      id={row.sha}
+      onMouseEnter={() => setHover(true)}
+      onMouseLeave={() => setHover(false)}
+      className={className}
+    >
       <CommitSummaryLine
         row={row}
         numPending={pendingJobs.length}
         showRevert={failedJobs.length !== 0}
+        showAnchorLink={hover}
       />
       <FailedJobs failedJobs={failedJobs} />
     </div>
