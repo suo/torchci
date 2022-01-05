@@ -47,8 +47,9 @@
 }
 
 .failedJobHighlighted {
-  border: 5px solid #5ECED4;
+  border: 5px solid #5eced4;
   padding: 10px;
+  box-shadow: 0 0 5px rgba(81, 203, 238, 1);
   border-radius: 5px;
 }
 
