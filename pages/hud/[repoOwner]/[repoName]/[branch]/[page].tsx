@@ -143,11 +143,11 @@ function HudTableBody({ shaGrid }: { shaGrid: RowData[] }) {
 }
 
 function FilterableHudTable({
-  page,
+  params,
   jobNames,
   children,
 }: {
-  page: number;
+  params: HudParams;
   jobNames: string[];
   children: React.ReactNode;
 }) {
@@ -169,13 +169,17 @@ function FilterableHudTable({
   const handleInput = useCallback((f) => setJobFilter(f), []);
   const handleSubmit = useCallback(() => {
     if (jobFilter === "") {
-      router.push(`/hud/${page}`, undefined, { shallow: true });
+      router.push(formatHudURL("hud", params), undefined, { shallow: true });
     } else {
-      router.push(`/hud/${page}?name_filter=${jobFilter}`, undefined, {
-        shallow: true,
-      });
+      router.push(
+        formatHudURL("hud", params) + `?name_filter=${jobFilter}`,
+        undefined,
+        {
+          shallow: true,
+        }
+      );
     }
-  }, [page, router, jobFilter]);
+  }, [params, router, jobFilter]);
 
   // We have to use an effect hook here because query params are undefined at
   // static generation time; they only become available after hydration.
@@ -209,7 +213,7 @@ function HudTable({ params }: { params: HudParams }) {
   // FilterableHudTable component. This is for rendering performance; we don't
   // want React to re-render the whole table every time the filter changes.
   return (
-    <FilterableHudTable page={params.page} jobNames={jobNames}>
+    <FilterableHudTable params={params} jobNames={jobNames}>
       <HudTableBody shaGrid={shaGrid} />
     </FilterableHudTable>
   );
