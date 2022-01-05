@@ -93,7 +93,13 @@ function DisableIssue({ job }: { job: JobData }) {
 
   if (matchingIssues.length !== 0) {
     // There is a matching issue, show that in the tooltip box.
-    linkText = "Test is disabled";
+    const matchingIssue = matchingIssues[0];
+    if (matchingIssue.state === "open") {
+      linkText = "Test is disabled";
+    } else {
+      buttonStyle = styles.closedDisableIssueButton;
+      linkText = "Disable issue exists but is closed";
+    }
     issueLink = matchingIssues[0].html_url;
   } else {
     // No matching issue, show a link to create one.

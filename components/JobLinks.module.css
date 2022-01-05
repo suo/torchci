@@ -6,3 +6,9 @@
   background-color: #ffc107;
   border-color: #ffc107;
 }
+
+.closedDisableIssueButton {
+  background-color: #17a2b8;
+  border-color: #17a2b8;
+  color: white
+}
