@@ -171,7 +171,9 @@ function CommitSummary({ row }: { row: RowData }) {
   const pendingJobs = jobs.filter((job) => job.conclusion === "pending");
 
   let className;
-  if (failedJobs.length !== 0) {
+  if (jobs.length === 0) {
+    className = styles.workflowBoxNone;
+  } else if (failedJobs.length !== 0) {
     className = styles.workflowBoxFail;
   } else if (pendingJobs.length === 0) {
     className = styles.workflowBoxSuccess;
