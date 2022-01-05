@@ -21,7 +21,7 @@ export default function JobLinks({ job }: { job: JobData }) {
     ) : null;
 
   const failureCaptures =
-    job.failureCaptures !== null ? (
+    job.failureCaptures != null ? (
       <span>
         {" | "}
         <a
