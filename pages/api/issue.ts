@@ -28,5 +28,8 @@ export default async function handler(
     }
   );
   const issues = query.results! as IssueData[];
-  return res.status(200).json({ issues });
+  return res
+    .status(200)
+    .setHeader("Cache-Control", "s-maxage=60")
+    .json({ issues });
 }

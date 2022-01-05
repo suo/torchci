@@ -51,5 +51,5 @@ export default async function handler(
     }
   });
 
-  res.status(200).json(jobsBySha);
+  res.status(200).setHeader("Cache-Control", "s-maxage=60").json(jobsBySha);
 }

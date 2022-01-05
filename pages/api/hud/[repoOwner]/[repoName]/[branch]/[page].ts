@@ -7,5 +7,8 @@ export default async function handler(
   res: NextApiResponse<HudData>
 ) {
   const params = packHudParams(req.query);
-  res.status(200).json(await fetchHud(params));
+  res
+    .status(200)
+    .setHeader("Cache-Control", "s-maxage=60")
+    .json(await fetchHud(params));
 }
