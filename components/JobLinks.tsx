@@ -98,7 +98,7 @@ function DisableIssue({ job }: { job: JobData }) {
       linkText = "Test is disabled";
     } else {
       buttonStyle = styles.closedDisableIssueButton;
-      linkText = "Disable issue exists but is closed";
+      linkText = "Previously disabled";
     }
     issueLink = matchingIssues[0].html_url;
   } else {
