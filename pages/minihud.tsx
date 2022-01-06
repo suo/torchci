@@ -34,6 +34,8 @@ function FailedJob({ job }: { job: JobData }) {
   const [highlighted, setHighlighted] = useState(false);
   const [thisJobHovered, setThisJobHovered] = useState(false);
 
+  const router = useRouter();
+
   useEffect(() => {
     const onHashChanged = () => {
       if (window.location.hash === "") {
@@ -52,8 +54,12 @@ function FailedJob({ job }: { job: JobData }) {
 
   function toggleJobFilter() {
     if (jobFilter === job.name) {
+      router.push("/minihud", undefined, { shallow: true });
       setJobFilter(null);
     } else {
+      router.push(`/minihud?name_filter=${job.name}`, undefined, {
+        shallow: true,
+      });
       setJobFilter(job.name!);
     }
   }
@@ -99,11 +105,11 @@ function FailedJob({ job }: { job: JobData }) {
       <div className={styles.failedJobLinks}>
         <input
           type="checkbox"
-          id="scales"
+          id="setfilterbox"
           checked={jobFilter === job.name}
           onChange={() => toggleJobFilter()}
         />
-        <label htmlFor="scales">Set filter | </label>
+        <label htmlFor="setfilterbox">Set filter | </label>
         <JobLinks job={job} />
       </div>
       <LogViewer job={job} />
