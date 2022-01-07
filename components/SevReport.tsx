@@ -28,7 +28,9 @@ export default function SevReport() {
   if (data === undefined) {
     return null;
   }
-  const issues: IssueData[] = data.issues;
+  const issues: IssueData[] = data.issues.filter(
+    (issue: IssueData) => issue.state === "open"
+  );
   if (issues.length === 0) {
     return null;
   }
