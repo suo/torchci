@@ -1,7 +1,7 @@
 import { Context, Probot } from "probot";
 
 function isCIFlowLabel(label: string): boolean {
-  return label.startsWith("ciflow/");
+  return label.startsWith("ciflow/") && label !== "ciflow/default";
 }
 
 function labelToTag(label: string, prNum: number): string {
