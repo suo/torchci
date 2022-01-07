@@ -89,7 +89,9 @@ async function handleSyncEvent(context: Context<"pull_request">) {
 
   const headSha = context.payload.pull_request.head.sha;
   const tags = getAllPRTags(context);
-  const promises = tags.map((tag) => syncTag(context, tag, headSha));
+  const promises = tags.map(
+    async (tag) => await syncTag(context, tag, headSha)
+  );
   await Promise.all(promises);
   context.log.info("END Processing sync event");
 }
@@ -127,7 +129,7 @@ async function handleClosedEvent(context: Context<"pull_request.closed">) {
   }
 
   const tags = getAllPRTags(context);
-  const promises = tags.map((tag) => rmTag(context, tag));
+  const promises = tags.map(async (tag) => await rmTag(context, tag));
   await Promise.all(promises);
 }
 

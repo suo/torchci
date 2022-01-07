@@ -213,10 +213,13 @@ function CommitSummary({ row }: { row: RowData }) {
   const [hover, setHover] = useState(false);
   const [highlighted, setHighlighted] = useState(false);
 
+  const existingJobs = row.jobs.filter((job) => job.conclusion !== undefined);
   const jobs =
     jobFilter === null
-      ? row.jobs
-      : row.jobs.filter((job) => includesCaseInsensitive(job.name!, jobFilter));
+      ? existingJobs
+      : existingJobs.filter((job) =>
+          includesCaseInsensitive(job.name!, jobFilter)
+        );
 
   const failedJobs = jobs.filter(isFailedJob);
   const pendingJobs = jobs.filter((job) => job.conclusion === "pending");
