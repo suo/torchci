@@ -8,7 +8,9 @@ function labelToTag(label: string, prNum: number): string {
   return `${label}/${prNum}`;
 }
 
-function getAllPRTags(context: Context<"pull_request">) {
+function getAllPRTags(
+  context: Context<"pull_request"> | Context<"pull_request.closed">
+) {
   const prNum = context.payload.pull_request.number;
   const labels = context.payload.pull_request.labels
     .map((label) => label.name)
@@ -24,7 +26,7 @@ function getAllPRTags(context: Context<"pull_request">) {
  * @param headSha
  */
 async function syncTag(
-  context: Context<"pull_request">,
+  context: Context<"pull_request"> | Context<"pull_request.labeled">,
   tag: string,
   headSha: string
 ) {
@@ -59,7 +61,10 @@ async function syncTag(
  * Remove a tag from the repo if necessary.
  * @param tag  looks like "ciflow/trunk/12345", where 12345 is the PR number.
  */
-async function rmTag(context: Context, tag: string) {
+async function rmTag(
+  context: Context<"pull_request.closed"> | Context<"pull_request.unlabeled">,
+  tag: string
+) {
   context.log.info(`Cleaning up tag ${tag}`);
   const matchingTags = await context.octokit.git.listMatchingRefs(
     context.repo({ ref: `tags/${tag}` })
@@ -114,7 +119,6 @@ async function handleUnlabeledEvent(
   }
   const prNum = context.payload.pull_request.number;
   const tag = labelToTag(context.payload.label.name, prNum);
-  // @ts-ignore
   await rmTag(context, tag);
 }
 
