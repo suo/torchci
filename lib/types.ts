@@ -33,7 +33,7 @@ export interface RowData {
   time: string;
   commitUrl: string;
   commitMessage: string;
-  diffNum: string;  // like: `D123456`
+  diffNum: string; // like: `D123456`
   prNum: number | null;
   jobs: JobData[];
 }
@@ -55,6 +55,12 @@ export interface HudParams {
   repoName: string;
   branch: string;
   page: number;
+}
+
+export interface PRData {
+  sha: string;
+  eventTime: string;
+  commitTitle: string;
 }
 
 export function packHudParams(input: any) {

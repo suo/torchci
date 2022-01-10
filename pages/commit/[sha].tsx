@@ -1,14 +1,11 @@
-import { GetStaticPaths, GetStaticProps } from "next";
+import styles from "components/commit.module.css";
+import JobSummary from "components/JobSummary";
+import LogViewer from "components/LogViewer";
+import { isFailedJob } from "lib/jobUtils";
+import { CommitData, JobData } from "lib/types";
 import _ from "lodash";
 import { useRouter } from "next/router";
 import useSWR from "swr";
-
-import fetchCommit from "lib/fetchCommit";
-import { JobData } from "lib/types";
-import styles from "components/commit.module.css";
-import JobSummary from "components/JobSummary";
-import { isFailedJob } from "lib/jobUtils";
-import LogViewer from "components/LogViewer";
 
 function FilteredJobList({
   filterName,
@@ -102,21 +99,9 @@ function VersionControlLinks({
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
-function CommitInfo({ sha }: { sha: string }) {
-  const { data: commit } = useSWR(`/api/commit/${sha}`, fetcher, {
-    refreshInterval: 60 * 1000, // refresh every minute
-    // Refresh even when the user isn't looking, so that switching to the tab
-    // will always have fresh info.
-    refreshWhenHidden: true,
-  });
-  if (commit === undefined) {
-    return <div>Loading...</div>;
-  }
-
+export function CommitData({ commit }: { commit: CommitData }) {
   return (
-    <div>
-      <h2>{commit.commitTitle}</h2>
-
+    <>
       <VersionControlLinks sha={commit.sha} diffNum={commit.diffNum} />
 
       <article className={styles.commitMessage}>
@@ -136,6 +121,30 @@ function CommitInfo({ sha }: { sha: string }) {
       />
 
       <WorkflowsContainer jobs={commit.jobs} />
+    </>
+  );
+}
+
+export function CommitInfo({ sha }: { sha: string }) {
+  const { data: commit, error } = useSWR(`/api/commit/${sha}`, fetcher, {
+    refreshInterval: 60 * 1000, // refresh every minute
+    // Refresh even when the user isn't looking, so that switching to the tab
+    // will always have fresh info.
+    refreshWhenHidden: true,
+  });
+
+  if (error != null) {
+    return <div>Error occured</div>;
+  }
+
+  if (commit === undefined) {
+    return <div>Loading...</div>;
+  }
+
+  return (
+    <div>
+      <h2>{commit.commitTitle}</h2>
+      <CommitData commit={commit} />
     </div>
   );
 }
