@@ -7,44 +7,46 @@ export default async function fetchHud(params: HudParams): Promise<{
   jobNames: string[];
 }> {
   const rocksetClient = getRocksetClient();
-  const hudQuery = await rocksetClient.queryLambdas.executeQueryLambda(
-    "commons",
-    "hud_query",
-    "05875f87e51aecd5",
-    {
-      parameters: [
-        {
-          name: "branch",
-          type: "string",
-          value: `refs/heads/${params.branch}`,
-        },
-        {
-          name: "page",
-          type: "int",
-          value: params.page.toString(),
-        },
-      ],
-    }
-  );
-  const commitQuery = await rocksetClient.queryLambdas.executeQueryLambda(
-    "commons",
-    "master_commits",
-    "22dfa1db426dc0f1",
-    {
-      parameters: [
-        {
-          name: "branch",
-          type: "string",
-          value: `refs/heads/${params.branch}`,
-        },
-        {
-          name: "page",
-          type: "int",
-          value: params.page.toString(),
-        },
-      ],
-    }
-  );
+  const [hudQuery, commitQuery] = await Promise.all([
+    rocksetClient.queryLambdas.executeQueryLambda(
+      "commons",
+      "hud_query",
+      "05875f87e51aecd5",
+      {
+        parameters: [
+          {
+            name: "branch",
+            type: "string",
+            value: `refs/heads/${params.branch}`,
+          },
+          {
+            name: "page",
+            type: "int",
+            value: params.page.toString(),
+          },
+        ],
+      }
+    ),
+    rocksetClient.queryLambdas.executeQueryLambda(
+      "commons",
+      "master_commits",
+      "22dfa1db426dc0f1",
+      {
+        parameters: [
+          {
+            name: "branch",
+            type: "string",
+            value: `refs/heads/${params.branch}`,
+          },
+          {
+            name: "page",
+            type: "int",
+            value: params.page.toString(),
+          },
+        ],
+      }
+    ),
+  ]);
 
   const commitsBySha = _.keyBy(commitQuery.results, "sha");
   let results = hudQuery.results;

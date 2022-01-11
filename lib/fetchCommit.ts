@@ -5,35 +5,36 @@ import { CommitData } from "./types";
 
 export default async function fetchCommit(sha: string): Promise<CommitData> {
   const rocksetClient = getRocksetClient();
-  const commitQuery = await rocksetClient.queryLambdas.executeQueryLambdaByTag(
-    "commons",
-    "commit_query",
-    "latest",
-    {
-      parameters: [
-        {
-          name: "sha",
-          type: "string",
-          value: sha,
-        },
-      ],
-    }
-  );
-
-  const commitJobsQuery = await rocksetClient.queryLambdas.executeQueryLambda(
-    "commons",
-    "commit_jobs_query",
-    "4ba333d37b875c58",
-    {
-      parameters: [
-        {
-          name: "sha",
-          type: "string",
-          value: sha,
-        },
-      ],
-    }
-  );
+  const [commitQuery, commitJobsQuery] = await Promise.all([
+    rocksetClient.queryLambdas.executeQueryLambdaByTag(
+      "commons",
+      "commit_query",
+      "latest",
+      {
+        parameters: [
+          {
+            name: "sha",
+            type: "string",
+            value: sha,
+          },
+        ],
+      }
+    ),
+    await rocksetClient.queryLambdas.executeQueryLambda(
+      "commons",
+      "commit_jobs_query",
+      "4ba333d37b875c58",
+      {
+        parameters: [
+          {
+            name: "sha",
+            type: "string",
+            value: sha,
+          },
+        ],
+      }
+    ),
+  ]);
 
   const commit = commitQuery.results?.[0].commit;
   const firstLine = commit.message.indexOf("\n");
