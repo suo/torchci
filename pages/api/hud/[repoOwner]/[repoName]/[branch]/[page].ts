@@ -9,6 +9,6 @@ export default async function handler(
   const params = packHudParams(req.query);
   res
     .status(200)
-    .setHeader("Cache-Control", "s-maxage=60")
+    .setHeader("Cache-Control", "s-maxage=1, stale-while-revalidate")
     .json(await fetchHud(params));
 }
