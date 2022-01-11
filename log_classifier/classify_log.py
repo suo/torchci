@@ -174,6 +174,7 @@ def match_to_json(id, rule_match, lines):
             "rule": rule_match.rule.name,
             # decode with replace to avoid raising errors on non-utf8 characters
             "line": line.decode(errors="replace").strip(),
+            "line_num": rule_match.line_num + 1,  # +1 because lines are 1 indexed to users
             "context": context.decode(errors="replace"),
             "captures": captures.decode(errors="replace").strip(),
         },
