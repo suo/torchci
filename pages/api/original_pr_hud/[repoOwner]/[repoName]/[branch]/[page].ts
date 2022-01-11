@@ -51,5 +51,8 @@ export default async function handler(
     }
   });
 
-  res.status(200).setHeader("Cache-Control", "s-maxage=60").json(jobsBySha);
+  res
+    .status(200)
+    .setHeader("Cache-Control", "s-maxage=1, stale-while-revalidate")
+    .json(jobsBySha);
 }

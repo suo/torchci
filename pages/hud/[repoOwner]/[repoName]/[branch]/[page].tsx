@@ -207,7 +207,11 @@ function FilterableHudTable({
 }
 
 function HudTable({ params }: { params: HudParams }) {
-  const { shaGrid, jobNames } = useHudData(params);
+  const data = useHudData(params);
+  if (data === undefined) {
+    return <div>Loading...</div>;
+  }
+  const { shaGrid, jobNames } = data;
 
   // Here, we are intentionally injecting HudTableBody into the
   // FilterableHudTable component. This is for rendering performance; we don't
@@ -279,7 +283,7 @@ function HudHeader({ params }: { params: HudParams }) {
 
 const PinnedTooltipContext = createContext<[null | string, any]>([null, null]);
 
-export default function Hud({ fallback }: any) {
+export default function Hud() {
   const router = useRouter();
 
   // Logic to handle tooltip pinning. The behavior we want is:
@@ -303,49 +307,17 @@ export default function Hud({ fallback }: any) {
   const params = packHudParams(router.query);
 
   return (
-    <SWRConfig value={{ fallback }}>
-      <PinnedTooltipContext.Provider value={[pinnedTooltip, setPinnedTooltip]}>
+    <PinnedTooltipContext.Provider value={[pinnedTooltip, setPinnedTooltip]}>
+      {params.branch !== undefined && (
         <div onClick={handleClick}>
           <HudHeader params={params} />
           <div>This page automatically updates.</div>
-          {router.isFallback ? (
-            <div>Loading...</div>
-          ) : (
-            <div>
-              <PageSelector params={params} />
-              <HudTable params={params} />
-            </div>
-          )}
+          <div>
+            <PageSelector params={params} />
+            <HudTable params={params} />
+          </div>
         </div>
-      </PinnedTooltipContext.Provider>
-    </SWRConfig>
+      )}
+    </PinnedTooltipContext.Provider>
   );
 }
-
-export const getStaticPaths: GetStaticPaths = async () => {
-  return {
-    paths: [
-      {
-        params: {
-          repoOwner: "pytorch",
-          repoName: "pytorch",
-          branch: "master",
-          page: "0",
-        },
-      },
-    ],
-    fallback: true,
-  };
-};
-
-export const getStaticProps: GetStaticProps = async ({ params }) => {
-  const packedParams = packHudParams(params);
-  return {
-    props: {
-      fallback: {
-        [formatHudURL("api/hud", packedParams)]: await fetchHud(packedParams),
-      },
-    },
-    revalidate: 60,
-  };
-};

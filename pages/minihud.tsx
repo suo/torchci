@@ -280,7 +280,12 @@ function MiniHud() {
     repoName: "pytorch",
     page: 0,
   };
-  const { shaGrid } = useHudData(params);
+  const data = useHudData(params);
+  if (data === undefined) {
+    return <div>Loading...</div>;
+  }
+
+  const { shaGrid } = data;
 
   return (
     <>
