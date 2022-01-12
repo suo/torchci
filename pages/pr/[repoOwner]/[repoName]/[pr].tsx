@@ -1,6 +1,6 @@
+import CommitStatus from "components/CommitStatus";
 import ErrorBoundary from "components/ErrorBoundary";
 import { useRouter } from "next/router";
-import { CommitData } from "pages/commit/[sha]";
 import React from "react";
 import useSWR from "swr";
 
@@ -25,7 +25,7 @@ function CommitInfo({ sha }: { sha: string }) {
     return <div>Loading...</div>;
   }
 
-  return <CommitData commit={commit} />;
+  return <CommitStatus commit={commit} />;
 }
 
 function CommitHeader({ prData }: { prData: any }) {
@@ -73,10 +73,11 @@ function Page() {
 
   const sha =
     (router.query.sha as string) ?? (prData != null ? prData[0].sha : null);
+  const prTitle = prData != null ? prData[0].title : "";
   return (
     <div>
       <h1 id="hud-header">
-        PyTorch PR: <code>{pr}</code>
+        PyTorch PR: <code>{`${prTitle} #${pr}`}</code>
       </h1>
       <CommitHeader prData={prData} />
       <ErrorBoundary>
