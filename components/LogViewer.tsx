@@ -165,7 +165,7 @@ function Log({ url, line }: { url: string; line: number }) {
       defaultValue={data}
       theme="logTheme"
       beforeMount={(monaco) => registerLogLanguage(monaco)}
-      line={line + 1}
+      line={line}
       options={{
         scrollBeyondLastLine: false,
         lineNumbersMinChars: 6,
@@ -178,8 +178,8 @@ function Log({ url, line }: { url: string; line: number }) {
           [
             {
               range: {
-                startLineNumber: line + 1,
-                endLineNumber: line + 1,
+                startLineNumber: line,
+                endLineNumber: line,
                 startColumn: 1,
                 endColumn: 1,
               },
@@ -192,7 +192,7 @@ function Log({ url, line }: { url: string; line: number }) {
         );
         let foldAction = editor.getAction("editor.foldAll");
         foldAction.run().then(() => {
-          editor.revealLineInCenter(line + 1);
+          editor.revealLineInCenter(line);
         });
       }}
     />
