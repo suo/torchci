@@ -84,7 +84,7 @@ async function rmTag(
  * are pointing to the PR's head SHA.
  */
 async function handleSyncEvent(context: Context<"pull_request">) {
-  context.log.debug(context, "START Processing sync event");
+  context.log.debug("START Processing sync event");
 
   const author = context.payload.pull_request.user.login;
   if (author !== "suo") {
@@ -105,7 +105,7 @@ async function handleSyncEvent(context: Context<"pull_request">) {
 async function handleUnlabeledEvent(
   context: Context<"pull_request.unlabeled">
 ) {
-  context.log.debug(context, "START Processing unlabeled event");
+  context.log.debug("START Processing unlabeled event");
 
   const author = context.payload.pull_request.user.login;
   if (author !== "suo") {
@@ -124,7 +124,7 @@ async function handleUnlabeledEvent(
 
 // Remove all tags as this PR is closed.
 async function handleClosedEvent(context: Context<"pull_request.closed">) {
-  context.log.debug(context, "START Processing rm event");
+  context.log.debug("START Processing rm event");
 
   const author = context.payload.pull_request.user.login;
   if (author !== "suo") {
@@ -139,7 +139,7 @@ async function handleClosedEvent(context: Context<"pull_request.closed">) {
 
 // Add the tag corresponding to the new label.
 async function handleLabelEvent(context: Context<"pull_request.labeled">) {
-  context.log.debug(context, "START Processing label event");
+  context.log.debug("START Processing label event");
 
   const author = context.payload.pull_request.user.login;
   if (author !== "suo") {
