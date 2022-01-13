@@ -42,12 +42,15 @@ async function handleWorkflowJob(
 
   let key;
   let payload;
+  let table;
   if (narrowType("workflow_job", event)) {
     key = `${repo_prefix}${event.payload.workflow_job.id}`;
     payload = event.payload.workflow_job;
+    table = "torchci-workflow-job";
   } else if (narrowType("workflow_run", event)) {
     key = `${repo_prefix}${event.payload.workflow_run.id}`;
     payload = event.payload.workflow_run;
+    table = "torchci-workflow-run";
   }
 
   const client = DynamoDBDocument.from(
@@ -61,7 +64,7 @@ async function handleWorkflowJob(
   );
 
   await client.put({
-    TableName: "torchci-workflow-job",
+    TableName: table,
     Item: {
       dynamoKey: key,
       ...payload,
