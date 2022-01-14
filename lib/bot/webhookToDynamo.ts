@@ -60,6 +60,50 @@ async function handleWorkflowJob(
   });
 }
 
+async function handleIssues(event: WebhookEvent<"issues">) {
+  const key_prefix = event.payload.repository.full_name + "/";
+  const client = DynamoDBDocument.from(
+    new DynamoDB({
+      credentials: {
+        accessKeyId: process.env.OUR_AWS_ACCESS_KEY_ID!,
+        secretAccessKey: process.env.OUR_AWS_SECRET_ACCESS_KEY!,
+      },
+      region: "us-east-1",
+    })
+  );
+
+  await client.put({
+    TableName: "torchci-issues",
+    Item: {
+      dynamoKey: `${key_prefix}${event.payload.issue.number}`,
+      ...event.payload.issue,
+    },
+  });
+}
+
+async function handlePullRequest(event: WebhookEvent<"pull_request">) {
+  const key_prefix = event.payload.repository.full_name + "/";
+  const client = DynamoDBDocument.from(
+    new DynamoDB({
+      credentials: {
+        accessKeyId: process.env.OUR_AWS_ACCESS_KEY_ID!,
+        secretAccessKey: process.env.OUR_AWS_SECRET_ACCESS_KEY!,
+      },
+      region: "us-east-1",
+    })
+  );
+
+  await client.put({
+    TableName: "torchci-pull-request",
+    Item: {
+      dynamoKey: `${key_prefix}${event.payload.pull_request.number}`,
+      ...event.payload.pull_request,
+    },
+  });
+}
+
 export default function webhookToDynamo(app: Probot) {
   app.on(["workflow_job", "workflow_run"], handleWorkflowJob);
+  app.on("issues", handleIssues);
+  app.on("pull_request", handlePullRequest);
 }
