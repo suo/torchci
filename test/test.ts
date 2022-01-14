@@ -1,4 +1,4 @@
-import bot from "lib/bot";
+import ciflowPushTrigger from "lib/bot/ciflowPushTrigger";
 import nock from "nock";
 import { Probot, ProbotOctokit } from "probot";
 
@@ -15,7 +15,7 @@ describe("Push trigger integration tests", () => {
         throttle: { enabled: false },
       }),
     });
-    bot(probot);
+    ciflowPushTrigger(probot);
   });
 
   afterEach(() => {
