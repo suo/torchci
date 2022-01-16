@@ -8,10 +8,10 @@ export default async function handler(
 ) {
   const params = packHudParams(req.query);
   const rocksetClient = getRocksetClient();
-  const hudQuery = await rocksetClient.queryLambdas.executeQueryLambda(
+  const hudQuery = await rocksetClient.queryLambdas.executeQueryLambdaByTag(
     "commons",
     "original_pr_hud_query",
-    "fdc13fe45bf37b74",
+    "prod",
     {
       parameters: [
         {

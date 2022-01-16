@@ -10,10 +10,10 @@ export default async function handler(
   const capture = req.query.capture;
   const rocksetClient = getRocksetClient();
 
-  const samples = await rocksetClient.queryLambdas.executeQueryLambda(
+  const samples = await rocksetClient.queryLambdas.executeQueryLambdaByTag(
     "commons",
     "failure_samples_query",
-    "ddb35e5a8ac49b55",
+    "prod",
     {
       parameters: [
         {

@@ -8,10 +8,10 @@ export default async function fetchHud(params: HudParams): Promise<{
 }> {
   const rocksetClient = getRocksetClient();
   const [hudQuery, commitQuery] = await Promise.all([
-    rocksetClient.queryLambdas.executeQueryLambda(
+    rocksetClient.queryLambdas.executeQueryLambdaByTag(
       "commons",
       "hud_query",
-      "05875f87e51aecd5",
+      "prod",
       {
         parameters: [
           {
@@ -27,10 +27,10 @@ export default async function fetchHud(params: HudParams): Promise<{
         ],
       }
     ),
-    rocksetClient.queryLambdas.executeQueryLambda(
+    rocksetClient.queryLambdas.executeQueryLambdaByTag(
       "commons",
       "master_commits",
-      "22dfa1db426dc0f1",
+      "prod",
       {
         parameters: [
           {

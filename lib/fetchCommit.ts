@@ -9,7 +9,7 @@ export default async function fetchCommit(sha: string): Promise<CommitData> {
     rocksetClient.queryLambdas.executeQueryLambdaByTag(
       "commons",
       "commit_query",
-      "latest",
+      "prod",
       {
         parameters: [
           {
@@ -20,10 +20,10 @@ export default async function fetchCommit(sha: string): Promise<CommitData> {
         ],
       }
     ),
-    await rocksetClient.queryLambdas.executeQueryLambda(
+    await rocksetClient.queryLambdas.executeQueryLambdaByTag(
       "commons",
       "commit_jobs_query",
-      "4ba333d37b875c58",
+      "prod",
       {
         parameters: [
           {

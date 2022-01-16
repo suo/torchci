@@ -64,7 +64,8 @@ function DisableIssue({ job }: { job: JobData }) {
     // Set a 60s cache for the request, so that lots of tooltip hovers don't
     // spam the backend. Since actually mutating the state (through filing a
     // disable issue) is a pretty heavy operation, 60s of staleness is fine.
-    dedupingInterval: 60000,
+    dedupingInterval: 60 * 1000,
+    refreshInterval: 60 * 1000, // refresh every minute
   });
 
   // Null states. Don't show an issue disable link if:

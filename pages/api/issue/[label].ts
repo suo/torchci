@@ -16,7 +16,7 @@ export default async function handler(
   const query = await rocksetClient.queryLambdas.executeQueryLambdaByTag(
     "commons",
     "issue_query",
-    "latest",
+    "prod",
     {
       parameters: [
         {
