@@ -1,3 +1,4 @@
+import { v4 as uuidv4 } from "uuid";
 import { DynamoDB } from "@aws-sdk/client-dynamodb";
 import { DynamoDBDocument } from "@aws-sdk/lib-dynamodb";
 import { Context, Probot } from "probot";
@@ -5,6 +6,18 @@ import {
   EmitterWebhookEvent as WebhookEvent,
   EmitterWebhookEventName as WebhookEvents,
 } from "@octokit/webhooks";
+
+function getDynamoClient(): DynamoDBDocument {
+  return DynamoDBDocument.from(
+    new DynamoDB({
+      credentials: {
+        accessKeyId: process.env.OUR_AWS_ACCESS_KEY_ID!,
+        secretAccessKey: process.env.OUR_AWS_SECRET_ACCESS_KEY!,
+      },
+      region: "us-east-1",
+    })
+  );
+}
 
 function narrowType<E extends WebhookEvents>(
   event: E,
@@ -41,16 +54,7 @@ async function handleWorkflowJob(
     table = "torchci-workflow-run";
   }
 
-  const client = DynamoDBDocument.from(
-    new DynamoDB({
-      credentials: {
-        accessKeyId: process.env.OUR_AWS_ACCESS_KEY_ID!,
-        secretAccessKey: process.env.OUR_AWS_SECRET_ACCESS_KEY!,
-      },
-      region: "us-east-1",
-    })
-  );
-
+  const client = getDynamoClient();
   await client.put({
     TableName: table,
     Item: {
@@ -62,15 +66,7 @@ async function handleWorkflowJob(
 
 async function handleIssues(event: WebhookEvent<"issues">) {
   const key_prefix = event.payload.repository.full_name + "/";
-  const client = DynamoDBDocument.from(
-    new DynamoDB({
-      credentials: {
-        accessKeyId: process.env.OUR_AWS_ACCESS_KEY_ID!,
-        secretAccessKey: process.env.OUR_AWS_SECRET_ACCESS_KEY!,
-      },
-      region: "us-east-1",
-    })
-  );
+  const client = getDynamoClient();
 
   await client.put({
     TableName: "torchci-issues",
@@ -83,15 +79,7 @@ async function handleIssues(event: WebhookEvent<"issues">) {
 
 async function handlePullRequest(event: WebhookEvent<"pull_request">) {
   const key_prefix = event.payload.repository.full_name + "/";
-  const client = DynamoDBDocument.from(
-    new DynamoDB({
-      credentials: {
-        accessKeyId: process.env.OUR_AWS_ACCESS_KEY_ID!,
-        secretAccessKey: process.env.OUR_AWS_SECRET_ACCESS_KEY!,
-      },
-      region: "us-east-1",
-    })
-  );
+  const client = getDynamoClient();
 
   await client.put({
     TableName: "torchci-pull-request",
@@ -102,8 +90,22 @@ async function handlePullRequest(event: WebhookEvent<"pull_request">) {
   });
 }
 
+async function handlePush(event: WebhookEvent<"push">) {
+  const key_prefix = event.payload.repository.full_name + "/";
+  const client = getDynamoClient();
+
+  await client.put({
+    TableName: "torchci-push",
+    Item: {
+      dynamoKey: `${key_prefix}/${uuidv4()}`,
+      ...event.payload,
+    },
+  });
+}
+
 export default function webhookToDynamo(app: Probot) {
   app.on(["workflow_job", "workflow_run"], handleWorkflowJob);
   app.on("issues", handleIssues);
   app.on("pull_request", handlePullRequest);
+  app.on("push", handlePush);
 }
