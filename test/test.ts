@@ -27,8 +27,18 @@ describe("Push trigger integration tests", () => {
     nock.cleanAll();
   });
 
+  test("CIFlow label trigger ignores closed PR", async () => {
+    const payload = require("./fixtures/pull_request.labeled");
+    payload.pull_request.state = "closed";
+    payload.label.name = "ciflow/test";
+
+    // no requests should be made
+    await probot.receive({ name: "pull_request", id: "123", payload });
+  });
+
   test("CIFlow label triggers tag push to head sha", async () => {
     const payload = require("./fixtures/pull_request.labeled");
+    payload.pull_request.state = "open";
     payload.label.name = "ciflow/test";
     const label = payload.label.name;
     const prNum = payload.pull_request.number;
