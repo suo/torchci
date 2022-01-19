@@ -122,6 +122,11 @@ async function handleClosedEvent(context: Context<"pull_request.closed">) {
 // Add the tag corresponding to the new label.
 async function handleLabelEvent(context: Context<"pull_request.labeled">) {
   context.log.debug("START Processing label event");
+  if (context.payload.pull_request.state === "closed") {
+    // Ignore closed PRs. If this PR is reopened, the tags will get pushed as
+    // part of the sync event handling.
+    return;
+  }
 
   const label = context.payload.label.name;
   if (!isCIFlowLabel(label)) {
