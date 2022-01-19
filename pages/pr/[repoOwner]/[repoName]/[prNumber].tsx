@@ -37,7 +37,7 @@ function CommitHeader({
   selectedSha: string;
 }) {
   const router = useRouter();
-  const pr = router.query.pr as string;
+  const pr = router.query.prNumber as string;
 
   return (
     <div>
@@ -62,8 +62,8 @@ function Page() {
   const router = useRouter();
 
   let swrKey;
-  if (router.query.pr !== undefined) {
-    swrKey = `/api/pr/${router.query.pr}`;
+  if (router.query.prNumber !== undefined) {
+    swrKey = `/api/pr/${router.query.prNumber}`;
   }
   if (router.query.sha !== undefined) {
     swrKey += `?sha=${router.query.sha}`;

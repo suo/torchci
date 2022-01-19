@@ -1,7 +1,7 @@
 import getRocksetClient from "./rockset";
 import { PRData } from "./types";
 
-export default async function fetchPR(pr: string): Promise<{ prData: PRData }> {
+export default async function fetchPR(pr: string): Promise<PRData> {
   const rocksetClient = getRocksetClient();
   const [prQuery, commitHistoryQuery] = await Promise.all([
     rocksetClient.queryLambdas.executeQueryLambdaByTag(
