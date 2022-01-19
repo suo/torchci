@@ -1,34 +1,39 @@
 import getRocksetClient from "./rockset";
 import { PRData } from "./types";
 
-export default async function fetchPR(pr: string): Promise<PRData[]> {
+export default async function fetchPR(pr: string): Promise<PRData> {
   const rocksetClient = getRocksetClient();
-  const PRQuery = await rocksetClient.queryLambdas.executeQueryLambda(
-    "commons",
-    "prs_query",
-    "eea6932288753f6d",
-    {
-      parameters: [
-        {
-          name: "pr",
-          type: "int",
-          value: pr,
-        },
-      ],
-    }
-  );
-  const shaSet = new Set();
-  const results: PRData[] = [];
+  const [prQuery, commitHistoryQuery] = await Promise.all([
+    rocksetClient.queryLambdas.executeQueryLambda(
+      "commons",
+      "pr_query",
+      "70a7732df6e82401",
+      {
+        parameters: [
+          {
+            name: "pr",
+            type: "int",
+            value: pr,
+          },
+        ],
+      }
+    ),
+    rocksetClient.queryLambdas.executeQueryLambda(
+      "commons",
+      "pr_commit_history_query",
+      "03dcb4ad66c079f9",
+      {
+        parameters: [
+          {
+            name: "pr",
+            type: "int",
+            value: pr,
+          },
+        ],
+      }
+    ),
+  ]);
+  const prDataResult = prQuery.results![0];
 
-  (PRQuery.results ?? []).map(({ sha, event_time, commit, title }) => {
-    if (!shaSet.has(sha)) {
-      const shaString = sha as string;
-      const eventTime = event_time as string;
-      const firstLine = commit.indexOf("\n");
-      const commitTitle: string = commit.slice(0, firstLine);
-      shaSet.add(shaString);
-      results.push({ sha: shaString, eventTime, commitTitle, title });
-    }
-  });
-  return results;
+  return { ...prDataResult, shas: commitHistoryQuery.results! };
 }

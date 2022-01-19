@@ -58,10 +58,8 @@ export interface HudParams {
 }
 
 export interface PRData {
-  sha: string;
-  eventTime: string;
-  commitTitle: string;
   title: string;
+  shas: { sha: string; title: string }[];
 }
 
 export function packHudParams(input: any) {

@@ -1,5 +1,6 @@
 import CommitStatus from "components/CommitStatus";
 import ErrorBoundary from "components/ErrorBoundary";
+import { PRData } from "lib/types";
 import { useRouter } from "next/router";
 import React from "react";
 import useSWR from "swr";
@@ -28,58 +29,66 @@ function CommitInfo({ sha }: { sha: string }) {
   return <CommitStatus commit={commit} />;
 }
 
-function CommitHeader({ prData }: { prData: any }) {
+function CommitHeader({
+  prData,
+  selectedSha,
+}: {
+  prData: PRData;
+  selectedSha: string;
+}) {
   const router = useRouter();
-  const pr = router.query.pr as string;
+  const pr = router.query.prNumber as string;
 
   return (
-    <h2>
+    <div>
       Commit:{" "}
       <select
-        style={{ font: "inherit" }}
+        defaultValue={selectedSha}
         onChange={(e) => {
           router.push(`/pr/pytorch/pytorch/${pr}?sha=${e.target.value}`);
         }}
       >
-        {(prData ?? []).map((commit: any, ind: number) => {
-          return (
-            <option key={ind} value={commit.sha}>
-              {commit.commitTitle +
-                ` (${commit.sha.substr(commit.sha.length - 6)})`}
-            </option>
-          );
-        })}
+        {prData.shas.map(({ sha, title }) => (
+          <option key={sha} value={sha}>
+            {title + ` (${sha.substring(0, 6)})`}
+          </option>
+        ))}
       </select>
-    </h2>
+    </div>
   );
 }
 
 function Page() {
   const router = useRouter();
-  const pr = router.query.pr as string;
 
-  const { data: prData } = useSWR(
-    `/api/pr/${pr}${
-      router.query.sha != null ? `?sha=${router.query.sha}` : ""
-    }`,
-    fetcher,
-    {
-      refreshInterval: 60 * 1000, // refresh every minute
-      // Refresh even when the user isn't looking, so that switching to the tab
-      // will always have fresh info.
-      refreshWhenHidden: true,
-    }
-  );
+  let swrKey;
+  if (router.query.prNumber !== undefined) {
+    swrKey = `/api/pr/${router.query.prNumber}`;
+  }
+  if (router.query.sha !== undefined) {
+    swrKey += `?sha=${router.query.sha}`;
+  }
+
+  const { data } = useSWR(swrKey, fetcher, {
+    refreshInterval: 60 * 1000, // refresh every minute
+    // Refresh even when the user isn't looking, so that switching to the tab
+    // will always have fresh info.
+    refreshWhenHidden: true,
+  });
+  const prData = data as PRData | undefined;
+
+  if (prData === undefined) {
+    return <div>Loading...</div>;
+  }
 
   const sha =
-    (router.query.sha as string) ?? (prData != null ? prData[0].sha : null);
-  const prTitle = prData != null ? prData[0].title : "";
+    (router.query.sha as string) ?? prData.shas[prData.shas.length - 1].sha;
   return (
     <div>
-      <h1 id="hud-header">
-        PyTorch PR: <code>{`${prTitle} #${pr}`}</code>
+      <h1>
+        {prData.title} <code>{router.query.pr}</code>
       </h1>
-      <CommitHeader prData={prData} />
+      <CommitHeader prData={prData} selectedSha={sha} />
       <ErrorBoundary>
         <CommitInfo sha={sha} />
       </ErrorBoundary>
