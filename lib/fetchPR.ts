@@ -4,10 +4,10 @@ import { PRData } from "./types";
 export default async function fetchPR(pr: string): Promise<PRData> {
   const rocksetClient = getRocksetClient();
   const [prQuery, commitHistoryQuery] = await Promise.all([
-    rocksetClient.queryLambdas.executeQueryLambdaByTag(
+    rocksetClient.queryLambdas.executeQueryLambda(
       "commons",
       "pr_query",
-      "latest",
+      "70a7732df6e82401",
       {
         parameters: [
           {
@@ -18,10 +18,10 @@ export default async function fetchPR(pr: string): Promise<PRData> {
         ],
       }
     ),
-    rocksetClient.queryLambdas.executeQueryLambdaByTag(
+    rocksetClient.queryLambdas.executeQueryLambda(
       "commons",
       "pr_commit_history_query",
-      "latest",
+      "03dcb4ad66c079f9",
       {
         parameters: [
           {
