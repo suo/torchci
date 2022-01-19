@@ -86,12 +86,6 @@ async function rmTag(
 async function handleSyncEvent(context: Context<"pull_request">) {
   context.log.debug("START Processing sync event");
 
-  const author = context.payload.pull_request.user.login;
-  if (author !== "suo") {
-    context.log.info(`Ignoring pull request from ${author}`);
-    return;
-  }
-
   const headSha = context.payload.pull_request.head.sha;
   const tags = getAllPRTags(context);
   const promises = tags.map(
@@ -107,12 +101,6 @@ async function handleUnlabeledEvent(
 ) {
   context.log.debug("START Processing unlabeled event");
 
-  const author = context.payload.pull_request.user.login;
-  if (author !== "suo") {
-    context.log.info(`Ignoring pull request from ${author}`);
-    return;
-  }
-
   const label = context.payload.label.name;
   if (!isCIFlowLabel(label)) {
     return;
@@ -126,12 +114,6 @@ async function handleUnlabeledEvent(
 async function handleClosedEvent(context: Context<"pull_request.closed">) {
   context.log.debug("START Processing rm event");
 
-  const author = context.payload.pull_request.user.login;
-  if (author !== "suo") {
-    context.log.info(`Ignoring pull request from ${author}`);
-    return;
-  }
-
   const tags = getAllPRTags(context);
   const promises = tags.map(async (tag) => await rmTag(context, tag));
   await Promise.all(promises);
@@ -140,10 +122,9 @@ async function handleClosedEvent(context: Context<"pull_request.closed">) {
 // Add the tag corresponding to the new label.
 async function handleLabelEvent(context: Context<"pull_request.labeled">) {
   context.log.debug("START Processing label event");
-
-  const author = context.payload.pull_request.user.login;
-  if (author !== "suo") {
-    context.log.info(`Ignoring pull request from ${author}`);
+  if (context.payload.pull_request.state === "closed") {
+    // Ignore closed PRs. If this PR is reopened, the tags will get pushed as
+    // part of the sync event handling.
     return;
   }
 
